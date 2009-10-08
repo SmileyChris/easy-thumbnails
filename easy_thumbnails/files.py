@@ -164,7 +164,8 @@ class Thumbnailer(File):
         data = engine.save_image(thumbnail_image, quality=quality).read()
 
         filename = self.get_thumbnail_name(thumbnail_options)
-        thumbnail = ThumbnailFile(filename, ContentFile(data))
+        thumbnail = ThumbnailFile(filename, ContentFile(data),
+                                  storage=self.thumbnail_storage)
         thumbnail.image = thumbnail_image
         thumbnail._committed = False
 
