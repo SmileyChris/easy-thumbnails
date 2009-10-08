@@ -1,0 +1,10 @@
+Things to to before this can leave alpha:
+
+* Better documentation
+* Tests
+
+Beta things to do:
+
+* Management methods for deleting users
+* Make the ThumbnailerFieldFile use the deleting management methods
+* Integrate different methods for generating the file (like sorl-thumbnail does) 
