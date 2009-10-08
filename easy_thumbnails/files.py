@@ -10,7 +10,6 @@ import os
 
 DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
                                         utils.get_setting('DEFAULT_STORAGE'))()
-print DEFAULT_THUMBNAIL_STORAGE.base_url
 
 
 def get_thumbnailer(source, relative_name=None):
