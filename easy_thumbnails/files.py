@@ -4,7 +4,8 @@ from django.core.files.storage import get_storage_class, default_storage
 from django.db.models.fields.files import ImageFieldFile, FieldFile
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from easy_thumbnails import engine, utils
+from easy_thumbnails import engine, models, utils
+import datetime
 import os
 
 
@@ -224,68 +225,39 @@ class Thumbnailer(File):
         """
         name = self.get_thumbnail_name(thumbnail_options)
 
-        if self.thumbnail_exists(thumbnail_options):
+        if self.thumbnail_exists(name):
             thumbnail = ThumbnailFile(name=name,
                                       storage=self.thumbnail_storage)
             return thumbnail
 
         thumbnail = self.generate_thumbnail(thumbnail_options)
-
-        if save and self.name:
+        if save:
             save_thumbnail(thumbnail, self.thumbnail_storage)
-            if self.source_storage != self.thumbnail_storage:
-                # If the source storage is local and the thumbnail storage is
-                # remote, save a copy of the thumbnail there too. This helps to
-                # keep the testing of thumbnail existence as a local activity.
-                try:
-                    self.thumbnail_storage.path(name)
-                except NotImplementedError:
-                    try:
-                        self.field_storage.path(name)
-                    except NotImplementedError:
-                        pass
-                    else:
-                        self.save_thumbnail(thumbnail, self.field_storage)
+            self.get_thumbnail_cache(name, create=True, update=True)
+
         return thumbnail
 
-    def thumbnail_exists(self, thumbnail_options):
+    def thumbnail_exists(self, thumbnail_name):
         """
         Calculate whether the thumbnail already exists and that the source is
         not newer than the thumbnail.
         
-        If neither the source nor the thumbnail are using local storages, only
-        the existance of the thumbnail will be checked.
+        If both the source and thumbnail file storages are local, their
+        file modification times are used. Otherwise the database cached
+        modification times are used.
         
         """
-        filename = self.get_thumbnail_name(thumbnail_options)
-
-        try:
-            source_path = self.source_storage.path(self.name)
-        except NotImplementedError:
-            source_path = None
-        try:
-            thumbnail_path = self.thumbnail_storage.path(filename)
-        except NotImplementedError:
-            thumbnail_path = None
-
-        if not source_path and not thumbnail_path:
-            # This is the worst-case scenario - neither storage was local so
-            # this will cause a remote existence check.
-            return self.thumbnail_storage.exists(filename)
-
-        # If either storage wasn't local, use the other for the path.
-        if not source_path:
-            source_path = self.thumbnail_storage.path(self.name)
-        if not thumbnail_path:
-            thumbnail_path = self.source_storage.path(filename)
-
-        if os.path.isfile(thumbnail_path):
-            if not os.path.isfile(source_path):
-                return True
-        else:
+        # Try to use the local file modification times first.
+        source_modtime = self.get_source_modtime()
+        thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
+        if source_modtime and thumbnail_modtime:
+            return source_modtime <= thumbnail_modtime
+        # Fall back to using the database cached modification times.
+        source = self.get_source_cache()
+        if not source:
             return False
-        return (os.path.getmtime(source_path) <=
-                os.path.getmtime(thumbnail_path))
+        thumbnail = self.get_thumbnail_cache(thumbnail_name)
+        return thumbnail and source.modified <= thumbnail.modified
 
     def _image(self):
         if not hasattr(self, '_cached_image'):
@@ -298,6 +270,39 @@ class Thumbnailer(File):
         return self._cached_image
 
     image = property(_image)
+
+    def get_source_cache(self, create=False, update=False):
+        modtime = self.get_source_modtime()
+        update_modified = modtime and datetime.datetime.fromtimestamp(modtime)
+        if update:
+            update_modified = update_modified or datetime.datetime.utcnow()
+        return models.Source.objects.get_file(
+            create=create, update_modified=update_modified,
+            storage=self.source_storage, name=self.name)
+
+    def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
+        modtime = self.get_thumbnail_modtime(thumbnail_name)
+        update_modified = modtime and datetime.datetime.fromtimestamp(modtime)
+        if update:
+            update_modified = update_modified or datetime.datetime.utcnow()
+        source = self.get_source_cache(create=True)
+        return models.Thumbnail.objects.get_file(
+            create=create, update_modified=update_modified,
+            storage=self.thumbnail_storage, source=source, name=thumbnail_name)
+
+    def get_source_modtime(self):
+        try:
+            path = self.source_storage.path(self.name)
+            return os.path.getmtime(path)
+        except (NotImplementedError, OSError):
+            pass
+
+    def get_thumbnail_modtime(self, thumbnail_name):
+        try:
+            path = self.thumbnail_storage.path(thumbnail_name)
+            return os.path.getmtime(path)
+        except (NotImplementedError, OSError):
+            pass
 
 
 class ThumbnailerFieldFile(FieldFile, Thumbnailer):
@@ -315,37 +320,23 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
 
     def save(self, name, content, *args, **kwargs):
         """
-        Save the file.
-        
-        If the thumbnail storage is local and differs from the field storage,
-        save a place-holder of the source file there too. This helps to keep
-        the testing of thumbnail existence as a local activity.
+        Save the file, also saving a reference to the thumbnail cache Source
+        model.
         
         """
         super(ThumbnailerFieldFile, self).save(name, content, *args, **kwargs)
-        # If the thumbnail storage differs and is local, save a place-holder of
-        # the source file there too.
-        if self.thumbnail_storage != self.field.storage:
-            try:
-                path = self.thumbnail_storage.path(self.name)
-            except NotImplementedError:
-                pass
-            else:
-                if not os.path.exists(path):
-                    try:
-                        os.makedirs(os.path.dirname(path))
-                    except OSError:
-                        pass
-                    open(path, 'w').close()
+        self.get_source_cache(self, create=True, update=True)
 
-# TODO: deletion should use the storage for listing and deleting.
-#    def delete(self, *args, **kwargs):
-#        """
-#        Delete the image, along with any thumbnails which match the filename
-#        pattern for this source image.
-#        
-#        """
-#        super(ThumbnailFieldFile, self).delete(*args, **kwargs)
+    def delete(self, *args, **kwargs):
+        """
+        Delete the image.
+        
+        """
+        super(ThumbnailerFieldFile, self).delete(*args, **kwargs)
+        source_cache = self.get_source_cache()
+        if source_cache:
+            source_cache.delete()
+            # TODO: Also delete related thumbnails (using the cache).
 
 
 class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):

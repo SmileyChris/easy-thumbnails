@@ -5,7 +5,7 @@ Easy Thumbnails
 The powerful, yet easy to implement thumbnailing application for Django.
 
 To install this application into your project, just add it to your
-``INSTALLED_APPS`` setting::
+``INSTALLED_APPS`` setting (and run ``manage.py syncdb``)::
 
     INSTALLED_APPS = (
         ...
