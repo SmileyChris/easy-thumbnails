@@ -4,44 +4,49 @@ import datetime
 import pickle
 
 
-def get_storage(storage):
-    pickled = pickle.dumps(storage)
-    hash = utils.get_storage_hash(pickled)
-    return Storage.objects.get_or_create(hash=hash,
-                                         defaults=dict(pickle=pickled))[0]
-
-
-def _get(model, get_kwargs, create=False, update=False):
-    if create:
-        object, created = model.objects.get_or_create(**get_kwargs)[1]
-    else:
-        try:
-            object = model.objects.get(**get_kwargs)
-        except model.DoesNotExist:
-            object = None
-        created = False
-    if update and not created:
-        object.save()
-    return object
+class StorageManager(models.Manager):
+    _storage_cache = {}
     
+    def get_storage(self, storage):
+        pickled = pickle.dumps(storage)
+        hash = utils.get_storage_hash(pickled)
+        if hash not in self._storage_cache:
+            self._storage_cache[hash] = self.get_or_create(hash=hash,
+                                            defaults=dict(pickle=pickled))[0]
+        return self._storage_cache[hash]
 
-def get_source(thumbnailer, create=False, update=False):
-    storage = get_storage(thumbnailer.source_storage)
-    kwargs = dict(storage=storage, name=thumbnailer.name)
-    return _get(Source, kwargs, create=create, update=update)
 
-
-def get_thumbnail(thumbnailer, name, source=None, create=False, update=False):
-    source = source or get_source(thumbnailer, create=True)
-    storage = get_storage(thumbnailer.thumbnail_storage)
-    kwargs = dict(storage=storage, source=source, name=name)
-    return _get(Thumbnail, kwargs, create=create, update=update)
+class FileManager(models.Manager):
+    def get_file(self, storage, name, create=False, update_modified=None,
+                 **kwargs):
+        if not isinstance(storage, Storage):
+            storage = Storage.objects.get_storage(storage)
+        kwargs.update(dict(storage=storage, name=name))
+        if create:
+            if update_modified:
+                defaults = kwargs.setdefault('defaults', {})
+                defaults['modified'] = update_modified
+            object, created = self.get_or_create(**kwargs)
+        else:
+            kwargs.pop('defaults', None)
+            try:
+                object = self.get(**kwargs)
+            except self.model.DoesNotExist:
+                object = None
+            created = False
+        if update_modified and object and not created:
+            if object.modified != update_modified:
+                object.modified = update_modified
+                object.save()
+        return object
 
 
 class Storage(models.Model):
     hash = models.CharField(primary_key=True, max_length=40, editable=False)
     pickle = models.TextField(unique=True)
-    
+
+    objects = StorageManager()
+
     def save(self, *args, **kwargs):
         self.hash = utils.get_storage_hash(self.pickle)
         super(Storage, self).save()
@@ -61,17 +66,15 @@ class Storage(models.Model):
 class File(models.Model):
     storage = models.ForeignKey(Storage)
     name = models.CharField(max_length=255)
-    modified = models.DateTimeField()
+    modified = models.DateTimeField(default=datetime.datetime.utcnow())
+
+    objects = FileManager()
 
     class Meta:
         abstract = True
-    
+
     def __unicode__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        self.modified = datetime.datetime.now()
-        super(Storage, self).save()
 
 
 class Source(File):
