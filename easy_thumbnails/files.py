@@ -103,11 +103,20 @@ class ThumbnailFile(ImageFieldFile):
 
     image = property(_get_image, _set_image)
 
-    def tag(self, alt='', use_size=True, **attrs):
+    def tag(self, alt='', use_size=None, **attrs):
         """
         Return a standard XHTML ``<img ... />`` tag for this field.
         
+        If ``use_size`` isn't set, it will be default to ``True`` or ``False``
+        depending on whether the file storage is local or not. 
+        
         """
+        if use_size is None:
+            try:
+                self.field.storage.path(self.name)
+                use_size = True
+            except NotImplementedError:
+                use_size = False
         attrs['alt'] = escape(alt)
         attrs['src'] = escape(self.url)
         if use_size:
