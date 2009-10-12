@@ -72,7 +72,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
             if edge_crop and filter(None, edge_crop.groups()):
                 x_right, x_crop, y_bottom, y_crop = edge_crop.groups()
                 if x_crop:
-                    offset = min(x * int(x_crop) // 100, dx)
+                    offset = min(int(xr) * int(x_crop) // 100, dx)
                     if x_right:
                         box[0] = dx - offset
                         box[2] = x - offset
@@ -80,7 +80,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
                         box[0] = offset
                         box[2] = x - (dx - offset)
                 if y_crop:
-                    offset = min(y * int(y_crop) // 100, dy)
+                    offset = min(int(yr) * int(y_crop) // 100, dy)
                     if y_bottom:
                         box[1] = dy - offset
                         box[3] = y - offset
