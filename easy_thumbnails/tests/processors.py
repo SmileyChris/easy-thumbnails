@@ -62,7 +62,6 @@ class ScaleAndCropTest(TestCase):
                                                   crop='10,-10')
         expected = image.crop([15, 0, 165, 600])
         
-        #Image.blend(x_offset_crop, expected, .2).show()
         self.assertImagesEqual(x_offset_crop, expected)
 
         y_offset_crop = processors.scale_and_crop(image, (800, 150),
