@@ -3,6 +3,28 @@ from easy_thumbnails import utils
 import re
 
 
+def _compare_entropy(start_slice, end_slice, slice, difference):
+    """
+    Calculate the entropy of two slices (from the start and end of an axis),
+    returning a tuple containing the amount that should be added to the start
+    and removed from the end of the axis.
+    
+    """
+    start_entropy = utils.image_entropy(start_slice)
+    end_entropy = utils.image_entropy(end_slice)
+    entropy_difference = abs(start_entropy / end_entropy - 1)
+    if entropy_difference < 0.01:
+        # Less than 1% difference, remove from both sides.
+        if difference >= slice * 2:
+            return slice, slice
+        half_slice = slice // 2
+        return half_slice, slice - half_slice
+    if start_entropy > end_entropy:
+        return 0, slice
+    else:
+        return slice, 0
+
+
 def colorspace(im, bw=False, **kwargs):
     if bw and im.mode != 'L':
         im = im.convert('L')
@@ -70,22 +92,20 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
                 left = top = 0
                 right, bottom = x, y
                 while dx:
-                    slice = min(dx, 10)
-                    l_sl = im.crop((0, 0, slice, y))
-                    r_sl = im.crop((x - slice, 0, x, y))
-                    if utils.image_entropy(l_sl) >= utils.image_entropy(r_sl):
-                        right -= slice
-                    else:
-                        left += slice
+                    slice = min(dx, max(dx // 5, 10))
+                    start = im.crop((left, 0, left + slice, y))
+                    end = im.crop((right - slice, 0, right, y))
+                    add, remove = _compare_entropy(start, end, slice, dx)
+                    left += add
+                    right -= remove
                     dx -= slice
                 while dy:
-                    slice = min(dy, 10)
-                    t_sl = im.crop((0, 0, x, slice))
-                    b_sl = im.crop((0, y - slice, x, y))
-                    if utils.image_entropy(t_sl) >= utils.image_entropy(b_sl):
-                        bottom -= slice
-                    else:
-                        top += slice
+                    slice = min(dy, max(dy // 5, 10))
+                    start = im.crop((0, top, x, top + slice))
+                    end = im.crop((0, bottom - slice, x, bottom))
+                    add, remove = _compare_entropy(start, end, slice, dy)
+                    top += add
+                    bottom -= remove
                     dy -= slice
                 box = (left, top, right, bottom)
             # Finally, crop the image!
