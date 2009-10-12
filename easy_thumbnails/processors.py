@@ -12,8 +12,7 @@ def _compare_entropy(start_slice, end_slice, slice, difference):
     """
     start_entropy = utils.image_entropy(start_slice)
     end_entropy = utils.image_entropy(end_slice)
-    entropy_difference = abs(start_entropy / end_entropy - 1)
-    if entropy_difference < 0.01:
+    if end_entropy and abs(start_entropy / end_entropy - 1) < 0.01:
         # Less than 1% difference, remove from both sides.
         if difference >= slice * 2:
             return slice, slice
