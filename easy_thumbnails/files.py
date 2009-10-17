@@ -334,7 +334,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         
         """
         super(ThumbnailerFieldFile, self).save(name, content, *args, **kwargs)
-        self.get_source_cache(self, create=True, update=True)
+        self.get_source_cache(create=True, update=True)
 
     def delete(self, *args, **kwargs):
         """
