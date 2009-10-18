@@ -19,7 +19,7 @@ setup(
     description='Easy thumbnails for Django',
     long_description=long_description,
     author='Chris Beaven',
-    email='smileychris@gmail.com',
+    author_email='smileychris@gmail.com',
     platforms=['any'],
     packages=[
         'easy_thumbnails',
