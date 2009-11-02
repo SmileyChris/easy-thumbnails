@@ -48,6 +48,17 @@ You can use the ``ThumbnailerField`` or ``ThumbnailerImageField`` fields (based
 on ``FileField`` and ``ImageField``, respectively) for easier access to
 retrieve (or generate) thumbnail images.
 
+By passing a ``resize_source`` argument to the ``ThumbnailerImageField``, you
+can resize the source image before it is saved::
+
+    class Profile(models.Model):
+        user = models.ForeignKey('auth.User')
+        avatar = ThumbnailerImageField(
+            upload_to='avatars',
+            resize_source=dict(size=(50, 50), crop='smart'),
+        )
+
+
 Lower level usage
 =================
 
