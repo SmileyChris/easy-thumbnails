@@ -70,6 +70,7 @@ class ThumbnailFile(ImageFieldFile):
         fake_field = FakeField(storage=storage)
         super(ThumbnailFile, self).__init__(FakeInstance(), fake_field, name,
                                             *args, **kwargs)
+        del self.field
         if file:
             self.file = file
 
