@@ -83,7 +83,11 @@ class ThumbnailFile(ImageFieldFile):
         
         """
         if not hasattr(self, '_image_cache'):
+            was_closed = self.closed
+            self.open()
             self.image = Image.open(self)
+            if was_closed:
+                self.close()
         return self._image_cache
 
     def _set_image(self, image):
@@ -271,12 +275,16 @@ class Thumbnailer(File):
 
     def _image(self):
         if not hasattr(self, '_cached_image'):
+            was_closed = self.closed
+            self.open()
             # TODO: Use different methods of generating the file, rather than
             # just relying on PIL.
             self._cached_image = Image.open(self)
             # Image.open() is a lazy operation, so force the load so we
             # can close this file again if appropriate.
             self._cached_image.load()
+            if was_closed:
+                self.close()
         return self._cached_image
 
     image = property(_image)
