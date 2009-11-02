@@ -138,8 +138,11 @@ class ThumbnailFile(ImageFieldFile):
             self._file = self.storage.open(self.name, 'rb')
         return self._file
 
-    def _set_file(self, file):
-        self._file = file
+    def _set_file(self, value):
+        if isinstance(value, file):
+            value = File(value)
+        self._file = value
+        self._committed = False
 
     def _del_file(self):
         del self._file
