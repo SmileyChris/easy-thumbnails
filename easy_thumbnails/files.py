@@ -34,7 +34,7 @@ def get_thumbnailer(source, relative_name=None):
 
 def save_thumbnail(thumbnail_file, storage):
     """
-    Save a thumbnailed file.
+    Save a thumbnailed file, returning the saved relative file name.
     
     """
     filename = thumbnail_file.name
@@ -139,7 +139,7 @@ class ThumbnailFile(ImageFieldFile):
         return self._file
 
     def _set_file(self, value):
-        if isinstance(value, file):
+        if not isinstance(value, File):
             value = File(value)
         self._file = value
         self._committed = False
@@ -350,14 +350,25 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
 
     def delete(self, *args, **kwargs):
         """
-        Delete the image.
+        Delete the image, along with any generated thumbnails.
         
         """
-        super(ThumbnailerFieldFile, self).delete(*args, **kwargs)
+        # First, delete any related thumbnails.
         source_cache = self.get_source_cache()
         if source_cache:
+            thumbnail_storage_cache = models.Storage.objects.get_storage(
+                                                        self.thumbnail_storage)
+            for thumbnail_cache in source_cache.thumbnails.all():
+                # Only attempt to delete the file if it was stored using the
+                # same storage as is currently used.
+                if thumbnail_cache.storage == thumbnail_storage_cache:
+                    self.thumbnail_storage.delete(thumbnail_cache.name)
+        # Next, delete the source image.
+        super(ThumbnailerFieldFile, self).delete(*args, **kwargs)
+        # Finally, delete the source cache entry (which will also delete any
+        # thumbnail cache entries).
+        if source_cache:
             source_cache.delete()
-            # TODO: Also delete related thumbnails (using the cache).
 
 
 class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):

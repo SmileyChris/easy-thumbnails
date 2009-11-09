@@ -6,6 +6,10 @@ from PIL import Image
 from StringIO import StringIO
 
 
+class TestModel(models.Model):
+    avatar = ThumbnailerField(upload_to='avatars')
+
+
 class ThumbnailerFieldTest(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
@@ -16,17 +20,22 @@ class ThumbnailerFieldTest(BaseTest):
         data.seek(0)
         image_file = ContentFile(data.read())
         self.storage.save('avatars/avatar.jpg', image_file)
-        # Create a test model which uses the temporary storage.
-        class TestModel(models.Model):
-            avatar = ThumbnailerField(upload_to='avatars',
-                                      storage=self.storage)
-        self.model = TestModel
+        # Set the test model to use the current temporary storage.
+        TestModel._meta.get_field('avatar').storage = self.storage
+        TestModel._meta.get_field('avatar').thumbnail_storage = self.storage
 
     def tearDown(self):
-        BaseTest.tearDown(self)
         self.storage.delete_temporary_storage()
+        BaseTest.tearDown(self)
 
     def test_generate_thumbnail(self):
-        instance = self.model(avatar='avatars/avatar.jpg')
+        instance = TestModel(avatar='avatars/avatar.jpg')
         thumb = instance.avatar.generate_thumbnail({'size': (300, 300)})
         self.assertEqual((thumb.width, thumb.height), (300, 225))
+
+    def test_delete(self):
+        instance = TestModel(avatar='avatars/avatar.jpg')
+        thumb = instance.avatar.get_thumbnail({'size': (300, 300)})
+        self.assertEqual((thumb.width, thumb.height), (300, 225))
+        instance.avatar.delete(save=False)
+        self.assertEqual(self.storage.listdir('avatars')[1], [])
