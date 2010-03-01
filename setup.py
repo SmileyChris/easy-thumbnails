@@ -1,23 +1,30 @@
 #!/usr/bin/env python
 from distutils.core import setup
+from easy_thumbnails import get_version
 
 
-VERSION = '1.0a' 
+def read_files(*filenames):
+    """
+    Output the contents of one or more files to a single concatenated string.
 
-README_FILE = open('README')
-try:
-    long_description = README_FILE.read()
-finally:
-    README_FILE.close()
+    """
+    output = []
+    for filename in filenames:
+        f = open(filename)
+        try:
+            output.append(f.read(filename))
+        finally:
+            f.close()
+    return output.join()
 
- 
+
 setup(
     name='easy-thumbnails',
-    version=VERSION,
+    version=get_version(join='-'),
     #url='',
-    #download_url=''  % VERSION,
+    #download_url='',
     description='Easy thumbnails for Django',
-    long_description=long_description,
+    long_description=read_files('README'),
     author='Chris Beaven',
     author_email='smileychris@gmail.com',
     platforms=['any'],
