@@ -66,7 +66,7 @@ Python
 
 Thumbnails are generated with a ``Thumbnailer`` instance. For example::
 
-    from easy_thumbnails import Thumbnailer
+    from easy_thumbnails.files import Thumbnailer
 
     def square_thumbnail(source):
         thumbnail_options = dict(size=(100, 100), crop=True, bw=True)
@@ -80,7 +80,7 @@ A model's ``ImageField`` provides an appropriate source file but if you need
 to manually create the source file object, you can use the provided
 ``ThumbnailFile`` object::
 
-	from easy_thumbnails import ThumbnailFile
+	from easy_thumbnails.files import ThumbnailFile
 
 	# For an existing file in storage:
 	source = ThumbnailFile('animals/aarvark.jpg')

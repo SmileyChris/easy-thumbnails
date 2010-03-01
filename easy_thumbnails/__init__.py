@@ -1,6 +1,3 @@
-# Import the two most common objects so they are more easily accessible.
-from files import Thumbnailer, ThumbnailFile
-
 VERSION = (1, 0, 'alpha', 2)
 
 
