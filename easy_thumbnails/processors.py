@@ -8,7 +8,7 @@ def _compare_entropy(start_slice, end_slice, slice, difference):
     Calculate the entropy of two slices (from the start and end of an axis),
     returning a tuple containing the amount that should be added to the start
     and removed from the end of the axis.
-    
+
     """
     start_entropy = utils.image_entropy(start_slice)
     end_entropy = utils.image_entropy(end_slice)
@@ -25,6 +25,19 @@ def _compare_entropy(start_slice, end_slice, slice, difference):
 
 
 def colorspace(im, bw=False, **kwargs):
+    """
+    Convert images to the correct color space.
+
+    A passive option (i.e. always processed) of this method is that all images
+    (unless grayscale) are converted to RGB colorspace.
+
+    This processor should be listed before :func:`scale_and_crop` so palette is
+    changed before the image is resized.
+
+    bw
+        Make the thumbnail grayscale (not really just black & white).
+
+    """
     if bw and im.mode != 'L':
         im = im.convert('L')
     elif im.mode not in ('L', 'RGB', 'RGBA'):
@@ -33,6 +46,16 @@ def colorspace(im, bw=False, **kwargs):
 
 
 def autocrop(im, autocrop=False, **kwargs):
+    """
+    Remove any unnecessary whitespace from the edges of the source image.
+
+    This processor should be listed before :func:`scale_and_crop` so the
+    whitespace is removed from the source image before it is resized.
+
+    autocrop
+        Activates the autocrop method for this image.
+
+    """
     if autocrop:
         bw = im.convert('1')
         bw = bw.filter(ImageFilter.MedianFilter)
@@ -46,6 +69,35 @@ def autocrop(im, autocrop=False, **kwargs):
 
 
 def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
+    """
+    Handle scaling and cropping the source image.
+
+    crop
+        Crop the source image height or width to exactly match the requested
+        thumbnail size (the default is to proportionally resize the source
+        image to fit within the requested thumbnail size).
+
+        By default, the image is centered before being cropped. To crop from
+        the edges, pass a comma separated string containing the ``x`` and ``y``
+        percentage offsets (negative values go from the right/bottom). Some
+        examples follow:
+
+        * ``crop="0,0"`` will crop from the left and top edges.
+
+        * ``crop="-10,-0"`` will crop from the right edge (with a 10% offset)
+          and the bottom edge.
+
+        * ``crop=",0"`` will keep the default behavior for the x axis
+          (horizontally centering the image) and crop from the top edge.
+
+        The image can also be "smart cropped" by using ``crop="smart"``. The
+        image is incrementally cropped down to the requested size by removing
+        slices from edges with the least entropy.
+
+    upscale
+        Allow upscaling of the source image during scaling.
+
+    """
     x, y = [float(v) for v in im.size]
     xr, yr = [float(v) for v in size]
 
@@ -113,6 +165,17 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
 
 
 def filters(im, detail=False, sharpen=False, **kwargs):
+    """
+    Pass the source image through post-processing filters.
+
+    sharpen
+        Sharpen the thumbnail image (using the PIL sharpen filter)
+
+    detail
+        Add detail to the image, like a mild *sharpen* (using the PIL
+        ``detail`` filter).
+
+    """
     if detail:
         im = im.filter(ImageFilter.DETAIL)
     if sharpen:

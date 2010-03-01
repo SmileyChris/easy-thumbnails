@@ -1,10 +1,10 @@
 # Import the two most common objects so they are more easily accessible.
 from files import Thumbnailer, ThumbnailFile
 
-VERSION = (1, 0, 'alpha', 1)
+VERSION = (1, 0, 'alpha', 2)
 
 
-def get_version(join=' '):
+def get_version(join=' ', short=False):
     """
     Return the version of this package as a string.
 
@@ -31,6 +31,9 @@ def get_version(join=' '):
             # ...
         )
 
+    Use the ``short`` argument to get the version number without trailing
+    version information.
+
     """
     version = []
     for i, bit in enumerate(VERSION):
@@ -40,8 +43,9 @@ def get_version(join=' '):
     number, remainder = number[:i], number[i:]
     if number:
         version.append('.'.join(number))
-    if remainder == ['alpha', 0]:
-        version.append('pre-alpha')
-    elif 'final' not in remainder:
-        version.extend(remainder)
+    if not short:
+        if remainder == ['alpha', 0]:
+            version.append('pre-alpha')
+        elif 'final' not in remainder:
+            version.extend(remainder)
     return join.join(version)

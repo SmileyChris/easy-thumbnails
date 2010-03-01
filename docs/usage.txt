@@ -1,0 +1,92 @@
+=====
+Usage
+=====
+
+The simplest and most common way easy-thumbnails is used is via the
+``{% thumbnail %}`` Django template tag, which generates images from a model
+with an ``ImageField``.
+
+A Python class is also provided which can be used to assist generation of
+thumbnail images.
+
+Overview
+========
+
+The primary function of easy-thumbnail is to create thumbnails based on a
+source image on the fly.
+
+So whenever a thumbnail does not exist or if the source was modified
+more recently than the existing thumbnail, a new thumbnail is generated (and
+saved).
+
+Image quality and format
+------------------------
+
+The default format used to save thumbnail images is a JPEG of quality 85 (out
+of 100).
+
+The thumbnail tag (and thumbnail generator) accept a ``quality`` option
+which changes the image quality. The default value of 85 can also be changed
+via the ``THUMBNAIL_QUALITY`` :doc:`ref/settings`.
+
+Similarly, the ``THUMBNAIL_EXTENSION`` setting can be used to specify an
+alternate image format.
+
+Templates
+=========
+
+To generate thumbnails in your template, use the ``{% thumbnail %}`` tag. To
+make this tag available for use in your template, use::
+    
+    {% load thumbnail %}
+
+``{% thumbnail %}`` tag
+-----------------------
+
+.. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnail
+
+For a full list of options, read the :doc:`ref/processors` documentation.
+
+
+Models
+======
+
+You can use the ``ThumbnailerField`` or ``ThumbnailerImageField`` fields (based
+on ``FileField`` and ``ImageField``, respectively) for easier access to
+retrieve (or generate) thumbnail images, use different storages and resize
+source images before saving.
+
+.. autoclass:: easy_thumbnails.fields.ThumbnailerField
+
+.. autoclass:: easy_thumbnails.fields.ThumbnailerImageField
+
+
+Python
+======
+
+Thumbnails are generated with a ``Thumbnailer`` instance. For example::
+
+    from easy_thumbnails import Thumbnailer
+
+    def square_thumbnail(source):
+        thumbnail_options = dict(size=(100, 100), crop=True, bw=True)
+        return Thumbnailer(source).get_thumbnail(thumbnail_options)
+
+By default, ``get_thumbnail`` saves the file (using file storage). The source
+file used to instanciate the ``Thumbnailer`` must have a ``name`` attribute
+which locates the file relative to the storage root.
+
+A model's ``ImageField`` provides an appropriate source file but if you need
+to manually create the source file object, you can use the provided
+``ThumbnailFile`` object::
+
+	from easy_thumbnails import ThumbnailFile
+
+	# For an existing file in storage:
+	source = ThumbnailFile('animals/aarvark.jpg')
+	square_thumbnail(source)
+	
+	# For a new file:
+	picture = open('/home/zookeeper/pictures/my_anteater.jpg')
+	source = ThumbnailFile('animals/anteater.jpg', file=picture)
+	square_thumbnail(source)

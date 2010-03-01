@@ -20,7 +20,7 @@ def split_args(args):
 
     An argument looks like ``crop``, ``crop="some option"`` or ``crop=my_var``.
     Arguments which provide no value get a value of ``True``.
-    
+
     """
     args_dict = {}
     for arg in args:
@@ -75,7 +75,7 @@ class ThumbnailNode(Node):
                             "but '%s' is not a valid size." %
                             (self.size_var, size))
                 return self.bail_out(context)
-        
+
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
         except:
@@ -99,20 +99,47 @@ def thumbnail(parser, token):
     """
     Creates a thumbnail of an ImageField.
 
-    To just output the absolute url to the thumbnail::
+    Basic tag Syntax::
 
-        {% thumbnail image 80x80 %}
+        {% thumbnail [source] [size] [options] %}
 
-    After the image path and dimensions, you can put any options::
+    *source* must be a ``File`` object, usually an Image/FileField of a model
+    instance.
 
-        {% thumbnail image 80x80 quality=95 sharpen  %}
+    *size* can either be:
 
-    To put the ThumbnailedField instance on the context rather than simply
-    rendering the url, finish the tag with ``as [context_var_name]``::
+    * the size in the format ``[width]x[height]`` (for example,
+      ``{% thumbnail person.photo 100x50 %}``) or
 
-        {% thumbnail image 80x80 as thumb %}
-        {{ thumb.width }} x {{ thumb.height }}
-        
+    * a variable containing a valid size (i.e. either a string in the
+      ``[width]x[height]`` format or a tuple containing two integers):
+      ``{% thumbnail person.photo size_var %}``.
+
+    *options* are a space separated list of options which are used when
+    processing the image to a thumbnail such as ``sharpen``, ``crop`` and
+    ``quality=90``.
+
+    The thumbnail tag can also place a ``ThumbnailFile`` object in the context,
+    providing access to the properties of the thumbnail such as the height and
+    width::
+    
+        {% thumbnail [source] [size] [options] as [variable] %}
+
+    When ``as [variable]`` is used, the tag does not return the absolute URL of
+    the thumbnail.
+
+    **Debugging**
+
+    By default, if there is an error creating the thumbnail or resolving the
+    image variable then the thumbnail tag will just return an empty string (and
+    if there was a context variable to be set then it will also be set to an empty
+    string).
+
+    For example, you will not see an error if the thumbnail could not
+    be written to directory because of permissions error. To display those
+    errors rather than failing silently, set ``THUMBNAIL_DEBUG = True`` in
+    your Django project's settings module.
+
     """
     args = token.split_contents()
     tag = args[0]

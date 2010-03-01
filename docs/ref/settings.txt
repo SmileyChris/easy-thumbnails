@@ -1,0 +1,73 @@
+========
+Settings
+========
+
+The following settings can be specified in your Django project's settings
+module to alter the behaviour of easy-thumbnails.
+
+.. _THUMBNAIL_DEBUG:
+
+THUMBNAIL_DEBUG
+	If this boolean setting (which defaults to ``False``) is set to ``True``,
+	display errors creating a thumbnail when using the ``{% thumbnail %}`` tag
+	rather than failing silently.
+
+THUMBNAIL_DEFAULT_STORAGE
+	The default Django storage for thumbnails.
+
+	Defaults to ``'easy_thumbnails.storage.ThumbnailFileSystemStorage'``.
+
+THUMBNAIL_MEDIA_ROOT
+	Used by easy-thumbnail's default storage to locate where thumbnails are
+	stored on the file system.
+
+	If not provided, Django's standard ``MEDIA_ROOT`` setting is used.
+
+THUMBNAIL_MEDIA_URL
+	Used by easy-thumbnail's default storage to build the absolute URL for a
+	generated thumbnail.
+
+	If not provided, Django's standard ``MEDIA_URL`` setting is used.
+
+THUMBNAIL_BASEDIR
+	Save thumbnail images to a directory directly off ``MEDIA_ROOT``, still
+	keeping the relative directory structure of the source image.
+
+	For example, using the ``{% thumbnail "photos/1.jpg" 150x150 %}`` tag with
+	a ``THUMBNAIL_BASEDIR`` of ``'thumbs'`` would result in the following
+	thumbnail filename::
+
+		MEDIA_ROOT + 'thumbs/photos/1_jpg_150x150_q85.jpg'
+
+THUMBNAIL_SUBDIR
+	Save thumbnail images to a sub-directory relative to the source image.
+
+	For example, using the ``{% thumbnail "photos/1.jpg" 150x150 %}`` tag with
+	a ``THUMBNAIL_SUBDIR`` of ``'thumbs'`` would result in the following
+	thumbnail filename::
+
+		MEDIA_ROOT + 'photos/thumbs/1_jpg_150x150_q85.jpg'
+
+THUMBNAIL_PREFIX
+	Prepend thumbnail filenames with the specified prefix.
+
+	For example, using the ``{% thumbnail "photos/1.jpg" 150x150 %}`` tag with
+	a ``THUMBNAIL_PREFIX`` of ``'thumbs_'`` would result in the following
+	thumbnail filename::
+
+		MEDIA_ROOT + 'photos/thumbs_1_jpg_150x150_q85.jpg'
+
+THUMBNAIL_PROCESSORS
+	The :doc:`processors` through which the source image is run when you create
+	a thumbnail.
+
+	The order of the processors is the order in which they are sequentially called
+	to process the image.
+
+THUMBNAIL_EXTENSION
+	Specify which type of image to save thumbnails as. For example:
+
+		THUMBNAIL_EXTENSION = 'png'
+
+	Note that changing the extension causes the ``THUMBNAIL_QUALITY`` setting
+	to have no effect.

@@ -155,6 +155,15 @@ class Thumbnailer(File):
     A file-like object which provides some methods to generate thumbnail
     images.
 
+    You can subclass this object and override the following properties to
+    change the defaults (pulled from the default settings):
+    
+        * thumbnail_basedir
+        * thumbnail_subdir
+        * thumbnail_prefix
+        * thumbnail_quality
+        * thumbnail_extension
+
     """
     thumbnail_basedir = utils.get_setting('BASEDIR')
     thumbnail_subdir = utils.get_setting('SUBDIR')
@@ -238,7 +247,7 @@ class Thumbnailer(File):
         Otherwise a new thumbnail image is generated using the
         ``thumbnail_options`` dictionary. If the ``save`` argument is ``True``
         (default), the generated thumbnail will be saved too.
-                        
+        
         """
         name = self.get_thumbnail_name(thumbnail_options)
 

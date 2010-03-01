@@ -1,0 +1,66 @@
+================
+Image Processors
+================
+
+
+Built-in processors
+===================
+
+Following is a list of the built-in processors, along with the thumbnail
+options which they use.
+
+.. automodule:: easy_thumbnails.processors
+   :members:
+
+
+Custom processors
+=================
+
+You can replace or leave out any default processor as suits your needs.
+Following is an explanation of how to create and activate a custom processor.
+
+When defining the ``THUMBNAIL_PROCESSORS`` setting, remember that this is the
+order through which the processors are run. The image received by a processor
+is the output of the previous processor.  
+
+
+Create the processor
+--------------------
+
+First create a processor like this::
+
+    def whizzbang_processor(image, bang=False, **kwargs):
+    	"""
+    	Whizz bang the source image.
+
+    	"""
+        if bang:
+            image = whizz(image)
+        return image
+
+The first argument for a processor is the source image.
+
+All other arguments are keyword arguments which relate to the list of options
+received by the thumbnail generator (including ``size`` and ``quality``).
+Ensure you list all arguments which could be used (giving them a default value
+of ``False``), as the processors arguments are introspected to generate a list
+of valid options.
+
+Whether a processor actually modifies the image or not, they must always return
+an image. 
+
+Use the processor
+-----------------
+
+Next, add the processor to the ``THUMBNAIL_PROCESSORS`` to your settings
+module::
+
+    THUMBNAIL_PROCESSORS = (
+        # Default processors
+        'easy_thumbnails.processors.colorspace',
+        'easy_thumbnails.processors.autocrop',
+        'easy_thumbnails.processors.scale_and_crop',
+        'easy_thumbnails.processors.filters',
+        # Custom processors
+        'wb_project.thumbnail_processors.whizzbang_processor',
+    )
