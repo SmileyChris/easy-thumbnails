@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from distutils.core import setup
-from easy_thumbnails import get_version
+#from easy_thumbnails import get_version
 
 
 def read_files(*filenames):
@@ -12,19 +12,19 @@ def read_files(*filenames):
     for filename in filenames:
         f = open(filename)
         try:
-            output.append(f.read(filename))
+            output.append(f.read())
         finally:
             f.close()
-    return output.join()
+    return '\n'.join(output)
 
 
 setup(
     name='easy-thumbnails',
-    version=get_version(join='-'),
+    version='x',
     #url='',
     #download_url='',
     description='Easy thumbnails for Django',
-    long_description=read_files('README'),
+    long_description='x',
     author='Chris Beaven',
     author_email='smileychris@gmail.com',
     platforms=['any'],
