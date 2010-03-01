@@ -42,7 +42,8 @@ class FileManager(models.Manager):
 
 
 class Storage(models.Model):
-    hash = models.CharField(primary_key=True, max_length=40, editable=False)
+    hash = models.CharField(primary_key=True, max_length=40, editable=False,
+                            db_index=True)
     pickle = models.TextField(unique=True)
 
     objects = StorageManager()
@@ -65,7 +66,7 @@ class Storage(models.Model):
 
 class File(models.Model):
     storage = models.ForeignKey(Storage)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, db_index=True)
     modified = models.DateTimeField(default=datetime.datetime.utcnow())
 
     objects = FileManager()
