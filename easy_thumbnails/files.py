@@ -276,8 +276,10 @@ class Thumbnailer(File):
         # Try to use the local file modification times first.
         source_modtime = self.get_source_modtime()
         thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
-        if source_modtime and thumbnail_modtime:
-            return source_modtime <= thumbnail_modtime
+        # The thumbnail modification time will be 0 if there was an OSError,
+        # in which case it will still be used (but always return False).
+        if source_modtime and thumbnail_modtime is not None:
+            return thumbnail_modtime and source_modtime <= thumbnail_modtime
         # Fall back to using the database cached modification times.
         source = self.get_source_cache()
         if not source:
@@ -324,15 +326,17 @@ class Thumbnailer(File):
         try:
             path = self.source_storage.path(self.name)
             return os.path.getmtime(path)
-        except (NotImplementedError, OSError):
+        except NotImplementedError:
             pass
 
     def get_thumbnail_modtime(self, thumbnail_name):
         try:
             path = self.thumbnail_storage.path(thumbnail_name)
             return os.path.getmtime(path)
-        except (NotImplementedError, OSError):
-            pass
+        except OSError:
+            return 0
+        except NotImplementedError:
+            return None
 
 
 class ThumbnailerFieldFile(FieldFile, Thumbnailer):
