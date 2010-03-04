@@ -30,7 +30,7 @@ download a copy of easy-thumbnails and install it manually. The
 latest release package can be downloaded from `easy-thumbnail's
 listing on the Python Package Index`__.
 
-.. __: http://pypi.python.org/pypi/easy-thumbnails/>
+.. __: http://pypi.python.org/pypi/easy-thumbnails/
 
 Once you've downloaded the package, unpack it and run the ``setup.py``
 installation script::
