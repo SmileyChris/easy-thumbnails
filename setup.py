@@ -32,6 +32,8 @@ setup(
         'easy_thumbnails',
         'easy_thumbnails.templatetags',
     ],
+    package_data={'easy_thumbnails': ['docs/*.py', 'docs/*.', 'docs/*.bat'
+                                      'docs/*.txt', 'docs/ref/*.txt']},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
