@@ -149,7 +149,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
                     add, remove = _compare_entropy(start, end, slice, dx)
                     left += add
                     right -= remove
-                    dx -= slice
+                    dx = dx - add - remove
                 while dy:
                     slice = min(dy, max(dy // 5, 10))
                     start = im.crop((0, top, x, top + slice))
@@ -157,7 +157,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
                     add, remove = _compare_entropy(start, end, slice, dy)
                     top += add
                     bottom -= remove
-                    dy -= slice
+                    dy = dy - add - remove
                 box = (left, top, right, bottom)
             # Finally, crop the image!
             im = im.crop(box)
