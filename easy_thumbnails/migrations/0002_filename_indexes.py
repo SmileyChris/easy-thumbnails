@@ -14,7 +14,7 @@ class Migration:
     def backwards(self, orm):
         db.delete_index('easy_thumbnails_source', ['name'])
         db.delete_index('easy_thumbnails_thumbnail', ['name'])
-        db.delet_index('easy_thumbnails_storage', ['hash'])
+        db.delete_index('easy_thumbnails_storage', ['hash'])
     
     
     models = {
