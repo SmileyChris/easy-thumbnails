@@ -149,6 +149,12 @@ class ThumbnailFile(ImageFieldFile):
 
     file = property(_get_file, _set_file, _del_file)
 
+    def open(self, mode=None, *args, **kwargs):
+        if self.closed and self.name:
+            self.file = self.storage.open(self.name, mode or self.mode)
+        else:
+            return super(ThumbnailFile, self).open(mode, *args, **kwargs)
+
 
 class Thumbnailer(File):
     """

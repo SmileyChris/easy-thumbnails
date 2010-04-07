@@ -1,4 +1,4 @@
-VERSION = (1, 0, 'alpha', 2)
+VERSION = (1, 0, 'alpha', 3)
 
 
 def get_version(join=' ', short=False):
@@ -33,11 +33,14 @@ def get_version(join=' ', short=False):
 
     """
     version = []
+    number = []
+    remainder = []
     for i, bit in enumerate(VERSION):
-        if not isinstance(bit, int):
+        if isinstance(bit, int):
+            number.append(str(bit))
+        else:
+            remainder = [str(bit) for bit in VERSION[i:]] 
             break
-    number = [str(bit) for bit in VERSION]
-    number, remainder = number[:i], number[i:]
     if number:
         version.append('.'.join(number))
     if not short:
