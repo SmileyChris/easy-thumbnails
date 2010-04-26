@@ -19,7 +19,7 @@ Template usage
 To generate thumbnails in your template, use the ``{% thumbnail %}`` tag. To
 make this tag available for use in your template, use::
     
-    {% load thumbnails %}
+    {% load thumbnail %}
 
 Basic tag Syntax::
 
