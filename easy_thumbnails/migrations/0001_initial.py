@@ -57,7 +57,7 @@ class Migration:
         },
         'easy_thumbnails.storage': {
             'hash': ('django.db.models.fields.CharField', [], {'max_length': '40', 'primary_key': 'True'}),
-            'pickle': ('django.db.models.fields.TextField', [], {'unique': 'True'})
+            'pickle': ('django.db.models.fields.TextField', [], {})
         },
         'easy_thumbnails.thumbnail': {
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

@@ -14,7 +14,7 @@ class Migration:
     def backwards(self, orm):
         db.delete_index('easy_thumbnails_source', ['name'])
         db.delete_index('easy_thumbnails_thumbnail', ['name'])
-        db.delet_index('easy_thumbnails_storage', ['hash'])
+        db.delete_index('easy_thumbnails_storage', ['hash'])
     
     
     models = {
@@ -26,7 +26,7 @@ class Migration:
         },
         'easy_thumbnails.storage': {
             'hash': ('django.db.models.fields.CharField', [], {'max_length': '40', 'primary_key': 'True'}),
-            'pickle': ('django.db.models.fields.TextField', [], {'unique': 'True'})
+            'pickle': ('django.db.models.fields.TextField', [], {})
         },
         'easy_thumbnails.thumbnail': {
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
