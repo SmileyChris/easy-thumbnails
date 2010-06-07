@@ -81,5 +81,5 @@ class ScaleAndCropTest(TestCase):
         image = create_image()
         
         smart_crop = processors.scale_and_crop(image, (600, 600), crop='smart')
-        expected = image.crop([74, 0, 674, 600])
+        expected = image.crop([78, 0, 678, 600])
         self.assertImagesEqual(smart_crop, expected)
