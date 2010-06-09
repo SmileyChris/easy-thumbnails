@@ -1,6 +1,7 @@
 from PIL import Image
 from django.core.files.base import File, ContentFile
-from django.core.files.storage import get_storage_class, default_storage
+from django.core.files.storage import get_storage_class, default_storage, \
+    Storage
 from django.db.models.fields.files import ImageFieldFile, FieldFile
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
@@ -16,7 +17,17 @@ DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
 def get_thumbnailer(source, relative_name=None):
     """
     Get a thumbnailer for a source file.
-    
+
+    The ``source`` argument must be one of the following:
+
+        * ``Thumbnailer`` instance
+
+        * ``FieldFile`` instance (i.e. a model instance file/image field
+          property)
+
+        * ``File`` or ``Storage`` instance, and for both of these cases the
+          ``relative_name`` argument must also be provided
+
     """
     if isinstance(source, Thumbnailer):
         return source
@@ -25,11 +36,16 @@ def get_thumbnailer(source, relative_name=None):
             relative_name = source.name
         return ThumbnailerFieldFile(source.instance, source.field,
                                     relative_name)
+    if not relative_name:
+        raise ValueError('If source is not a FieldFile or Thumbnailer '
+                         'instance, the relative name must be provided')
     elif isinstance(source, File):
         return Thumbnailer(source.file, relative_name)
-    raise TypeError('The source object must either be a Thumbnailer, a '
-                    'FieldFile or a File with the relative_name argument '
-                    'provided.')
+    elif isinstance(source, Storage):
+        source_image = source.open(relative_name)
+        return Thumbnailer(source_image, relative_name, source_storage=source)
+    raise TypeError('Unknown source type, expected a Thumbnailer, FieldFile, '
+                    'File or Storage instance.')
 
 
 def save_thumbnail(thumbnail_file, storage):
@@ -65,6 +81,9 @@ class ThumbnailFile(ImageFieldFile):
     """
     A thumbnailed file.
     
+    This can be used just like a Django model instance's property for a file
+    field (i.e. an ``ImageFieldFile`` object).
+
     """
     def __init__(self, name, file=None, storage=None, *args, **kwargs):
         fake_field = FakeField(storage=storage)
@@ -85,7 +104,7 @@ class ThumbnailFile(ImageFieldFile):
         if not hasattr(self, '_image_cache'):
             was_closed = self.closed
             self.open()
-            self.image = Image.open(self)
+            self.image = Image.open(self.file)
             if was_closed:
                 self.close()
         return self._image_cache
@@ -151,10 +170,10 @@ class ThumbnailFile(ImageFieldFile):
 
     def open(self, mode=None, *args, **kwargs):
         if self.closed and self.name:
-            self.file = self.storage.open(self.name, mode or self.mode)
+            self.file = self.storage.open(self.name, mode or self.mode or 'rb')
         else:
             return super(ThumbnailFile, self).open(mode, *args, **kwargs)
-
+    
 
 class Thumbnailer(File):
     """

@@ -126,7 +126,7 @@ def thumbnail(parser, token):
         {% thumbnail [source] [size] [options] as [variable] %}
 
     When ``as [variable]`` is used, the tag does not return the absolute URL of
-    the thumbnail.
+    the thumbnail. 
 
     **Debugging**
 
