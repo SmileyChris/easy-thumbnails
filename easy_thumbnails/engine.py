@@ -1,5 +1,4 @@
-from easy_thumbnails import defaults, utils
-from django.core.files.base import ContentFile
+from easy_thumbnails import utils
 import os
 try:
     from cStringIO import StringIO

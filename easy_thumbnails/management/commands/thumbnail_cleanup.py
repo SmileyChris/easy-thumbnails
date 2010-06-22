@@ -3,7 +3,7 @@ import re
 from django.db import models
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
-from easy_thumbnails.main import get_thumbnail_setting
+from easy_thumbnails.utils import get_setting
 
 
 try:
@@ -12,12 +12,12 @@ except NameError:
     from sets import Set as set     # For Python 2.3
 
 thumb_re = re.compile(r'^%s(.*)_\d{1,}x\d{1,}_[-\w]*q([1-9]\d?|100)\.jpg' %
-                      get_thumbnail_setting('PREFIX'))
+                      get_setting('PREFIX'))
 
 
 def get_thumbnail_path(path):
-    basedir = get_thumbnail_setting('BASEDIR')
-    subdir = get_thumbnail_setting('SUBDIR')
+    basedir = get_setting('BASEDIR')
+    subdir = get_setting('SUBDIR')
     return os.path.join(basedir, path, subdir)
 
 

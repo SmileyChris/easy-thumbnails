@@ -1,4 +1,3 @@
-import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.template import Template, Context, TemplateSyntaxError

@@ -1,6 +1,7 @@
+from django.conf import settings
+from easy_thumbnails.utils import get_setting
 import os
 import re
-
 
 re_thumbnail_file = re.compile(r'(?P<source_filename>.+)_(?P<x>\d+)x(?P<y>\d+)'
                                r'(?:_(?P<options>\w+))?_q(?P<quality>\d+)'
@@ -14,14 +15,10 @@ def all_thumbnails(path, recursive=True, prefix=None, subdir=None):
     Each key is a source image filename, relative to path.
     Each value is a list of dictionaries as explained in `thumbnails_for_file`.
     """
-    # Fall back to using thumbnail settings. These are local imports so that
-    # there is no requirement of Django to use the utils module.
     if prefix is None:
-        from easy_thumbnails.files import get_thumbnail_setting
-        prefix = get_thumbnail_setting('PREFIX')
+        prefix = get_setting('PREFIX')
     if subdir is None:
-        from easy_thumbnails.files import get_thumbnail_setting
-        subdir = get_thumbnail_setting('SUBDIR')
+        subdir = get_setting('SUBDIR')
     thumbnail_files = {}
     if not path.endswith('/'):
         path = '%s/' % path
@@ -77,20 +74,14 @@ def thumbnails_for_file(relative_source_path, root=None, basedir=None,
       `options`   -- list of options for this thumbnail
       `quality`   -- quality setting for this thumbnail
     """
-    # Fall back to using thumbnail settings. These are local imports so that
-    # there is no requirement of Django to use the utils module.
     if root is None:
-        from django.conf import settings
         root = settings.MEDIA_ROOT
     if prefix is None:
-        from easy_thumbnails.files import get_thumbnail_setting
-        prefix = get_thumbnail_setting('PREFIX')
+        prefix = get_setting('PREFIX')
     if subdir is None:
-        from easy_thumbnails.files import get_thumbnail_setting
-        subdir = get_thumbnail_setting('SUBDIR')
+        subdir = get_setting('SUBDIR')
     if basedir is None:
-        from easy_thumbnails.files import get_thumbnail_setting
-        basedir = get_thumbnail_setting('BASEDIR')
+        basedir = get_setting('BASEDIR')
     source_dir, filename = os.path.split(relative_source_path)
     thumbs_path = os.path.join(root, basedir, source_dir, subdir)
     if not os.path.isdir(thumbs_path):
