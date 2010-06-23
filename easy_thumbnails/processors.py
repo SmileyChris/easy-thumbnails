@@ -43,7 +43,6 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
         white.
 
     """
-    import pdb;pdb.set_trace()
     if bw and im.mode != 'L':
         return im.convert('L')
 
