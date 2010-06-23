@@ -65,9 +65,15 @@ THUMBNAIL_PROCESSORS
 	to process the image.
 
 THUMBNAIL_EXTENSION
-	Specify which type of image to save thumbnails as. For example:
+	Specify which type of image to save thumbnails as rather than the default
+	of 'jpg'. For example:
 
 		THUMBNAIL_EXTENSION = 'png'
 
 	Note that changing the extension causes the ``THUMBNAIL_QUALITY`` setting
 	to have no effect.
+
+THUMBNAIL_TRANSPARENCY_EXTENSION
+	Images which have an alpha layer (e.g. GIFs or transparent PNGs) will use
+	this extension when being saved. The default is 'png' to ensure the
+	transparency information is retained.

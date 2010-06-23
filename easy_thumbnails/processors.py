@@ -24,7 +24,7 @@ def _compare_entropy(start_slice, end_slice, slice, difference):
         return slice, 0
 
 
-def colorspace(im, bw=False, **kwargs):
+def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     """
     Convert images to the correct color space.
 
@@ -37,12 +37,29 @@ def colorspace(im, bw=False, **kwargs):
     bw
         Make the thumbnail grayscale (not really just black & white).
 
+    replace_alpha
+        Replace any transparency layer with a solid color. For example,
+        ``replace_alpha='#fff'`` would replace the transparency layer with
+        white.
+
     """
+    import pdb;pdb.set_trace()
     if bw and im.mode != 'L':
-        im = im.convert('L')
-    elif im.mode not in ('L', 'RGB', 'RGBA'):
-        im = im.convert('RGB')
-    return im
+        return im.convert('L')
+
+    if im.mode in ('L', 'RGB'):
+        return im
+
+    if im.mode == 'RGBA' or (im.mode == 'P' and 'transparency' in im.info):
+        if im.mode != 'RGBA':
+            im = im.convert('RGBA')
+        if not replace_alpha:
+            return im
+        base = Image.new('RGBA', im.size, replace_alpha)
+        base.paste(im)
+        im = base
+
+    return im.convert('RGB')
 
 
 def autocrop(im, autocrop=False, **kwargs):

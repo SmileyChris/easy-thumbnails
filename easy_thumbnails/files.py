@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from easy_thumbnails import engine, models, utils
 import datetime
 import os
+from django.utils.http import urlquote
 
 
 DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
@@ -168,12 +169,23 @@ class ThumbnailFile(ImageFieldFile):
 
     file = property(_get_file, _set_file, _del_file)
 
+    def _get_url(self):
+        url = super(ThumbnailFile, self).url
+        # Hack: storages should already be quoting the urls, but Django's
+        # built in FileSystemStorage doesn't. We'll work around a common
+        # case which shouldn't ever be used for a url (for a file) at least.
+        if '#' in url:
+            url = urlquote(url)  
+        return url
+    
+    url = property(_get_url)
+
     def open(self, mode=None, *args, **kwargs):
         if self.closed and self.name:
             self.file = self.storage.open(self.name, mode or self.mode or 'rb')
         else:
             return super(ThumbnailFile, self).open(mode, *args, **kwargs)
-    
+
 
 class Thumbnailer(File):
     """
@@ -195,6 +207,8 @@ class Thumbnailer(File):
     thumbnail_prefix = utils.get_setting('PREFIX')
     thumbnail_quality = utils.get_setting('QUALITY')
     thumbnail_extension = utils.get_setting('EXTENSION')
+    thumbnail_transparency_extension = utils.get_setting(
+                                                    'TRANSPARENCY_EXTENSION')
 
     def __init__(self, file, name=None, source_storage=None,
                  thumbnail_storage=None, *args, **kwargs):
@@ -213,9 +227,13 @@ class Thumbnailer(File):
         """
         thumbnail_image = engine.process_image(self.image, thumbnail_options)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
-        data = engine.save_image(thumbnail_image, quality=quality).read()
 
-        filename = self.get_thumbnail_name(thumbnail_options)
+        filename = self.get_thumbnail_name(thumbnail_options,
+                            transparent=self.is_transparent(thumbnail_image))
+
+        data = engine.save_image(thumbnail_image, filename=filename,
+                                 quality=quality).read()
+
         thumbnail = ThumbnailFile(filename, ContentFile(data),
                                   storage=self.thumbnail_storage)
         thumbnail.image = thumbnail_image
@@ -223,7 +241,7 @@ class Thumbnailer(File):
 
         return thumbnail
 
-    def get_thumbnail_name(self, thumbnail_options):
+    def get_thumbnail_name(self, thumbnail_options, transparent=False):
         """
         Return a thumbnail filename for the given ``thumbnail_options``
         dictionary and ``source_name`` (which defaults to the File's ``name``
@@ -233,8 +251,11 @@ class Thumbnailer(File):
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
         filename = '%s%s' % (self.thumbnail_prefix, source_filename)
-        extension = (self.thumbnail_extension or source_extension.lower()
-                     or 'jpg')
+        if transparent:
+            extension = self.thumbnail_transparency_extension
+        else:
+            extension = self.thumbnail_extension
+        extension = extension or 'jpg'
 
         thumbnail_options = thumbnail_options.copy()
         size = tuple(thumbnail_options.pop('size'))
@@ -274,17 +295,28 @@ class Thumbnailer(File):
         (default), the generated thumbnail will be saved too.
         
         """
-        name = self.get_thumbnail_name(thumbnail_options)
-
-        if self.thumbnail_exists(name):
-            thumbnail = ThumbnailFile(name=name,
-                                      storage=self.thumbnail_storage)
-            return thumbnail
+        opaque_name = self.get_thumbnail_name(thumbnail_options,
+                                              transparent=False)
+        transparent_name = self.get_thumbnail_name(thumbnail_options,
+                                                   transparent=True)
+        if opaque_name == transparent_name:
+            names = (opaque_name,)
+        else:
+            names = (opaque_name, transparent_name)
+        for filename in names:
+            if self.thumbnail_exists(filename):
+                thumbnail = ThumbnailFile(name=filename,
+                                          storage=self.thumbnail_storage)
+                return thumbnail
 
         thumbnail = self.generate_thumbnail(thumbnail_options)
         if save:
             save_thumbnail(thumbnail, self.thumbnail_storage)
-            self.get_thumbnail_cache(name, create=True, update=True)
+            # Ensure the right thumbnail name is used based on the transparency
+            # of the image.
+            filename = (self.is_transparent(thumbnail) and transparent_name or
+                        opaque_name)
+            self.get_thumbnail_cache(filename, create=True, update=True)
 
         return thumbnail
 
@@ -362,6 +394,11 @@ class Thumbnailer(File):
             return 0
         except NotImplementedError:
             return None
+
+    def is_transparent(self, image):
+        return (image.mode == 'RGBA' or
+                (image.mode == 'P' and 'transparency' in image.info))
+
 
 
 class ThumbnailerFieldFile(FieldFile, Thumbnailer):

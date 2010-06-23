@@ -10,6 +10,7 @@ PREFIX = ''
 
 QUALITY = 85
 EXTENSION = 'jpg'
+TRANSPARENCY_EXTENSION = 'png'
 PROCESSORS = (
     'easy_thumbnails.processors.colorspace',
     'easy_thumbnails.processors.autocrop',

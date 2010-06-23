@@ -1,3 +1,4 @@
+from PIL import Image
 from easy_thumbnails import utils
 import os
 try:
@@ -23,20 +24,25 @@ def process_image(source, processor_options, processors=None):
         image = processor(image, **processor_options)
     return image
 
-    
-def save_image(image, destination=None, format='JPEG', quality=85):
+
+def save_image(image, destination=None, filename=None, **options):
     """
     Save a PIL image.
     
     """
     if destination is None:
         destination = StringIO()
-    try:
-        image.save(destination, format=format, quality=quality, optimize=1)
-    except IOError:
-        # Try again, without optimization (PIL can't optimize an image
-        # larger than ImageFile.MAXBLOCK, which is 64k by default)
-        image.save(destination, format=format, quality=quality)
+    filename = filename or ''
+    format = Image.EXTENSION.get(os.path.splitext(filename)[1], 'JPEG')
+    if format == 'JPEG':
+        options.setdefault('quality', 85)
+        try:
+            image.save(destination, format=format, optimize=1, **options)
+        except IOError:
+            # Try again, without optimization (PIL can't optimize an image
+            # larger than ImageFile.MAXBLOCK, which is 64k by default)
+            pass
+    image.save(destination, format=format, **options)
     if hasattr(destination, 'seek'):
         destination.seek(0)
     return destination
@@ -69,7 +75,7 @@ def get_filetype_magic(path):
         import magic
     except ImportError:
         return None
-    
+
     m = magic.open(magic.MAGIC_NONE)
     m.load()
     filetype = m.file(path)
