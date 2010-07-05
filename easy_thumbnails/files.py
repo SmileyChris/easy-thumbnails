@@ -29,6 +29,9 @@ def get_thumbnailer(source, relative_name=None):
         * ``File`` or ``Storage`` instance, and for both of these cases the
           ``relative_name`` argument must also be provided
 
+        * A string, which will be used as the relative name (the source will be
+          set to the default storage)
+
     """
     if isinstance(source, Thumbnailer):
         return source
@@ -37,6 +40,9 @@ def get_thumbnailer(source, relative_name=None):
             relative_name = source.name
         return ThumbnailerFieldFile(source.instance, source.field,
                                     relative_name)
+    elif isinstance(source, basestring) and not relative_name:
+        relative_name = source
+        source = default_storage
     if not relative_name:
         raise ValueError('If source is not a FieldFile or Thumbnailer '
                          'instance, the relative name must be provided')
