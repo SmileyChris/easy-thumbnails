@@ -12,6 +12,13 @@ THUMBNAIL_DEBUG
 	display errors creating a thumbnail when using the ``{% thumbnail %}`` tag
 	rather than failing silently.
 
+THUMBNAIL_QUALITY
+	The default quality level for JPG images on a scale from 1 (worst) to 95
+	(best). Technically, values up to 100 are allowed, but this is not
+	recommended.
+
+	Defaults to 85.
+
 THUMBNAIL_DEFAULT_STORAGE
 	The default Django storage for thumbnails.
 
