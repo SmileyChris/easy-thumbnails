@@ -8,13 +8,13 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         db.rename_table('easy_thumbnails_storagenew', 'easy_thumbnails_storage')
-        db.rename_column('easy_thumbnails_source', 'storage_new', 'storage')
-        db.rename_column('easy_thumbnails_thumbnail', 'storage_new', 'storage')
+        db.rename_column('easy_thumbnails_source', 'storage_new_id', 'storage_id')
+        db.rename_column('easy_thumbnails_thumbnail', 'storage_new_id', 'storage_id')
 
     def backwards(self, orm):
         db.rename_table('easy_thumbnails_storage', 'easy_thumbnails_storagenew')
-        db.rename_column('easy_thumbnails_source', 'storage', 'storage_new')
-        db.rename_column('easy_thumbnails_thumbnail', 'storage', 'storage_new')
+        db.rename_column('easy_thumbnails_source', 'storage_id', 'storage_new_id')
+        db.rename_column('easy_thumbnails_thumbnail', 'storage_id', 'storage_new_id')
 
 
     models = {
