@@ -43,8 +43,7 @@ class FileManager(models.Manager):
 
 
 class Storage(models.Model):
-    hash = models.CharField(primary_key=True, max_length=40, editable=False,
-                            db_index=True)
+    hash = models.CharField(max_length=40, editable=False, db_index=True)
     pickle = models.TextField()
 
     objects = StorageManager()
