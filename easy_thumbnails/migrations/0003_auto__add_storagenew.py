@@ -10,7 +10,8 @@ class Migration(SchemaMigration):
         
         # Adding model 'StorageNew'
         db.create_table('easy_thumbnails_storagenew', (
-            ('hash', self.gf('django.db.models.fields.CharField')(max_length=40, primary_key=True, db_index=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('hash', self.gf('django.db.models.fields.CharField')(max_length=40, db_index=True)),
             ('pickle', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal('easy_thumbnails', ['StorageNew'])

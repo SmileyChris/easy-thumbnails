@@ -10,7 +10,9 @@ class Migration(SchemaMigration):
         db.rename_table('easy_thumbnails_storagenew', 'easy_thumbnails_storage')
         db.rename_column('easy_thumbnails_source', 'storage_new', 'storage')
         db.rename_column('easy_thumbnails_thumbnail', 'storage_new', 'storage')
-
+        #s = orm.Storage.objects.all()[0]
+        from easy_thumbnails.models import Storage
+        Storage.objects.all()[0]
 
     def backwards(self, orm):
         db.rename_table('easy_thumbnails_storage', 'easy_thumbnails_storagenew')

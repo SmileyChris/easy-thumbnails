@@ -8,32 +8,20 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Changing field 'Source.storage_new'
-        db.alter_column('easy_thumbnails_source', 'storage_new_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['easy_thumbnails.StorageNew']))
-
         # Changing field 'Source.storage'
         db.alter_column('easy_thumbnails_source', 'storage_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['easy_thumbnails.Storage'], null=True))
 
         # Changing field 'Thumbnail.storage'
         db.alter_column('easy_thumbnails_thumbnail', 'storage_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['easy_thumbnails.Storage'], null=True))
 
-        # Changing field 'Thumbnail.storage_new'
-        db.alter_column('easy_thumbnails_thumbnail', 'storage_new_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['easy_thumbnails.StorageNew']))
-
 
     def backwards(self, orm):
-        
-        # Changing field 'Source.storage_new'
-        db.alter_column('easy_thumbnails_source', 'storage_new_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['easy_thumbnails.StorageNew'], null=True))
 
         # Changing field 'Source.storage'
         db.alter_column('easy_thumbnails_source', 'storage_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['easy_thumbnails.Storage']))
 
         # Changing field 'Thumbnail.storage'
         db.alter_column('easy_thumbnails_thumbnail', 'storage_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['easy_thumbnails.Storage']))
-
-        # Changing field 'Thumbnail.storage_new'
-        db.alter_column('easy_thumbnails_thumbnail', 'storage_new_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['easy_thumbnails.StorageNew'], null=True))
 
 
     models = {
