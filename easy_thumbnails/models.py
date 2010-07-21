@@ -17,6 +17,7 @@ class StorageManager(models.Manager):
 
 
 class FileManager(models.Manager):
+
     def get_file(self, storage, name, create=False, update_modified=None,
                  **kwargs):
         if not isinstance(storage, Storage):
@@ -50,7 +51,7 @@ class Storage(models.Model):
 
     def save(self, *args, **kwargs):
         self.hash = utils.get_storage_hash(self.pickle)
-        super(Storage, self).save()
+        super(Storage, self).save(*args, **kwargs)
 
     def decode(self):
         """
