@@ -1,4 +1,3 @@
-from PIL import Image
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import get_storage_class, default_storage, \
     Storage
@@ -102,18 +101,15 @@ class ThumbnailFile(ImageFieldFile):
 
     def _get_image(self):
         """
-        Get a PIL image instance of this file.
+        Get a PIL Image instance of this file.
         
         The image is cached to avoid the file needing to be read again if the
         function is called again.
         
         """
         if not hasattr(self, '_image_cache'):
-            was_closed = self.closed
-            self.open()
-            self.image = Image.open(self.file)
-            if was_closed:
-                self.close()
+            from easy_thumbnails.source_generators import pil_image
+            self.image = pil_image(self)
         return self._image_cache
 
     def _set_image(self, image):
@@ -352,16 +348,8 @@ class Thumbnailer(File):
 
     def _image(self):
         if not hasattr(self, '_cached_image'):
-            was_closed = self.closed
-            self.open()
-            # TODO: Use different methods of generating the file, rather than
-            # just relying on PIL.
-            self._cached_image = Image.open(self)
-            # Image.open() is a lazy operation, so force the load so we
-            # can close this file again if appropriate.
-            self._cached_image.load()
-            if was_closed:
-                self.close()
+            self._cached_image = engine.generate_source_image(source,
+                                                              thumbnail_options)
         return self._cached_image
 
     image = property(_image)
