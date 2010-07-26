@@ -40,17 +40,20 @@ def get_thumbnailer(source, relative_name=None):
             relative_name = source.name
         return ThumbnailerFieldFile(source.instance, source.field,
                                     relative_name)
-    elif isinstance(source, basestring) and not relative_name:
+    if isinstance(source, basestring) and not relative_name:
         relative_name = source
         source = default_storage
+        is_storage = True
+    else:
+        is_storage = isinstance(source, Storage)
     if not relative_name:
         raise ValueError('If source is not a FieldFile or Thumbnailer '
                          'instance, the relative name must be provided')
-    elif isinstance(source, File):
-        return Thumbnailer(source.file, relative_name)
-    elif isinstance(source, Storage):
+    elif is_storage:
         source_image = source.open(relative_name)
         return Thumbnailer(source_image, relative_name, source_storage=source)
+    elif isinstance(source, File):
+        return Thumbnailer(source.file, relative_name)
     raise TypeError('Unknown source type, expected a Thumbnailer, FieldFile, '
                     'File or Storage instance.')
 
