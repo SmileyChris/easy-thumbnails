@@ -17,4 +17,3 @@ PROCESSORS = (
     'easy_thumbnails.processors.scale_and_crop',
     'easy_thumbnails.processors.filters',
 )
-IMAGEMAGICK_FILE_TYPES = ('eps', 'pdf', 'psd')
