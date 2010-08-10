@@ -2,7 +2,10 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.template import Template, Context, TemplateSyntaxError
 from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 from StringIO import StringIO
 from easy_thumbnails.files import get_thumbnailer
 

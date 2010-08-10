@@ -1,4 +1,7 @@
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import get_storage_class, default_storage, \
     Storage

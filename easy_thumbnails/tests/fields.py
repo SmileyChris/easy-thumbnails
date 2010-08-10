@@ -2,7 +2,10 @@ from django.db import models
 from django.core.files.base import ContentFile
 from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
 from easy_thumbnails.fields import ThumbnailerField
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 from StringIO import StringIO
 
 
