@@ -7,7 +7,18 @@ import tempfile
 
 
 class TemporaryStorage(FileSystemStorage):
+    """
+    A storage class useful for tests that uses a temporary location to store
+    all files and provides a method to remove this location when it is finished
+    with.
+
+    """
+
     def __init__(self, location=None, *args, **kwargs):
+        """
+        Create the temporary location.
+
+        """
         if location is None:
             location = tempfile.mkdtemp()
             self.temporary_location = location
@@ -15,21 +26,47 @@ class TemporaryStorage(FileSystemStorage):
                                                **kwargs)
 
     def delete_temporary_storage(self):
+        """
+        Delete the temporary directory created during initialisation.
+        This storage class should not be used again after this method is
+        called. 
+
+        """
         temporary_location = getattr(self, 'temporary_location', None)
         if temporary_location:
             shutil.rmtree(temporary_location)
 
 
 class FakeRemoteStorage(TemporaryStorage):
+    """
+    A storage class that acts similar to remote storage.
+
+    """
+
     def path(self, *args, **kwargs):
+        """
+        Raise ``NotImplementedError``, since this is the way that
+        easy-thumbnails determines if a storage is remote.
+
+        """
         raise NotImplementedError
 
 
 class BaseTest(TestCase):
+    """
+    Remove any customised THUMBNAIL_* settings in a project's ``settings``
+    configuration module before running the tests to ensure there is a
+    consistent test environment.
+
+    """
     restore_settings = ['THUMBNAIL_%s' % key for key in dir(defaults)
                         if key.isupper()]
 
     def setUp(self):
+        """
+        Remember THUMBNAIL_* settings for later and then remove them.
+
+        """
         self._remembered_settings = {}
         for setting in self.restore_settings:
             if hasattr(settings, setting):
@@ -37,10 +74,19 @@ class BaseTest(TestCase):
                 delattr(settings._wrapped, setting)
 
     def tearDown(self):
+        """
+        Restore all THUMBNAIL_* settings to their original state. 
+
+        """
         for setting in self.restore_settings:
             self.restore_setting(setting)
 
     def restore_setting(self, setting):
+        """
+        Restore an individual setting to it's original value (or remove it if
+        it didn't originally exist).
+
+        """
         if setting in self._remembered_settings:
             value = self._remembered_settings.pop(setting)
             setattr(settings, setting, value)
