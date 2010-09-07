@@ -64,15 +64,26 @@ Lower level usage
 
 Thumbnails are generated with a ``Thumbnailer`` instance. For example::
 
-    from easy_thumbnails import Thumbnailer
+    from easy_thumbnails.files import get_thumbnailer
 
     def square_thumbnail(source):
         thumbnail_options = dict(size=(100, 100), crop=True, bw=True)
-        return Thumbnailer(source).get_thumbnail(thumbnail_options)
+        return get_thumbnailer(source).get_thumbnail(thumbnail_options)
 
 By default, ``get_thumbnail`` saves the file (using file storage). The source
-file used to instanciate the ``Thumbnailer`` must have a ``name`` instance
-relative to the storage root.
+file used to instanciate the ``Thumbnailer`` must be one of the following:
+
+* ``Thumbnailer`` instance
+
+* ``FieldFile`` instance (i.e. a model instance file/image field
+  property)
+
+* ``File`` or ``Storage`` instance, and for both of these cases the
+  ``relative_name`` argument must also be provided
+
+* A string, which will be used as the relative name (the source will be
+  set to the default storage)
+
 
 The ``ThumbnailFile`` object provided makes this easy::
 
