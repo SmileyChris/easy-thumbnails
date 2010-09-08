@@ -42,3 +42,9 @@ class ThumbnailerFieldTest(BaseTest):
         self.assertEqual((thumb.width, thumb.height), (300, 225))
         instance.avatar.delete(save=False)
         self.assertEqual(self.storage.listdir('avatars')[1], [])
+
+    def test_get_thumbnails(self):
+        instance = TestModel(avatar='avatars/avatar.jpg')
+        instance.avatar.get_thumbnail({'size': (300, 300)})
+        instance.avatar.get_thumbnail({'size': (200, 200)})
+        self.assertEqual(len(list(instance.avatar.get_thumbnails())), 2)

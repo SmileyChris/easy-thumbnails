@@ -457,6 +457,23 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         if source_cache:
             source_cache.delete()
 
+    def get_thumbnails(self, *args, **kwargs):
+        """
+        Return an iterator which returns ThumbnailFile instances. 
+
+        """
+        # First, delete any related thumbnails.
+        source_cache = self.get_source_cache()
+        if source_cache:
+            thumbnail_storage_hash = utils.get_storage_hash(
+                                                    self.thumbnail_storage)
+            for thumbnail_cache in source_cache.thumbnails.all():
+                # Only iterate files which are stored using the current
+                # thumbnail storage.
+                if thumbnail_cache.storage_hash == thumbnail_storage_hash:
+                    yield ThumbnailFile(name=thumbnail_cache.name,
+                                        storage=self.thumbnail_storage)
+
 
 class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
     """
