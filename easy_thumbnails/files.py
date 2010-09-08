@@ -443,12 +443,12 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         # First, delete any related thumbnails.
         source_cache = self.get_source_cache()
         if source_cache:
-            thumbnail_storage_cache = models.Storage.objects.get_storage(
-                                                        self.thumbnail_storage)
+            thumbnail_storage_hash = utils.get_storage_hash(
+                                                    self.thumbnail_storage)
             for thumbnail_cache in source_cache.thumbnails.all():
                 # Only attempt to delete the file if it was stored using the
                 # same storage as is currently used.
-                if thumbnail_cache.storage == thumbnail_storage_cache:
+                if thumbnail_cache.storage_hash == thumbnail_storage_hash:
                     self.thumbnail_storage.delete(thumbnail_cache.name)
         # Next, delete the source image.
         super(ThumbnailerFieldFile, self).delete(*args, **kwargs)

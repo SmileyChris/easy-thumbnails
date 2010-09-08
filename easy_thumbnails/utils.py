@@ -3,7 +3,6 @@ from django.utils.hashcompat import md5_constructor
 from easy_thumbnails import defaults
 import inspect
 import math
-import pickle
 
 
 def image_entropy(im):
@@ -77,10 +76,11 @@ def is_storage_local(storage):
 
 def get_storage_hash(storage):
     """
-    Return a hex string hash for a storage object (or string containing a
-    pickle of a storage object).
+    Return a hex string hash for a storage object (or string containing
+    'full.path.ClassName' referring to a storage object).
     
     """
     if not isinstance(storage, basestring):
-        storage = pickle.dumps(storage)
+        storage_cls = storage.__class__
+        storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
     return md5_constructor(storage).hexdigest()
