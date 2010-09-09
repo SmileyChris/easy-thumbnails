@@ -1,28 +1,14 @@
 from django.db import models
 from easy_thumbnails import utils
 import datetime
-import pickle
-
-
-class StorageManager(models.Manager):
-    _storage_cache = {}
-    
-    def get_storage(self, storage):
-        pickled = pickle.dumps(storage)
-        hash = utils.get_storage_hash(pickled)
-        if hash not in self._storage_cache:
-            self._storage_cache[hash] = self.get_or_create(hash=hash,
-                                            defaults=dict(pickle=pickled))[0]
-        return self._storage_cache[hash]
 
 
 class FileManager(models.Manager):
 
     def get_file(self, storage, name, create=False, update_modified=None,
                  **kwargs):
-        if not isinstance(storage, Storage):
-            storage = Storage.objects.get_storage(storage)
-        kwargs.update(dict(storage=storage, name=name))
+        kwargs.update(dict(storage_hash=utils.get_storage_hash(storage),
+                           name=name))
         if create:
             if update_modified:
                 defaults = kwargs.setdefault('defaults', {})
@@ -33,7 +19,7 @@ class FileManager(models.Manager):
             try:
                 object = self.get(**kwargs)
             except self.model.DoesNotExist:
-                object = None
+                return
             created = False
         if update_modified and object and not created:
             if object.modified != update_modified:
@@ -42,30 +28,8 @@ class FileManager(models.Manager):
         return object
 
 
-class Storage(models.Model):
-    hash = models.CharField(max_length=40, editable=False, db_index=True)
-    pickle = models.TextField()
-
-    objects = StorageManager()
-
-    def save(self, *args, **kwargs):
-        self.hash = utils.get_storage_hash(self.pickle)
-        super(Storage, self).save(*args, **kwargs)
-
-    def decode(self):
-        """
-        Returned the unpickled storage object, or ``None`` if an error occurs
-        while unpickling.
-          
-        """
-        try:
-            return pickle.loads(self.pickle)
-        except:
-            pass
-
-
 class File(models.Model):
-    storage = models.ForeignKey(Storage)
+    storage_hash = models.CharField(max_length=40, db_index=True)
     name = models.CharField(max_length=255, db_index=True)
     modified = models.DateTimeField(default=datetime.datetime.utcnow())
 

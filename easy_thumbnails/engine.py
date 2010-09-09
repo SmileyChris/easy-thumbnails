@@ -1,4 +1,7 @@
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 from easy_thumbnails import utils
 import os
 try:

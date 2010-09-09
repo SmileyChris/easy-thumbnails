@@ -1,4 +1,7 @@
-from PIL import Image, ImageFilter, ImageChops
+try:
+    from PIL import Image, ImageFilter, ImageChops
+except ImportError:
+    import Image, ImageFilter, ImageChops
 from easy_thumbnails import utils
 import re
 

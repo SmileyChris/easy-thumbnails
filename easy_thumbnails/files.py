@@ -39,17 +39,20 @@ def get_thumbnailer(source, relative_name=None):
             relative_name = source.name
         return ThumbnailerFieldFile(source.instance, source.field,
                                     relative_name)
-    elif isinstance(source, basestring) and not relative_name:
+    if isinstance(source, basestring) and not relative_name:
         relative_name = source
         source = default_storage
+        is_storage = True
+    else:
+        is_storage = isinstance(source, Storage)
     if not relative_name:
         raise ValueError('If source is not a FieldFile or Thumbnailer '
                          'instance, the relative name must be provided')
-    elif isinstance(source, File):
-        return Thumbnailer(source.file, relative_name)
-    elif isinstance(source, Storage):
+    elif is_storage:
         source_image = source.open(relative_name)
         return Thumbnailer(source_image, relative_name, source_storage=source)
+    elif isinstance(source, File):
+        return Thumbnailer(source.file, relative_name)
     raise TypeError('Unknown source type, expected a Thumbnailer, FieldFile, '
                     'File or Storage instance.')
 
@@ -425,12 +428,12 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         # First, delete any related thumbnails.
         source_cache = self.get_source_cache()
         if source_cache:
-            thumbnail_storage_cache = models.Storage.objects.get_storage(
-                                                        self.thumbnail_storage)
+            thumbnail_storage_hash = utils.get_storage_hash(
+                                                    self.thumbnail_storage)
             for thumbnail_cache in source_cache.thumbnails.all():
                 # Only attempt to delete the file if it was stored using the
                 # same storage as is currently used.
-                if thumbnail_cache.storage == thumbnail_storage_cache:
+                if thumbnail_cache.storage_hash == thumbnail_storage_hash:
                     self.thumbnail_storage.delete(thumbnail_cache.name)
         # Next, delete the source image.
         super(ThumbnailerFieldFile, self).delete(*args, **kwargs)
@@ -438,6 +441,23 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         # thumbnail cache entries).
         if source_cache:
             source_cache.delete()
+
+    def get_thumbnails(self, *args, **kwargs):
+        """
+        Return an iterator which returns ThumbnailFile instances. 
+
+        """
+        # First, delete any related thumbnails.
+        source_cache = self.get_source_cache()
+        if source_cache:
+            thumbnail_storage_hash = utils.get_storage_hash(
+                                                    self.thumbnail_storage)
+            for thumbnail_cache in source_cache.thumbnails.all():
+                # Only iterate files which are stored using the current
+                # thumbnail storage.
+                if thumbnail_cache.storage_hash == thumbnail_storage_hash:
+                    yield ThumbnailFile(name=thumbnail_cache.name,
+                                        storage=self.thumbnail_storage)
 
 
 class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
