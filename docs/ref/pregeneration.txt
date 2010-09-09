@@ -1,0 +1,71 @@
+============================
+Easy Thumbnail Pregeneration
+============================
+
+
+For models with ImageFields, thumbnail images can be pregenerated rather than
+being created at runtime.
+
+Use the ``pregeneration.register`` function to register aliases which should
+be generated outside the standard request/response cycle.
+
+Following is an example of how to do it (usually done in an app's ``models``
+module)::
+
+    from easy_thumbnails import pregeneration
+
+    pregeneration.register(Profile, 'avatar', on_save=True, aliases={
+        'small': small_icon,
+        'big': big_icon,
+    })
+    pregeneration.register(Profile, 'avatar', aliases={'huge': huge_icon})
+
+Note that the ``register`` command takes the following arguments:
+
+    * **model** - a django Model (required)
+    * **field** - a string (or list of strings) for the field names of 
+      ``ImageField``s found on the ``model`` (required)
+    * **aliases** - a dictionary of aliases where each key is the alias name
+      and the value is an options dictionary (required)
+    * **on_save** - whether the field(s) should also be updated when the model
+      is saved (optional, defaults to ``False``)
+
+
+Management command
+==================
+
+A management command is provided to automatically generate all thumbnails for
+fields registered with the ``pregeneration.register`` function.
+
+Call ``manage.py generate_thumbnails`` to generate all thumbnails.
+You can also call ``manage.py generate_thumbnails appname`` to generate the
+thumbnails for an individual application.
+
+
+Using an alias in a template
+============================
+
+Use the ``thumbnail_alias`` tag to generate. The syntax of this tag is::
+
+    {% thumbnail_alias <source> <alias> [alias_field] %}
+
+Extending the above example of pregenerated registration for a ``Profile``
+model, and with an instance of this model passed to context as ``profile``::
+ 
+{% thumbnail_alias profile.avatar "small" %}
+
+You can use the alias of an alternate ``ImageField`` as the third (optional)
+argument. This is useful if ``source`` is not an ``ImageField`` (or if it's one
+which isn't registered with the alias).
+
+Using an alias in Python
+========================
+
+Here in an example of how to get a thumbnail using an alias' options in
+Python::
+
+    from easy_thumbnails import pregeneration
+
+    def some_function(): 
+        thumb = pregeneration.get_thumbnail(profile.avatar, 'icon')
+        # Do something with thumb.
