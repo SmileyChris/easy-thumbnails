@@ -374,8 +374,10 @@ class Thumbnailer(File):
         try:
             path = self.source_storage.path(self.name)
             return os.path.getmtime(path)
+        except OSError:
+            return 0
         except NotImplementedError:
-            pass
+            return None
 
     def get_thumbnail_modtime(self, thumbnail_name):
         try:
