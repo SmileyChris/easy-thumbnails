@@ -13,6 +13,9 @@ except ImportError:
 DEFAULT_PROCESSORS = [utils.dynamic_import(p)
                       for p in utils.get_setting('PROCESSORS')]
 
+SOURCE_GENERATORS = [utils.dynamic_import(p)
+                     for p in utils.get_setting('SOURCE_GENERATORS')]
+
 
 def process_image(source, processor_options, processors=None):
     """
@@ -49,3 +52,26 @@ def save_image(image, destination=None, filename=None, **options):
     if hasattr(destination, 'seek'):
         destination.seek(0)
     return destination
+
+
+def generate_source_image(source, processor_options, generators=None):
+    """
+    Processes a source file through a series of source generators, stopping
+    once a generator returns an image.
+
+    The return value is this image instance or ``None`` if no generators
+    return an image.
+
+    """
+    was_closed = source.closed
+    source.open()
+    if generators is None:
+        generators = SOURCE_GENERATORS
+    try:
+        for generator in generators:
+            image = generator(source, **processor_options)
+            if image:
+                return image
+    finally:
+        if was_closed:
+            source.close()

@@ -23,8 +23,7 @@ class FileManager(models.Manager):
             created = False
         if update_modified and object and not created:
             if object.modified != update_modified:
-                object.modified = update_modified
-                object.save()
+                self.filter(pk=object.pk).update(modified=update_modified)
         return object
 
 

@@ -32,12 +32,13 @@ def dynamic_import(import_string):
 
 def valid_processor_options(processors=None):
     """
-    Return a list of unique valid options for a list of image processors.
-    
+    Return a list of unique valid options for a list of image processors
+    (and/or source generators)
+
     """
     if processors is None:
-        processors = [dynamic_import(p) for p in
-                      get_setting('PROCESSORS')]
+        processors = [dynamic_import(p) for p in get_setting('PROCESSORS') +
+                      get_setting('SOURCE_GENERATORS')]
     valid_options = set(['size', 'quality'])
     for processor in processors:
         args = inspect.getargspec(processor)[0]

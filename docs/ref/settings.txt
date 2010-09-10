@@ -68,8 +68,16 @@ THUMBNAIL_PROCESSORS
 	The :doc:`processors` through which the source image is run when you create
 	a thumbnail.
 
-	The order of the processors is the order in which they are sequentially called
+	The order of the processors is the order in which they are sequentially
+	called
 	to process the image.
+
+THUMBNAIL_SOURCE_GENERATORS
+	The :doc:`source_generators` through which the base image is created from
+	the source file. 
+
+	The order of the processors is the order in which they are sequentially
+	tried.
 
 THUMBNAIL_EXTENSION
 	Specify which type of image to save thumbnails as rather than the default
