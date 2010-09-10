@@ -56,8 +56,8 @@ def save_image(image, destination=None, filename=None, **options):
 
 def generate_source_image(source, processor_options, generators=None):
     """
-    Processes a source file through a series of source generators, stopping once
-    a generator returns an image.
+    Processes a source file through a series of source generators, stopping
+    once a generator returns an image.
 
     The return value is this image instance or ``None`` if no generators
     return an image.

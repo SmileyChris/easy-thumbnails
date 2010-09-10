@@ -230,7 +230,9 @@ class Thumbnailer(File):
         dictionary.
         
         """
-        thumbnail_image = engine.process_image(self.image, thumbnail_options)
+        
+        image = engine.generate_source_image(self, thumbnail_options)
+        thumbnail_image = engine.process_image(image, thumbnail_options)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 
         filename = self.get_thumbnail_name(thumbnail_options,
@@ -348,13 +350,6 @@ class Thumbnailer(File):
             return False
         thumbnail = self.get_thumbnail_cache(thumbnail_name)
         return thumbnail and source.modified <= thumbnail.modified
-
-    def _image(self):
-        if not hasattr(self, '_cached_image'):
-            self._cached_image = engine.generate_source_image(self)
-        return self._cached_image
-
-    image = property(_image)
 
     def get_source_cache(self, create=False, update=False):
         modtime = self.get_source_modtime()
