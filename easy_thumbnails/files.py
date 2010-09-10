@@ -351,8 +351,7 @@ class Thumbnailer(File):
 
     def _image(self):
         if not hasattr(self, '_cached_image'):
-            self._cached_image = engine.generate_source_image(source,
-                                                              thumbnail_options)
+            self._cached_image = engine.generate_source_image(self)
         return self._cached_image
 
     image = property(_image)

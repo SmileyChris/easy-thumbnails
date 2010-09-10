@@ -66,7 +66,7 @@ def generate_source_image(source, processor_options, generators=None):
     was_closed = source.closed
     source.open()
     if generators is None:
-        generators = DEFAULT_SOURCE_GENERATORS
+        generators = SOURCE_GENERATORS
     try:
         for generator in generators:
             image = generator(source, **processor_options)
