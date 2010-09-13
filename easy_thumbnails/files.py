@@ -43,6 +43,10 @@ def get_thumbnailer(source, relative_name=None):
         relative_name = source
         source = default_storage
         is_storage = True
+    elif hasattr(source, 'easy_thumbnails_relative_name') and not relative_name:
+        relative_name = source.easy_thumbnails_relative_name
+        source = getattr(source, 'easy_thumbnails_source', default_storage)
+        is_storage = True
     else:
         is_storage = isinstance(source, Storage)
     if not relative_name:
