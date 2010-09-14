@@ -8,7 +8,11 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         db.rename_table('easy_thumbnails_storagenew', 'easy_thumbnails_storage')
+        if db.backend_name == 'mysql':
+            db.drop_foreign_key('easy_thumbnails_source', 'storage_new_id')
         db.rename_column('easy_thumbnails_source', 'storage_new_id', 'storage_id')
+        if db.backend_name == 'mysql':
+            db.drop_foreign_key('easy_thumbnails_thumbnail', 'storage_new_id')
         db.rename_column('easy_thumbnails_thumbnail', 'storage_new_id', 'storage_id')
 
     def backwards(self, orm):
