@@ -7,8 +7,8 @@ from django.utils.safestring import mark_safe
 from easy_thumbnails import engine, models, utils
 import datetime
 import os
-from tempfile import NamedTemporaryFile
 import urllib2, shutil
+from StringIO import StringIO
 from django.utils.http import urlquote
 
 
@@ -234,9 +234,10 @@ class Thumbnailer(File):
         """
         if not utils.is_storage_local(self.source_storage):
             # Get a local copy of the source file
-            tmp_image_f = NamedTemporaryFile()
+            tmp_image_f = StringIO()
             orig_f = urllib2.urlopen(self.source_storage.url(self.name))
-            shutil.copyfileobj(orig_f, tmp_image_f)
+            tmp_image_f.write(orig_f.read())
+            tmp_image_f.seek(0)
             self.file = tmp_image_f
 
         image = engine.generate_source_image(self, thumbnail_options)
