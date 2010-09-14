@@ -7,6 +7,8 @@ from django.utils.safestring import mark_safe
 from easy_thumbnails import engine, models, utils
 import datetime
 import os
+from tempfile import NamedTemporaryFile
+import urllib2, shutil
 from django.utils.http import urlquote
 
 
@@ -60,7 +62,7 @@ def get_thumbnailer(source, relative_name=None):
 def save_thumbnail(thumbnail_file, storage):
     """
     Save a thumbnailed file, returning the saved relative file name.
-    
+
     """
     filename = thumbnail_file.name
     if storage.exists(filename):
@@ -89,7 +91,7 @@ class FakeInstance(object):
 class ThumbnailFile(ImageFieldFile):
     """
     A thumbnailed file.
-    
+
     This can be used just like a Django model instance's property for a file
     field (i.e. an ``ImageFieldFile`` object).
 
@@ -105,10 +107,10 @@ class ThumbnailFile(ImageFieldFile):
     def _get_image(self):
         """
         Get a PIL Image instance of this file.
-        
+
         The image is cached to avoid the file needing to be read again if the
         function is called again.
-        
+
         """
         if not hasattr(self, '_image_cache'):
             from easy_thumbnails.source_generators import pil_image
@@ -118,9 +120,9 @@ class ThumbnailFile(ImageFieldFile):
     def _set_image(self, image):
         """
         Set the image for this file.
-        
-        This also caches the dimensions of the image. 
-        
+
+        This also caches the dimensions of the image.
+
         """
         if image:
             self._image_cache = image
@@ -136,10 +138,10 @@ class ThumbnailFile(ImageFieldFile):
     def tag(self, alt='', use_size=None, **attrs):
         """
         Return a standard XHTML ``<img ... />`` tag for this field.
-        
+
         If ``use_size`` isn't set, it will be default to ``True`` or ``False``
-        depending on whether the file storage is local or not. 
-        
+        depending on whether the file storage is local or not.
+
         """
         if use_size is None:
             try:
@@ -180,9 +182,9 @@ class ThumbnailFile(ImageFieldFile):
         # built in FileSystemStorage doesn't. We'll work around a common
         # case which shouldn't ever be used for a url (for a file) at least.
         if '#' in url:
-            url = urlquote(url)  
+            url = urlquote(url)
         return url
-    
+
     url = property(_get_url)
 
     def open(self, mode=None, *args, **kwargs):
@@ -199,7 +201,7 @@ class Thumbnailer(File):
 
     You can subclass this object and override the following properties to
     change the defaults (pulled from the default settings):
-    
+
         * thumbnail_basedir
         * thumbnail_subdir
         * thumbnail_prefix
@@ -225,12 +227,18 @@ class Thumbnailer(File):
     def generate_thumbnail(self, thumbnail_options):
         """
         Return a ``ThumbnailFile`` containing a thumbnail image.
-        
+
         The thumbnail image is generated using the ``thumbnail_options``
         dictionary.
-        
+
         """
-        
+        if not utils.is_storage_local(self.source_storage):
+            # Get a local copy of the source file
+            tmp_image_f = NamedTemporaryFile()
+            orig_f = urllib2.urlopen(self.source_storage.url(self.name))
+            shutil.copyfileobj(orig_f, tmp_image_f)
+            self.file = tmp_image_f
+
         image = engine.generate_source_image(self, thumbnail_options)
         thumbnail_image = engine.process_image(image, thumbnail_options)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
@@ -253,7 +261,7 @@ class Thumbnailer(File):
         Return a thumbnail filename for the given ``thumbnail_options``
         dictionary and ``source_name`` (which defaults to the File's ``name``
         if not provided).
-        
+
         """
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
@@ -294,13 +302,13 @@ class Thumbnailer(File):
     def get_thumbnail(self, thumbnail_options, save=True):
         """
         Return a ``ThumbnailFile`` containing a thumbnail.
-        
+
         It the file already exists, it will simply be returned.
-        
+
         Otherwise a new thumbnail image is generated using the
         ``thumbnail_options`` dictionary. If the ``save`` argument is ``True``
         (default), the generated thumbnail will be saved too.
-        
+
         """
         opaque_name = self.get_thumbnail_name(thumbnail_options,
                                               transparent=False)
@@ -331,11 +339,11 @@ class Thumbnailer(File):
         """
         Calculate whether the thumbnail already exists and that the source is
         not newer than the thumbnail.
-        
+
         If both the source and thumbnail file storages are local, their
         file modification times are used. Otherwise the database cached
         modification times are used.
-        
+
         """
         # Try to use the local file modification times first.
         source_modtime = self.get_source_modtime()
@@ -398,7 +406,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
     """
     A field file which provides some methods for generating (and returning)
     thumbnail images.
-    
+
     """
     def __init__(self, *args, **kwargs):
         super(ThumbnailerFieldFile, self).__init__(*args, **kwargs)
@@ -411,7 +419,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         """
         Save the file, also saving a reference to the thumbnail cache Source
         model.
-        
+
         """
         super(ThumbnailerFieldFile, self).save(name, content, *args, **kwargs)
         self.get_source_cache(create=True, update=True)
@@ -419,7 +427,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
     def delete(self, *args, **kwargs):
         """
         Delete the image, along with any generated thumbnails.
-        
+
         """
         # First, delete any related thumbnails.
         source_cache = self.get_source_cache()
@@ -440,7 +448,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
 
     def get_thumbnails(self, *args, **kwargs):
         """
-        Return an iterator which returns ThumbnailFile instances. 
+        Return an iterator which returns ThumbnailFile instances.
 
         """
         # First, delete any related thumbnails.
@@ -460,20 +468,20 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
     """
     A field file which provides some methods for generating (and returning)
     thumbnail images.
-    
+
     """
     def save(self, name, content, *args, **kwargs):
         """
         Save the image.
-        
+
         If the thumbnail storage is local and differs from the field storage,
         save a place-holder of the source image there too. This helps to keep
         the testing of thumbnail existence as a local activity.
-        
+
         The image will be resized down using a ``ThumbnailField`` if
         ``resize_source`` (a dictionary of thumbnail options) is provided by
         the field.
-        
+
         """
         options = getattr(self.field, 'resize_source', None)
         if options:
