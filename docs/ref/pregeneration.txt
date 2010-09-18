@@ -4,7 +4,7 @@ Easy Thumbnail Pregeneration
 
 
 For models with ImageFields, thumbnail images can be pregenerated rather than
-being created at runtime.
+waiting for them to be created when first used in a template.
 
 Use the ``pregeneration.register`` function to register aliases which should
 be generated outside the standard request/response cycle.
