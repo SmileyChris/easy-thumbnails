@@ -135,7 +135,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
         if dx or dy:
             # Center cropping (default).
             ex, ey = dx // 2, dy // 2
-            box = [ex, ey, size[0] + ex, size[1] + ey]
+            box = [ex, ey, min(x, size[0] + ex), min(y, size[1] + ey)]
             # See if an edge cropping argument was provided.
             edge_crop = (isinstance(crop, basestring) and
                          re.match(r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop))

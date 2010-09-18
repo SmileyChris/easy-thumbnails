@@ -17,7 +17,8 @@ def create_image(mode='RGB', size=(800, 600)):
 
 class ScaleAndCropTest(TestCase):
     def assertImagesEqual(self, im1, im2, msg=None):
-        if ImageChops.difference(im1, im2).getbbox() is not None:
+        if im1.size != im2.size or \
+                    ImageChops.difference(im1, im2).getbbox() is not None:
             raise self.failureException, \
                   (msg or 'The two images were not identical')
     
