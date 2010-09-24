@@ -87,3 +87,19 @@ class ScaleAndCropTest(TestCase):
         smart_crop = processors.scale_and_crop(image, (600, 600), crop='smart')
         expected = image.crop([78, 0, 678, 600])
         self.assertImagesEqual(smart_crop, expected)
+
+    def test_one_dimension_scale(self):
+        image = create_image()
+
+        scaled = processors.scale_and_crop(image, (100, 0))
+        self.assertEqual(scaled.size, (100, 75))
+        scaled = processors.scale_and_crop(image, (0, 100))
+        self.assertEqual(scaled.size, (133, 100))
+
+    def test_one_dimension_crop(self):
+        image = create_image()
+
+        cropped = processors.scale_and_crop(image, (100, 0), crop=True)
+        self.assertEqual(cropped.size, (100, 75))
+        cropped = processors.scale_and_crop(image, (0, 100), crop=True)
+        self.assertEqual(cropped.size, (133, 100))

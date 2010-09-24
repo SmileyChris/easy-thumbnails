@@ -230,7 +230,6 @@ class Thumbnailer(File):
         dictionary.
         
         """
-        
         image = engine.generate_source_image(self, thumbnail_options)
         thumbnail_image = engine.process_image(image, thumbnail_options)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)

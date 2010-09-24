@@ -90,6 +90,11 @@ def autocrop(im, autocrop=False, **kwargs):
 def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
     """
     Handle scaling and cropping the source image.
+    
+    Images can be scaled / cropped against a single dimension by using zero
+    as the placeholder in the size. For example, ``size=(100, 0)`` will cause
+    the image to be resized to 100 pixels wide, keeping the aspect ratio of
+    the source image.
 
     crop
         Crop the source image height or width to exactly match the requested
@@ -117,66 +122,77 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
         Allow upscaling of the source image during scaling.
 
     """
-    x, y = [float(v) for v in im.size]
-    xr, yr = [float(v) for v in size]
+    source_x, source_y = [float(v) for v in im.size]
+    target_x, target_y = [float(v) for v in size]
 
-    if crop:
-        r = max(xr / x, yr / y)
+    if crop or not target_x or not target_y:
+        scale = max(target_x / source_x, target_y / source_y)
     else:
-        r = min(xr / x, yr / y)
+        scale = min(target_x / source_x, target_y / source_y)
 
-    if r < 1.0 or (r > 1.0 and upscale):
-        im = im.resize((int(x * r), int(y * r)), resample=Image.ANTIALIAS)
+    # Handle one-dimensional targets.
+    if not target_x:
+        target_x = source_x * scale
+    elif not target_y:
+        target_y = source_y * scale
+
+    if scale < 1.0 or (scale > 1.0 and upscale):
+        im = im.resize((int(source_x * scale), int(source_y * scale)),
+                       resample=Image.ANTIALIAS)
 
     if crop:
-        # Difference (for x and y) between new image size and requested size.
-        x, y = im.size
-        dx, dy = int(x - min(x, xr)), int(y - min(y, yr))
-        if dx or dy:
+        # Use integer values now.
+        source_x, source_y = im.size
+        # Difference between new image size and requested size.
+        diff_x = int(source_x - min(source_x, target_x))
+        diff_y = int(source_y - min(source_y, target_y))
+        if diff_x or diff_y:
             # Center cropping (default).
-            ex, ey = dx // 2, dy // 2
-            box = [ex, ey, min(x, size[0] + ex), min(y, size[1] + ey)]
+            halfdiff_x, halfdiff_y = diff_x // 2, diff_y // 2
+            box = [halfdiff_x, halfdiff_y,
+                   min(source_x, int(target_x) + halfdiff_x),
+                   min(source_y, int(target_y) + halfdiff_y)]
             # See if an edge cropping argument was provided.
             edge_crop = (isinstance(crop, basestring) and
                          re.match(r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop))
             if edge_crop and filter(None, edge_crop.groups()):
                 x_right, x_crop, y_bottom, y_crop = edge_crop.groups()
                 if x_crop:
-                    offset = min(int(xr) * int(x_crop) // 100, dx)
+                    offset = min(int(target_x) * int(x_crop) // 100, diff_x)
                     if x_right:
-                        box[0] = dx - offset
-                        box[2] = x - offset
+                        box[0] = diff_x - offset
+                        box[2] = source_x - offset
                     else:
                         box[0] = offset
-                        box[2] = x - (dx - offset)
+                        box[2] = source_x - (diff_x - offset)
                 if y_crop:
-                    offset = min(int(yr) * int(y_crop) // 100, dy)
+                    offset = min(int(target_y) * int(y_crop) // 100, diff_y)
                     if y_bottom:
-                        box[1] = dy - offset
-                        box[3] = y - offset
+                        box[1] = diff_y - offset
+                        box[3] = source_y - offset
                     else:
                         box[1] = offset
-                        box[3] = y - (dy - offset)
+                        box[3] = source_y - (diff_y - offset)
             # See if the image should be "smart cropped".
             elif crop == 'smart':
                 left = top = 0
-                right, bottom = x, y
-                while dx:
-                    slice = min(dx, max(dx // 5, 10))
-                    start = im.crop((left, 0, left + slice, y))
-                    end = im.crop((right - slice, 0, right, y))
-                    add, remove = _compare_entropy(start, end, slice, dx)
+                right, bottom = source_x, source_y
+                while diff_x:
+                    slice = min(diff_x, max(diff_x // 5, 10))
+                    start = im.crop((left, 0, left + slice, source_y))
+                    end = im.crop((right - slice, 0, right, source_y))
+                    add, remove = _compare_entropy(start, end, slice, diff_x)
                     left += add
                     right -= remove
-                    dx = dx - add - remove
-                while dy:
-                    slice = min(dy, max(dy // 5, 10))
-                    start = im.crop((0, top, x, top + slice))
-                    end = im.crop((0, bottom - slice, x, bottom))
-                    add, remove = _compare_entropy(start, end, slice, dy)
+                    diff_x = diff_x - add - remove
+                while diff_y:
+                    slice = min(diff_y, max(diff_y // 5, 10))
+                    start = im.crop((0, top, source_x, top + slice))
+                    end = im.crop((0, bottom - slice, source_x, bottom))
+                    add, remove = _compare_entropy(start, end, slice, diff_y)
                     top += add
                     bottom -= remove
-                    dy = dy - add - remove
+                    diff_y = diff_y - add - remove
                 box = (left, top, right, bottom)
             # Finally, crop the image!
             im = im.crop(box)

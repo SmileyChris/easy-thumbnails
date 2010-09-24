@@ -177,3 +177,10 @@ class ThumbnailTagTest(BaseTest):
             '{% thumbnail source 240x240 sharpen crop quality=95 as thumb %}'
             'width:{{ thumb.width }}, url:{{ thumb.url }}')
         self.assertEqual(output, 'width:240, url:%s' % expected_url)
+
+        # One dimensional resize
+        output = self.render_template('src="{% thumbnail source 100x0 %}"')
+        expected = '%s.100x0_q85.jpg' % self.RELATIVE_PIC_NAME
+        self.verify_thumbnail((100, 75), expected)
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="%s"' % expected_url)
