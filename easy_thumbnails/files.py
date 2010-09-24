@@ -31,6 +31,11 @@ def get_thumbnailer(source, relative_name=None):
         * A string, which will be used as the relative name (the source will be
           set to the default storage)
 
+        * An object that has an ``easy_thumbnails_relative_name`` attribute,
+          which will be used as the relative name (the source will be
+          set to the default storage unless an ``easy_thumbnails_source`` 
+          attribute is provided)
+
     """
     if isinstance(source, Thumbnailer):
         return source
