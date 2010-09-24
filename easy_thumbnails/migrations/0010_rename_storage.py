@@ -7,9 +7,24 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        using_mysql = db.backend_name == 'mysql'
         db.rename_table('easy_thumbnails_storagenew', 'easy_thumbnails_storage')
+        if using_mysql:
+            db.drop_foreign_key('easy_thumbnails_source', 'storage_new_id')
         db.rename_column('easy_thumbnails_source', 'storage_new_id', 'storage_id')
+        if using_mysql:
+            db.execute('ALTER TABLE easy_thumbnails_source ADD CONSTRAINT '
+                       'sourcestorage_id_fk_to_storage FOREIGN KEY (storage_id) '
+                       'REFERENCES easy_thumbnails_storage(id)')
+
+        if using_mysql:
+            db.drop_foreign_key('easy_thumbnails_thumbnail', 'storage_new_id')
         db.rename_column('easy_thumbnails_thumbnail', 'storage_new_id', 'storage_id')
+        if using_mysql:
+            db.execute('ALTER TABLE easy_thumbnails_thumbnail ADD CONSTRAINT '
+                       'thumbnailstorage_id_fk_to_storage FOREIGN KEY (storage_id) '
+                       'REFERENCES easy_thumbnails_storage(id)')
+
 
     def backwards(self, orm):
         db.rename_table('easy_thumbnails_storage', 'easy_thumbnails_storagenew')
