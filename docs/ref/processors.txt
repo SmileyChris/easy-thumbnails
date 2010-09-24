@@ -46,6 +46,10 @@ Ensure you list all arguments which could be used (giving them a default value
 of ``False``), as the processors arguments are introspected to generate a list
 of valid options.
 
+You must also use ``**kwargs`` at the end of your argument list because all
+options used to generate the thumbnail are passed to processors, not just the
+ones defined.
+
 Whether a processor actually modifies the image or not, they must always return
 an image. 
 
@@ -55,12 +59,8 @@ Use the processor
 Next, add the processor to the ``THUMBNAIL_PROCESSORS`` to your settings
 module::
 
-    THUMBNAIL_PROCESSORS = (
-        # Default processors
-        'easy_thumbnails.processors.colorspace',
-        'easy_thumbnails.processors.autocrop',
-        'easy_thumbnails.processors.scale_and_crop',
-        'easy_thumbnails.processors.filters',
-        # Custom processors
+    from easy_thumbnails import defaults
+
+    THUMBNAIL_PROCESSORS = defaults.PROCESSORS + (
         'wb_project.thumbnail_processors.whizzbang_processor',
     )
