@@ -240,6 +240,9 @@ class Thumbnailer(File):
         
         """
         image = engine.generate_source_image(self, thumbnail_options)
+        if image is None:
+            raise TypeError("Image file format is not supported!")
+
         thumbnail_image = engine.process_image(image, thumbnail_options)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 

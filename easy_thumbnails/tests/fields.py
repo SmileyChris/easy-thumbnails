@@ -36,6 +36,13 @@ class ThumbnailerFieldTest(BaseTest):
         thumb = instance.avatar.generate_thumbnail({'size': (300, 300)})
         self.assertEqual((thumb.width, thumb.height), (300, 225))
 
+    def test_generate_thumbnail_type_error(self):
+        text_file = ContentFile("Lorem ipsum dolor sit amet. Not an image.")
+        self.storage.save('avatars/invalid.jpg', text_file)
+        instance = TestModel(avatar='avatars/invalid.jpg')
+        generate = lambda: instance.avatar.generate_thumbnail()
+        self.assertRaises(TypeError, generate)
+
     def test_delete(self):
         instance = TestModel(avatar='avatars/avatar.jpg')
         thumb = instance.avatar.get_thumbnail({'size': (300, 300)})
