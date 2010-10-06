@@ -2,6 +2,8 @@ from django.db import models
 from django.core.files.base import ContentFile
 from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
 from easy_thumbnails.fields import ThumbnailerField
+from easy_thumbnails.exceptions import InvalidImageFormatError
+
 try:
     from PIL import Image
 except ImportError:
@@ -40,8 +42,9 @@ class ThumbnailerFieldTest(BaseTest):
         text_file = ContentFile("Lorem ipsum dolor sit amet. Not an image.")
         self.storage.save('avatars/invalid.jpg', text_file)
         instance = TestModel(avatar='avatars/invalid.jpg')
-        generate = lambda: instance.avatar.generate_thumbnail()
-        self.assertRaises(TypeError, generate)
+        generate = lambda: instance.avatar.generate_thumbnail(
+            {'size': (300, 300)})
+        self.assertRaises(InvalidImageFormatError, generate)
 
     def test_delete(self):
         instance = TestModel(avatar='avatars/avatar.jpg')
