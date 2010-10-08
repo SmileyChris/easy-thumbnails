@@ -27,7 +27,7 @@ class ThumbnailerField(FileField):
         """
         from south.modelsinspector import introspector
         field_class = 'django.db.models.fields.files.FileField'
-        args, kwargs = introspector(FileField)
+        args, kwargs = introspector(self)
         return (field_class, args, kwargs)
 
 
@@ -62,5 +62,5 @@ class ThumbnailerImageField(ThumbnailerField, ImageField):
         """
         from south.modelsinspector import introspector
         field_class = 'django.db.models.fields.files.ImageField'
-        args, kwargs = introspector(ImageField)
+        args, kwargs = introspector(self)
         return (field_class, args, kwargs)
