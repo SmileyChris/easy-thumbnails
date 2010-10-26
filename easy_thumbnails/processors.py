@@ -1,9 +1,12 @@
-try:
-    from PIL import Image, ImageFilter, ImageChops
-except ImportError:
-    import Image, ImageFilter, ImageChops
-from easy_thumbnails import utils
 import re
+
+try:
+    from PIL import Image, ImageChops, ImageFilter
+except ImportError:
+    import Image
+    import ImageChops
+    import ImageFilter
+from easy_thumbnails import utils
 
 
 def _compare_entropy(start_slice, end_slice, slice, difference):
@@ -90,7 +93,7 @@ def autocrop(im, autocrop=False, **kwargs):
 def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
     """
     Handle scaling and cropping the source image.
-    
+
     Images can be scaled / cropped against a single dimension by using zero
     as the placeholder in the size. For example, ``size=(100, 0)`` will cause
     the image to be resized to 100 pixels wide, keeping the aspect ratio of

@@ -8,7 +8,6 @@ import math
 def image_entropy(im):
     """
     Calculate the entropy of an image. Used for "smart cropping".
-    
     """
     hist = im.histogram()
     hist_size = float(sum(hist))
@@ -19,7 +18,6 @@ def image_entropy(im):
 def dynamic_import(import_string):
     """
     Dynamically import a module or object.
-    
     """
     # Use rfind rather than rsplit for Python 2.3 compatibility.
     lastdot = import_string.rfind('.')
@@ -34,7 +32,6 @@ def valid_processor_options(processors=None):
     """
     Return a list of unique valid options for a list of image processors
     (and/or source generators)
-
     """
     if processors is None:
         processors = [dynamic_import(p) for p in get_setting('PROCESSORS') +
@@ -53,7 +50,6 @@ def get_setting(setting, override=None):
     default.
 
     If override is not None, it will be used instead of the setting.
-    
     """
     if override is not None:
         return override
@@ -66,7 +62,6 @@ def get_setting(setting, override=None):
 def is_storage_local(storage):
     """
     Check to see if a file storage is local.
-    
     """
     try:
         storage.path('test')
@@ -79,7 +74,6 @@ def get_storage_hash(storage):
     """
     Return a hex string hash for a storage object (or string containing
     'full.path.ClassName' referring to a storage object).
-    
     """
     if not isinstance(storage, basestring):
         storage_cls = storage.__class__

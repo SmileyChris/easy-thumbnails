@@ -39,7 +39,7 @@ def get_version(join=' ', short=False):
         if isinstance(bit, int):
             number.append(str(bit))
         else:
-            remainder = [str(bit) for bit in VERSION[i:]] 
+            remainder = [str(bit) for bit in VERSION[i:]]
             break
     if number:
         version.append('.'.join(number))
