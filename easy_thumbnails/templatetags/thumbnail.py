@@ -122,18 +122,18 @@ def thumbnail(parser, token):
     The thumbnail tag can also place a ``ThumbnailFile`` object in the context,
     providing access to the properties of the thumbnail such as the height and
     width::
-    
+
         {% thumbnail [source] [size] [options] as [variable] %}
 
     When ``as [variable]`` is used, the tag does not return the absolute URL of
-    the thumbnail. 
+    the thumbnail.
 
     **Debugging**
 
     By default, if there is an error creating the thumbnail or resolving the
     image variable then the thumbnail tag will just return an empty string (and
-    if there was a context variable to be set then it will also be set to an empty
-    string).
+    if there was a context variable to be set then it will also be set to an
+    empty string).
 
     For example, you will not see an error if the thumbnail could not
     be written to directory because of permissions error. To display those

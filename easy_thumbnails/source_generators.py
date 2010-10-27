@@ -1,14 +1,14 @@
-from PIL import Image
 try:
     from cStringIO import StringIO
-except:
+except ImportError:
     from StringIO import StringIO
+
+from PIL import Image
 
 
 def pil_image(source, **options):
     """
     Try to open the source file directly using PIL, ignoring any errors.
-
     """
     # Use a StringIO wrapper because if the source is an incomplete file like
     # object, PIL may have problems with it. For example, some image types

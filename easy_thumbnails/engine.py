@@ -21,7 +21,6 @@ def process_image(source, processor_options, processors=None):
     """
     Process a source PIL image through a series of image processors, returning
     the (potentially) altered image.
-    
     """
     if processors is None:
         processors = DEFAULT_PROCESSORS
@@ -34,7 +33,6 @@ def process_image(source, processor_options, processors=None):
 def save_image(image, destination=None, filename=None, **options):
     """
     Save a PIL image.
-    
     """
     if destination is None:
         destination = StringIO()
@@ -61,7 +59,6 @@ def generate_source_image(source, processor_options, generators=None):
 
     The return value is this image instance or ``None`` if no generators
     return an image.
-
     """
     was_closed = source.closed
     source.open()

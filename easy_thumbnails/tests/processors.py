@@ -1,7 +1,9 @@
 try:
     from PIL import Image, ImageChops, ImageDraw
 except ImportError:
-    import Image, ImageChops, ImageDraw
+    import Image
+    import ImageChops
+    import ImageDraw
 from easy_thumbnails import processors
 from unittest import TestCase
 
@@ -21,10 +23,10 @@ class ScaleAndCropTest(TestCase):
                     ImageChops.difference(im1, im2).getbbox() is not None:
             raise self.failureException, \
                   (msg or 'The two images were not identical')
-    
+
     def test_scale(self):
         image = create_image()
-        
+
         scaled = processors.scale_and_crop(image, (100, 100))
         self.assertEqual(scaled.size, (100, 75))
 
@@ -65,7 +67,7 @@ class ScaleAndCropTest(TestCase):
         x_offset_crop = processors.scale_and_crop(image, (150, 600),
                                                   crop='10,-10')
         expected = image.crop([15, 0, 165, 600])
-        
+
         self.assertImagesEqual(x_offset_crop, expected)
 
         y_offset_crop = processors.scale_and_crop(image, (800, 150),
@@ -83,7 +85,7 @@ class ScaleAndCropTest(TestCase):
 
     def test_crop_smart(self):
         image = create_image()
-        
+
         smart_crop = processors.scale_and_crop(image, (600, 600), crop='smart')
         expected = image.crop([78, 0, 678, 600])
         self.assertImagesEqual(smart_crop, expected)
