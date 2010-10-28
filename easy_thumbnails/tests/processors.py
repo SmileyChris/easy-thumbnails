@@ -35,6 +35,9 @@ class ScaleAndCropTest(TestCase):
 
         upscaled = processors.scale_and_crop(image, (1000, 1000), upscale=True)
         self.assertEqual(upscaled.size, (1000, 750))
+        
+        truncated_float_scale = processors.scale_and_crop(image, (29, 0))
+        self.assertEqual(truncated_float_scale.size[0], 29)
 
     def test_crop(self):
         image = create_image()
