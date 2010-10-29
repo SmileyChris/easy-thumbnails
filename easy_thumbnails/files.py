@@ -35,7 +35,6 @@ def get_thumbnailer(source, relative_name=None):
           which will be used as the relative name (the source will be
           set to the default storage unless an ``easy_thumbnails_source``
           attribute is provided)
-
     """
     if isinstance(source, Thumbnailer):
         return source
@@ -143,8 +142,13 @@ class ThumbnailFile(ImageFieldFile):
         """
         Return a standard XHTML ``<img ... />`` tag for this field.
 
-        If ``use_size`` isn't set, it will be default to ``True`` or ``False``
-        depending on whether the file storage is local or not.
+        Use :py:attr:`alt` to specify alt-text.
+
+        If :py:attr:`use_size` isn't set, it will be default to ``True`` or
+        ``False`` depending on whether the file storage is local or not.
+
+        All other keyword arguments are added as (properly escaped) extra
+        attributes to the `img` tag.
         """
         if use_size is None:
             try:
@@ -159,8 +163,6 @@ class ThumbnailFile(ImageFieldFile):
         attrs = ' '.join(['%s="%s"' % (key, escape(value))
                           for key, value in attrs.items()])
         return mark_safe('<img %s />' % attrs)
-
-    tag = property(tag)
 
     def _get_file(self):
         self._require_file()
@@ -180,10 +182,15 @@ class ThumbnailFile(ImageFieldFile):
     file = property(_get_file, _set_file, _del_file)
 
     def _get_url(self):
+        """
+        Return the full url of this file.
+
+        .. note:: storages should already be quoting the urls, but Django's
+                  built in ``FileSystemStorage`` doesn't.
+                  ``ThumbnailFieldFile`` works around a common case of the file
+                  containing a ``#``, which shouldn't ever be used for a url.
+        """
         url = super(ThumbnailFile, self).url
-        # Hack: storages should already be quoting the urls, but Django's
-        # built in FileSystemStorage doesn't. We'll work around a common
-        # case which shouldn't ever be used for a url (for a file) at least.
         if '#' in url:
             url = urlquote(url)
         return url
@@ -210,7 +217,6 @@ class Thumbnailer(File):
         * thumbnail_prefix
         * thumbnail_quality
         * thumbnail_extension
-
     """
     thumbnail_basedir = utils.get_setting('BASEDIR')
     thumbnail_subdir = utils.get_setting('SUBDIR')
