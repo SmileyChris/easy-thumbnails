@@ -32,11 +32,11 @@ via the ``THUMBNAIL_QUALITY`` :doc:`ref/settings`.
 Similarly, the ``THUMBNAIL_EXTENSION`` and ``THUMBNAIL_TRANSPARENCY_EXTENSION``
 settings can be used to specify an alternate image format.
 
-.. py:currentmodule:: easy_thumbnails.processors 
+.. currentmodule:: easy_thumbnails.processors 
 
 .. note:: If you want to drop the transparency layer for a specific thumbnail
           (to ensure it always uses ``THUMBNAIL_EXTENSION``) then use the
-          ``replace_alpha`` option of the :py:func:`colorspace` processor. 
+          ``replace_alpha`` option of the :func:`colorspace` processor. 
 
 Templates
 =========

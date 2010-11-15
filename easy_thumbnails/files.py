@@ -142,10 +142,10 @@ class ThumbnailFile(ImageFieldFile):
         """
         Return a standard XHTML ``<img ... />`` tag for this field.
 
-        Use :py:attr:`alt` to specify alt-text.
+        Use ``alt`` to specify alt-text.
 
-        If :py:attr:`use_size` isn't set, it will be default to ``True`` or
-        ``False`` depending on whether the file storage is local or not.
+        If ``use_size`` isn't set, it will be default to ``True`` or ``False``
+        depending on whether the file storage is local or not.
 
         All other keyword arguments are added as (properly escaped) extra
         attributes to the `img` tag.
