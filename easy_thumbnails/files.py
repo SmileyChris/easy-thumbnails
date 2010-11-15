@@ -466,10 +466,6 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
         """
         Save the image.
 
-        If the thumbnail storage is local and differs from the field storage,
-        save a place-holder of the source image there too. This helps to keep
-        the testing of thumbnail existence as a local activity.
-
         The image will be resized down using a ``ThumbnailField`` if
         ``resize_source`` (a dictionary of thumbnail options) is provided by
         the field.
