@@ -328,8 +328,8 @@ class Thumbnailer(File):
             save_thumbnail(thumbnail, self.thumbnail_storage)
             # Ensure the right thumbnail name is used based on the transparency
             # of the image.
-            filename = (self.is_transparent(thumbnail) and transparent_name or
-                        opaque_name)
+            filename = (self.is_transparent(thumbnail.image) and
+                        transparent_name or opaque_name)
             self.get_thumbnail_cache(filename, create=True, update=True)
 
         return thumbnail
