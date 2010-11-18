@@ -105,3 +105,10 @@ class ScaleAndCropTest(TestCase):
         self.assertEqual(cropped.size, (100, 75))
         cropped = processors.scale_and_crop(image, (0, 100), crop=True)
         self.assertEqual(cropped.size, (133, 100))
+
+    def test_croup_rounding(self):
+        image = create_image(size=(2400, 3620))
+
+        size = (110, 1000)
+        cropped = processors.scale_and_crop(image, size, crop=True)
+        self.assertEqual(cropped.size, size)

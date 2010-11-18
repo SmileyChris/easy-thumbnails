@@ -140,7 +140,10 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
         target_y = source_y * scale
 
     if scale < 1.0 or (scale > 1.0 and upscale):
-        im = im.resize((int(source_x * scale), int(source_y * scale)),
+        # Resize the image to the target size boundry. Round the scaled boundry
+        # sizes to avoid floating point errors.
+        im = im.resize((int(round(source_x * scale)),
+                        int(round(source_y * scale))),
                        resample=Image.ANTIALIAS)
 
     if crop:

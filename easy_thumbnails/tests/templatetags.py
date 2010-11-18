@@ -146,7 +146,7 @@ class ThumbnailTagTest(BaseTest):
         output = self.render_template('src="'
             '{% thumbnail source size %}"')
         expected = '%s.90x100_q85.jpg' % self.RELATIVE_PIC_NAME
-        self.verify_thumbnail((90, 67), expected)
+        self.verify_thumbnail((90, 68), expected)
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
         # as a string:
