@@ -10,20 +10,34 @@ class Migration(SchemaMigration):
         using_mysql = db.backend_name == 'mysql'
         db.rename_table('easy_thumbnails_storagenew', 'easy_thumbnails_storage')
         if using_mysql:
-            db.drop_foreign_key('easy_thumbnails_source', 'storage_new_id')
+            try:
+                db.drop_foreign_key('easy_thumbnails_source', 'storage_new_id')
+            except ValueError, e:
+                # e.g MyISAM tables don't support foreign key constraints
+                print "Could not remove foreign key contraint: %s" % e
         db.rename_column('easy_thumbnails_source', 'storage_new_id', 'storage_id')
         if using_mysql:
-            db.execute('ALTER TABLE easy_thumbnails_source ADD CONSTRAINT '
-                       'sourcestorage_id_fk_to_storage FOREIGN KEY (storage_id) '
-                       'REFERENCES easy_thumbnails_storage(id)')
+            try:
+                db.execute('ALTER TABLE easy_thumbnails_source ADD CONSTRAINT '
+                           'sourcestorage_id_fk_to_storage FOREIGN KEY (storage_id) '
+                           'REFERENCES easy_thumbnails_storage(id)')
+            except Exception, e:
+                print "Could not add contraint: %s" % e
 
         if using_mysql:
-            db.drop_foreign_key('easy_thumbnails_thumbnail', 'storage_new_id')
+            try:
+                db.drop_foreign_key('easy_thumbnails_thumbnail', 'storage_new_id')
+            except ValueError, e:
+                # e.g MyISAM tables don't support foreign key constraints
+                print "Could not remove foreign key contraint: %s" % e
         db.rename_column('easy_thumbnails_thumbnail', 'storage_new_id', 'storage_id')
         if using_mysql:
-            db.execute('ALTER TABLE easy_thumbnails_thumbnail ADD CONSTRAINT '
-                       'thumbnailstorage_id_fk_to_storage FOREIGN KEY (storage_id) '
-                       'REFERENCES easy_thumbnails_storage(id)')
+            try:
+                db.execute('ALTER TABLE easy_thumbnails_thumbnail ADD CONSTRAINT '
+                           'thumbnailstorage_id_fk_to_storage FOREIGN KEY (storage_id) '
+                           'REFERENCES easy_thumbnails_storage(id)')
+            except Exception, e:
+                print "Could not add contraint: %s" % e
 
 
     def backwards(self, orm):
