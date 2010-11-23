@@ -2,6 +2,14 @@
 Image Processors
 ================
 
+Easy thumbnails generates thumbnail images by passing the source image through
+a series of image processors. Each processor may alter the image, often
+dependent on the options it receives.
+
+This makes the system very flexible, as the processors an image passes through
+can be defined in :ref:`THUMBNAIL_PROCESSORS <setting-thumbnail_processors>`
+and even overridden by an individual :class:`easy_thumbnails.files.Thumbnailer`
+(via the :attr:`processors` attribute).
 
 Built-in processors
 ===================
@@ -19,10 +27,10 @@ Custom processors
 You can replace or leave out any default processor as suits your needs.
 Following is an explanation of how to create and activate a custom processor.
 
-When defining the ``THUMBNAIL_PROCESSORS`` setting, remember that this is the
-order through which the processors are run. The image received by a processor
-is the output of the previous processor.  
-
+When defining the
+:ref:`THUMBNAIL_PROCESSORS setting <setting-thumbnail_processors>`, remember
+that this is the order through which the processors are run. The image received
+by a processor is the output of the previous processor.
 
 Create the processor
 --------------------
@@ -56,7 +64,8 @@ an image.
 Use the processor
 -----------------
 
-Next, add the processor to the ``THUMBNAIL_PROCESSORS`` to your settings
+Next, add the processor to
+:ref:`THUMBNAIL_PROCESSORS <setting-thumbnail_processors>` in your settings
 module::
 
     from easy_thumbnails import defaults
