@@ -88,6 +88,7 @@ The easy way to create a :class:`Thumbnailer` instance is to use the following
 utility function:
 
 .. autofunction:: get_thumbnailer
+   :noindex:
 
 Once you have an instance, you can use the :meth:`Thumbnailer.get_thumbnail`
 method to retrieve a thumbnail, which will generate it if it doesn't exist (or

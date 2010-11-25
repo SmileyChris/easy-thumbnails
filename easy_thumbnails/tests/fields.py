@@ -38,10 +38,21 @@ class ThumbnailerFieldTest(BaseTest):
 
     def test_delete(self):
         instance = TestModel(avatar='avatars/avatar.jpg')
-        thumb = instance.avatar.get_thumbnail({'size': (300, 300)})
-        self.assertEqual((thumb.width, thumb.height), (300, 225))
+        instance.avatar.get_thumbnail({'size': (300, 300)})
+        instance.avatar.get_thumbnail({'size': (200, 200)})
+        instance.avatar.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(len(self.storage.listdir('avatars')[1]), 4)
         instance.avatar.delete(save=False)
-        self.assertEqual(self.storage.listdir('avatars')[1], [])
+        self.assertEqual(len(self.storage.listdir('avatars')[1]), 0)
+
+    def test_delete_thumbnails(self):
+        instance = TestModel(avatar='avatars/avatar.jpg')
+        instance.avatar.get_thumbnail({'size': (300, 300)})
+        instance.avatar.get_thumbnail({'size': (200, 200)})
+        instance.avatar.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(len(self.storage.listdir('avatars')[1]), 4)
+        instance.avatar.delete_thumbnails()
+        self.assertEqual(len(self.storage.listdir('avatars')[1]), 1)
 
     def test_get_thumbnails(self):
         instance = TestModel(avatar='avatars/avatar.jpg')
