@@ -21,7 +21,7 @@ The easiest way is to use an automatic package-installation tools like pip__.
 
 Simply type::
 
-    pip install easy_thumbnails
+    pip install easy-thumbnails
 
 Manual installation
 -------------------
