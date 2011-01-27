@@ -453,14 +453,18 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         source_cache = self.get_source_cache()
         deleted = 0
         if source_cache:
-            thumbnail_storage_hash = utils.get_storage_hash(
-                                                    self.thumbnail_storage)
+            source_storage_hash = utils.get_storage_hash(self.source_storage)
             for thumbnail_cache in source_cache.thumbnails.all():
                 # Only attempt to delete the file if it was stored using the
-                # same storage as is currently used.
-                if thumbnail_cache.storage_hash == thumbnail_storage_hash:
-                    self.thumbnail_storage.delete(thumbnail_cache.name)
-                    deleted += 1
+                # same storage as the source.
+                if thumbnail_cache.storage_hash == source_storage_hash:
+                    try:
+                        self.thumbnail_storage.delete(thumbnail_cache.name)
+                        deleted += 1
+                    except:
+                        # TODO : Is there not somthing smarter to do than swallowing
+                        # this exception
+                        pass
         return deleted
 
     def get_thumbnails(self, *args, **kwargs):
