@@ -34,11 +34,12 @@ def get_thumbnailer(object, relative_name=None):
         * ``Thumbnailer`` instance (the instance is just returned with no
           processing)
 
-        * An object that has an ``easy_thumbnails_relative_name`` attribute,
-          which will be used as the relative name (the source will be
-          set to the default storage unless an ``easy_thumbnails_source``
-          attribute is provided)
+        * An object with a ``easy_thumbnails_thumbnailer`` attribute (the
+          attribute is simply returned under the assumption it is a Thumbnailer
+          instance)
     """
+    if hasattr(object, 'easy_thumbnails_thumbnailer'):
+        return object.easy_thumbnails_thumbnailer
     if isinstance(object, Thumbnailer):
         return object
     elif isinstance(object, FieldFile):
@@ -46,27 +47,28 @@ def get_thumbnailer(object, relative_name=None):
             relative_name = object.name
         return ThumbnailerFieldFile(object.instance, object.field,
                                     relative_name)
-    if isinstance(object, basestring) and not relative_name:
+
+    source_image = None
+    source_storage = None
+
+    if isinstance(object, basestring):
         relative_name = object
-        object = default_storage
-        is_storage = True
-    elif hasattr(object, 'easy_thumbnails_relative_name') and not \
-        relative_name:
-        relative_name = object.easy_thumbnails_relative_name
-        object = getattr(object, 'easy_thumbnails_source', default_storage)
-        is_storage = True
-    else:
-        is_storage = isinstance(object, Storage)
+        source_storage = default_storage
+    
     if not relative_name:
         raise ValueError('If object is not a FieldFile or Thumbnailer '
                          'instance, the relative name must be provided')
-    elif is_storage:
+
+    if isinstance(object, File):
+        source_image = object.file
+    elif isinstance(object, Storage):
         source_image = object.open(relative_name)
-        return Thumbnailer(source_image, relative_name, source_storage=object)
-    elif isinstance(object, File):
-        return Thumbnailer(object.file, relative_name)
-    raise TypeError('Unknown object type, expected a Thumbnailer, FieldFile, '
-                    'File or Storage instance.')
+    else:
+        raise TypeError('Unknown object type, expected a Thumbnailer, '
+                        'FieldFile, File or Storage instance.')
+
+    return Thumbnailer(source_image, relative_name,
+                       source_storage=source_storage)
 
 
 def save_thumbnail(thumbnail_file, storage):
