@@ -32,7 +32,7 @@ via the :ref:`THUMBNAIL_QUALITY setting <setting-thumbnail_quality>`.
 Similarly, the :ref:`THUMBNAIL_EXTENSION <setting-thumbnail_extension>` and
 :ref:`THUMBNAIL_TRANSPARENCY_EXTENSION
 <setting-thumbnail_transparency_extension>`
-settings can be used to specify an alternate image format.
+settings can be used to specify an alternate image format. To preserve specific extensions, for instance if you always want to create PNG thumbnails from PNG sources, you can list these extensions in the :ref:`THUMBNAIL_PRESERVE_EXTENSIONS <setting-thumbnail_preserve_extensions>` setting.  
 
 .. currentmodule:: easy_thumbnails.processors 
 

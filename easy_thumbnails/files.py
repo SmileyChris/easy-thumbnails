@@ -228,8 +228,10 @@ class Thumbnailer(File):
     thumbnail_prefix = utils.get_setting('PREFIX')
     thumbnail_quality = utils.get_setting('QUALITY')
     thumbnail_extension = utils.get_setting('EXTENSION')
+    thumbnail_preserve_extensions = utils.get_setting('PRESERVE_EXTENSIONS')
     thumbnail_transparency_extension = utils.get_setting(
                                                     'TRANSPARENCY_EXTENSION')
+    thumbnail_always_generate = utils.get_setting('ALWAYS_GENERATE')
     source_generators = None
     thumbnail_processors = None
 
@@ -278,7 +280,10 @@ class Thumbnailer(File):
         if transparent:
             extension = self.thumbnail_transparency_extension
         else:
-            extension = self.thumbnail_extension
+            if source_extension.lower() in self.thumbnail_preserve_extensions:
+                extension = source_extension
+            else:
+                extension = self.thumbnail_extension
         extension = extension or 'jpg'
 
         thumbnail_options = thumbnail_options.copy()
@@ -327,7 +332,7 @@ class Thumbnailer(File):
         else:
             names = (opaque_name, transparent_name)
         for filename in names:
-            if self.thumbnail_exists(filename):
+            if self.thumbnail_exists(filename) and not self.thumbnail_always_generate:
                 thumbnail = ThumbnailFile(name=filename,
                                           storage=self.thumbnail_storage)
                 return thumbnail

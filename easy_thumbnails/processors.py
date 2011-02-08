@@ -145,6 +145,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
         im = im.resize((int(round(source_x * scale)),
                         int(round(source_y * scale))),
                        resample=Image.ANTIALIAS)
+        
 
     if crop:
         # Use integer values now.

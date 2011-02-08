@@ -20,3 +20,10 @@ PROCESSORS = (
 SOURCE_GENERATORS = (
     'easy_thumbnails.source_generators.pil_image',
 )
+
+PRESERVE_EXTENSIONS = ('png',)
+
+"""
+If True, thumbnails are always regenerated. Use for testing purposes, NOT in production.
+"""
+ALWAYS_GENERATE = False  
