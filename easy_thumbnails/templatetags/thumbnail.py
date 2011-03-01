@@ -51,6 +51,12 @@ class ThumbnailNode(Node):
                 raise VariableDoesNotExist("Variable '%s' does not exist." %
                         self.source_var)
             return self.bail_out(context)
+        if not source:
+            if raise_errors:
+                raise TemplateSyntaxError(
+                    "Variable '%s' is an invalid source." % self.source_var
+                )
+            return self.bail_out(context)
         # Resolve the thumbnail option values.
         try:
             opts = {}
@@ -58,12 +64,12 @@ class ThumbnailNode(Node):
                 if hasattr(value, 'resolve'):
                     value = value.resolve(context)
                 opts[str(key)] = value
-        except:
+        except Exception:
             if raise_errors:
                 raise
             return self.bail_out(context)
         # Size variable can be either a tuple/list of two integers or a
-        # valid string, only the string is checked.
+        # valid string.
         size = opts['size']
         if isinstance(size, basestring):
             m = RE_SIZE.match(size)
@@ -71,14 +77,12 @@ class ThumbnailNode(Node):
                 opts['size'] = (int(m.group(1)), int(m.group(2)))
             else:
                 if raise_errors:
-                    raise TemplateSyntaxError("Variable '%s' was resolved "
-                            "but '%s' is not a valid size." %
-                            (self.size_var, size))
+                    raise TemplateSyntaxError("%r is not a valid size." % size)
                 return self.bail_out(context)
 
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
-        except:
+        except Exception:
             if raise_errors:
                 raise
             return self.bail_out(context)
