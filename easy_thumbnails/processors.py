@@ -121,6 +121,10 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
         image is incrementally cropped down to the requested size by removing
         slices from edges with the least entropy.
 
+        Finally, you can use ``crop="scale"`` to simply scale the image so that
+        at least one dimension fits within the size dimensions given (you may
+        want to use the upscale option too).
+
     upscale
         Allow upscaling of the source image during scaling.
 
@@ -140,8 +144,8 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
         target_y = source_y * scale
 
     if scale < 1.0 or (scale > 1.0 and upscale):
-        # Resize the image to the target size boundry. Round the scaled boundry
-        # sizes to avoid floating point errors.
+        # Resize the image to the target size boundary. Round the scaled
+        # boundary sizes to avoid floating point errors.
         im = im.resize((int(round(source_x * scale)),
                         int(round(source_y * scale))),
                        resample=Image.ANTIALIAS)
@@ -201,7 +205,8 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
                     diff_y = diff_y - add - remove
                 box = (left, top, right, bottom)
             # Finally, crop the image!
-            im = im.crop(box)
+            if crop != 'scale':
+                im = im.crop(box)
     return im
 
 
