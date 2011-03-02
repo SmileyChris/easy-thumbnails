@@ -5,13 +5,12 @@ from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from easy_thumbnails.utils import get_setting
 
-
 try:
     set
 except NameError:
     from sets import Set as set     # For Python 2.3
 
-thumb_re = re.compile(r'^%s(.*)_\d{1,}x\d{1,}_[-\w]*q([1-9]\d?|100)\.jpg' %
+thumb_re = re.compile(r'^%s(.*)\.\d{1,}x\d{1,}_[-\w]*q([1-9]\d?|100)\.jpg' %
                       get_setting('PREFIX'))
 
 
