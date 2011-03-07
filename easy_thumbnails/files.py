@@ -9,7 +9,6 @@ import datetime
 import os
 from django.utils.http import urlquote
 
-
 DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
                                         utils.get_setting('DEFAULT_STORAGE'))()
 
