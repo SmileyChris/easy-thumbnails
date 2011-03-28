@@ -1,10 +1,10 @@
 # encoding: utf-8
 import datetime
+import hashlib
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 from django.core.files.storage import default_storage
-from django.utils.hashcompat import md5_constructor
 import pickle
 
 class Migration(DataMigration):
@@ -30,7 +30,7 @@ class Migration(DataMigration):
             storage_obj = default_storage
         storage_cls = storage_obj.__class__
         name = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
-        return md5_constructor(name).hexdigest()
+        return hashlib.md5(name).hexdigest()
 
     def forwards(self, orm):
         "Write your forwards methods here."
