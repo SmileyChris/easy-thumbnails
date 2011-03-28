@@ -1,10 +1,9 @@
 from django.conf import settings
 from django.utils.functional import LazyObject
-from django.utils.hashcompat import md5_constructor
 from easy_thumbnails import defaults
+import hashlib
 import inspect
 import math
-
 
 def image_entropy(im):
     """
@@ -84,4 +83,4 @@ def get_storage_hash(storage):
     if not isinstance(storage, basestring):
         storage_cls = storage.__class__
         storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
-    return md5_constructor(storage).hexdigest()
+    return hashlib.md5(storage).hexdigest()
