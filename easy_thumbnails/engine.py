@@ -26,7 +26,12 @@ def process_image(source, processor_options, processors=None):
         processors = DEFAULT_PROCESSORS
     image = source
     for processor in processors:
-        image = processor(image, **processor_options)
+        try:
+            image = processor(image, **processor_options)
+        except:
+            path = os.path.join(os.path.realpath(os.path.dirname(__file__)), "static", "broken_image.jpg")
+            broken_image = Image.open(path)
+            image = processor(broken_image, **processor_options)
     return image
 
 
