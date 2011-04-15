@@ -75,7 +75,6 @@ class ThumbnailNode(Node):
                             "but '%s' is not a valid size." %
                             (self.size_var, size))
                 return self.bail_out(context)
-
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
         except:

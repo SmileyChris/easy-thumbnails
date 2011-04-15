@@ -90,7 +90,7 @@ def autocrop(im, autocrop=False, **kwargs):
     return im
 
 
-def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
+def scale_and_crop(im, size, crop=False, upscale=False, clip=None, **kwargs):
     """
     Handle scaling and cropping the source image.
 
@@ -123,6 +123,15 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
 
     upscale
         Allow upscaling of the source image during scaling.
+        
+    clip
+        Enables clipping to allow for the removal of a percentage of the source 
+        image's edges. This can be useful if TODO: ... to small
+        
+        * clip="10" will remove 10% from the edges, resulting in the visible 
+          portion of the image being 10% larger than without clipping. 
+        
+        TODO: Together with cropping 
 
     """
     source_x, source_y = [float(v) for v in im.size]
@@ -138,6 +147,9 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
         target_x = source_x * scale
     elif not target_y:
         target_y = source_y * scale
+
+    if clip: 
+        scale *= (1 + float(clip) / 100.0)
 
     if scale < 1.0 or (scale > 1.0 and upscale):
         # Resize the image to the target size boundry. Round the scaled boundry
