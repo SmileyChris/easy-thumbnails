@@ -33,11 +33,12 @@ def get_thumbnailer(object, relative_name=None):
         * ``Thumbnailer`` instance (the instance is just returned with no
           processing)
 
-        * An object that has an ``easy_thumbnails_relative_name`` attribute,
-          which will be used as the relative name (the source will be
-          set to the default storage unless an ``easy_thumbnails_source``
-          attribute is provided)
+        * An object with a ``easy_thumbnails_thumbnailer`` attribute (the
+          attribute is simply returned under the assumption it is a Thumbnailer
+          instance)
     """
+    if hasattr(object, 'easy_thumbnails_thumbnailer'):
+        return object.easy_thumbnails_thumbnailer
     if isinstance(object, Thumbnailer):
         return object
     elif isinstance(object, FieldFile):
@@ -45,27 +46,26 @@ def get_thumbnailer(object, relative_name=None):
             relative_name = object.name
         return ThumbnailerFieldFile(object.instance, object.field,
                                     relative_name)
-    if isinstance(object, basestring) and not relative_name:
+
+    source_image = None
+
+    if isinstance(object, basestring):
         relative_name = object
         object = default_storage
-        is_storage = True
-    elif hasattr(object, 'easy_thumbnails_relative_name') and not \
-        relative_name:
-        relative_name = object.easy_thumbnails_relative_name
-        object = getattr(object, 'easy_thumbnails_source', default_storage)
-        is_storage = True
-    else:
-        is_storage = isinstance(object, Storage)
+
     if not relative_name:
         raise ValueError('If object is not a FieldFile or Thumbnailer '
                          'instance, the relative name must be provided')
-    elif is_storage:
+
+    if isinstance(object, File):
+        source_image = object.file
+    elif isinstance(object, Storage) or object == default_storage:
         source_image = object.open(relative_name)
-        return Thumbnailer(source_image, relative_name, source_storage=object)
-    elif isinstance(object, File):
-        return Thumbnailer(object.file, relative_name)
-    raise TypeError('Unknown object type, expected a Thumbnailer, FieldFile, '
-                    'File or Storage instance.')
+    else:
+        raise TypeError('Unknown object type, expected a Thumbnailer, '
+                        'FieldFile, File or Storage instance.')
+
+    return Thumbnailer(source_image, relative_name)
 
 
 def save_thumbnail(thumbnail_file, storage):
@@ -453,16 +453,14 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         if source_cache:
             thumbnail_storage_hash = utils.get_storage_hash(
                                                     self.thumbnail_storage)
-            thumbnails = source_cache.thumbnails.all()
-            for thumbnail_cache in thumbnails:
+            for thumbnail_cache in source_cache.thumbnails.all():
                 # Only attempt to delete the file if it was stored using the
                 # same storage as is currently used.
                 if thumbnail_cache.storage_hash == thumbnail_storage_hash:
                     self.thumbnail_storage.delete(thumbnail_cache.name)
+                    # Delete the cache thumbnail instance too.
+                    thumbnail_cache.delete()
                     deleted += 1
-            # Delete the thumbnails from the cache.
-            pks = [thumb.pk for thumb in thumbnails]
-            models.Thumbnail.objects.filter(pk__in=pks).delete()
         return deleted
 
     def get_thumbnails(self, *args, **kwargs):

@@ -79,6 +79,15 @@ class ThumbnailNode(Node):
                 if raise_errors:
                     raise TemplateSyntaxError("%r is not a valid size." % size)
                 return self.bail_out(context)
+        # Ensure the quality is an integer.
+        if 'quality' in opts:
+            try:
+                opts['quality'] = int(opts['quality'])
+            except (TypeError, ValueError):
+                if raise_errors:
+                    raise TemplateSyntaxError("%r is an invalid quality." %
+                                              opts['quality'])
+                return self.bail_out(context)
 
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
