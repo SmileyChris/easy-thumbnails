@@ -12,7 +12,7 @@ from easy_thumbnails.files import get_thumbnailer
 
 class ThumbnailTagTest(BaseTest):
     RELATIVE_PIC_NAME = 'test.jpg'
-    restore_settings = ['THUMBNAIL_DEBUG']
+    restore_settings = ['THUMBNAIL_DEBUG', 'TEMPLATE_DEBUG']
 
     def setUp(self):
         BaseTest.setUp(self)
@@ -23,6 +23,9 @@ class ThumbnailTagTest(BaseTest):
         data.seek(0)
         image_file = ContentFile(data.read())
         self.storage.save(self.RELATIVE_PIC_NAME, image_file)
+
+        # Required so that IOError's get wrapped as TemplateSyntaxError
+        settings.TEMPLATE_DEBUG = True
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
