@@ -235,7 +235,7 @@ def mask_apply(im, mask=False, **kwargs):
         Put mask on image.
 
         mask
-            Filename without extension in THUMBNAIL_MEDIA_ROOT/_masks
+            Filename without extension in THUMBNAIL_MEDIA_ROOT
 
     """
     if mask:

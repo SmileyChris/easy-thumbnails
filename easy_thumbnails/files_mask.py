@@ -35,7 +35,7 @@ class MaskFile(File):
 
 
 def get_mask(mask_path):
-    path = os.path.join(utils.get_setting('MEDIA_ROOT'), '_masks', mask_path+".png")
+    path = os.path.join(utils.get_setting('MASK_ROOT'), mask_path+".png")
     try:
         file = open(path, 'rb')
     except IOError:
