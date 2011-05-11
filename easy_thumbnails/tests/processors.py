@@ -124,3 +124,25 @@ class ScaleAndCropTest(TestCase):
         size = (110, 1000)
         cropped = processors.scale_and_crop(image, size, crop=True)
         self.assertEqual(cropped.size, size)
+
+
+class MaskTest(TestCase):
+    def create_mask(self, mode='RGB', size=(200, 300)):
+        image = Image.new(mode, size)
+        draw = ImageDraw.Draw(image)
+        draw.ellipse((0, 0) + size, fill=(255, 255, 255))
+        return image
+
+    def test_apply(self):
+        image = Image.new('RGB', (800, 600), 'red')
+
+        mask = self.create_mask()
+
+        thumb = processors.mask_apply(image, mask)
+        self.assertEqual(thumb.size, (200, 300))
+
+        pixel_left_top = thumb.getpixel((0,0))
+        pixel_center = thumb.getpixel((100,150))
+
+        self.assertEqual(pixel_left_top, (255, 0, 0, 0)) # trasparent pixel
+        self.assertEqual(pixel_center, (255, 0, 0, 255)) # red pixel

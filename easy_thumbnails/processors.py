@@ -7,7 +7,7 @@ except ImportError:
     import ImageChops
     import ImageFilter
 from easy_thumbnails import utils
-from easy_thumbnails.files_mask import get_mask
+from easy_thumbnails.files_mask import Mask
 
 
 def _compare_entropy(start_slice, end_slice, slice, difference):
@@ -235,13 +235,19 @@ def mask_apply(im, mask=False, **kwargs):
         Put mask on image.
 
         mask
-            Filename without extension in THUMBNAIL_MEDIA_ROOT
+            Filename without extension in THUMBNAIL_MASKS_ROOT
 
     """
     if mask:
-        mask_im = get_mask(mask)
+        mask_im = None
+
+        if isinstance(mask, str):
+            mask_im = Mask(mask).image
+        elif isinstance(mask, Image.Image):
+            mask_im = mask
+
         if not mask_im is None:
-            mask_im = mask_im.image.convert('L')
+            mask_im = mask_im.convert('L')
             im = ImageOps.fit(im, mask_im.size, centering=(0.5, 0.5))
             im.putalpha(mask_im)
     return im

@@ -3,7 +3,7 @@ DEBUG = False
 DEFAULT_STORAGE = 'easy_thumbnails.storage.ThumbnailFileSystemStorage'
 MEDIA_ROOT = ''
 MEDIA_URL = ''
-MASKS_ROOT = MEDIA_ROOT
+MASKS_DIR = ''
 
 BASEDIR = ''
 SUBDIR = ''

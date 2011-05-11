@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.files.base import File, ContentFile
 from easy_thumbnails import utils
 import os
@@ -34,11 +35,25 @@ class MaskFile(File):
     image = property(_get_image, _set_image)
 
 
-def get_mask(mask_path):
-    path = os.path.join(utils.get_setting('MASK_ROOT'), mask_path+".png")
-    try:
-        file = open(path, 'rb')
-    except IOError:
-        return None
-    mask = MaskFile(file)
-    return mask
+class Mask(object):
+    def __init__(self, name):
+        self.name = name
+        self.STATIC_ROOT = settings.STATIC_ROOT
+        return self.open()
+
+    def get_path(self, name):
+        path = os.path.abspath(
+                    os.path.join(
+                        self.STATIC_ROOT,
+                        utils.get_setting('MASKS_DIR'),
+                        name+".png"))
+        return path
+
+    def open(self):
+        path = self.get_path(self.name)
+        try:
+            file = open(path, 'rb')
+        except IOError:
+            return None
+        mask = MaskFile(file)
+        return mask
