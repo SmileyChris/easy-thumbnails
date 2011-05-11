@@ -1,12 +1,13 @@
 import re
 
 try:
-    from PIL import Image, ImageChops, ImageFilter
+    from PIL import Image, ImageChops, ImageFilter, ImageOps
 except ImportError:
     import Image
     import ImageChops
     import ImageFilter
 from easy_thumbnails import utils
+from easy_thumbnails.files_mask import get_mask
 
 
 def _compare_entropy(start_slice, end_slice, slice, difference):
@@ -226,4 +227,21 @@ def filters(im, detail=False, sharpen=False, **kwargs):
         im = im.filter(ImageFilter.DETAIL)
     if sharpen:
         im = im.filter(ImageFilter.SHARPEN)
+    return im
+
+
+def mask_apply(im, mask=False, **kwargs):
+    """
+        Put mask on image.
+
+        mask
+            Filename without extension in THUMBNAIL_MEDIA_ROOT/_masks
+
+    """
+    if mask:
+        mask_im = get_mask(mask)
+        if not mask_im is None:
+            mask_im = mask_im.image.convert('L')
+            im = ImageOps.fit(im, mask_im.size, centering=(0.5, 0.5))
+            im.putalpha(mask_im)
     return im

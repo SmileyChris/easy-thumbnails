@@ -16,6 +16,7 @@ PROCESSORS = (
     'easy_thumbnails.processors.autocrop',
     'easy_thumbnails.processors.scale_and_crop',
     'easy_thumbnails.processors.filters',
+    'easy_thumbnails.processors.mask_apply',
 )
 SOURCE_GENERATORS = (
     'easy_thumbnails.source_generators.pil_image',
