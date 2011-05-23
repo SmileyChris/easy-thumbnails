@@ -155,16 +155,16 @@ class ThumbnailFile(ImageFieldFile):
         """
         if use_size is None:
             try:
-                self.field.storage.path(self.name)
+                self.storage.path(self.name)
                 use_size = True
             except NotImplementedError:
                 use_size = False
-        attrs['alt'] = escape(alt)
-        attrs['src'] = escape(self.url)
+        attrs['alt'] = alt
+        attrs['src'] = self.url
         if use_size:
             attrs.update(dict(width=self.width, height=self.height))
         attrs = ' '.join(['%s="%s"' % (key, escape(value))
-                          for key, value in attrs.items()])
+                          for key, value in sorted(attrs.items())])
         return mark_safe('<img %s />' % attrs)
 
     def _get_file(self):
