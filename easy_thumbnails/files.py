@@ -404,7 +404,7 @@ class Thumbnailer(File):
             return None
 
     def is_transparent(self, image):
-        return (image.mode == 'RGBA' or
+        return (image.mode in ['RGBA', 'LA'] or
                 (image.mode == 'P' and 'transparency' in image.info))
 
 
