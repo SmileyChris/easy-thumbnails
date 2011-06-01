@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.core.files.base import ContentFile
 from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
@@ -38,21 +39,35 @@ class ThumbnailerFieldTest(BaseTest):
 
     def test_delete(self):
         instance = TestModel(avatar='avatars/avatar.jpg')
-        instance.avatar.get_thumbnail({'size': (300, 300)})
-        instance.avatar.get_thumbnail({'size': (200, 200)})
-        instance.avatar.get_thumbnail({'size': (100, 100)})
-        self.assertEqual(len(self.storage.listdir('avatars')[1]), 4)
+        source_path = instance.avatar.path
+        thumb_paths = (
+            instance.avatar.get_thumbnail({'size': (300, 300)}).path,
+            instance.avatar.get_thumbnail({'size': (200, 200)}).path,
+            instance.avatar.get_thumbnail({'size': (100, 100)}).path,
+        )
+        self.assert_(os.path.exists(source_path))
+        for path in thumb_paths:
+            self.assert_(os.path.exists(path))
         instance.avatar.delete(save=False)
-        self.assertEqual(len(self.storage.listdir('avatars')[1]), 0)
+        self.assertFalse(os.path.exists(source_path))
+        for path in thumb_paths:
+            self.assertFalse(os.path.exists(path))
 
     def test_delete_thumbnails(self):
         instance = TestModel(avatar='avatars/avatar.jpg')
-        instance.avatar.get_thumbnail({'size': (300, 300)})
-        instance.avatar.get_thumbnail({'size': (200, 200)})
-        instance.avatar.get_thumbnail({'size': (100, 100)})
-        self.assertEqual(len(self.storage.listdir('avatars')[1]), 4)
+        source_path = instance.avatar.path
+        thumb_paths = (
+            instance.avatar.get_thumbnail({'size': (300, 300)}).path,
+            instance.avatar.get_thumbnail({'size': (200, 200)}).path,
+            instance.avatar.get_thumbnail({'size': (100, 100)}).path,
+        )
+        self.assert_(os.path.exists(source_path))
+        for path in thumb_paths:
+            self.assert_(os.path.exists(path))
         instance.avatar.delete_thumbnails()
-        self.assertEqual(len(self.storage.listdir('avatars')[1]), 1)
+        self.assert_(os.path.exists(source_path))
+        for path in thumb_paths:
+            self.assertFalse(os.path.exists(path))
 
     def test_get_thumbnails(self):
         instance = TestModel(avatar='avatars/avatar.jpg')

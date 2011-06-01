@@ -45,14 +45,23 @@ class ThumbnailTagTest(BaseTest):
         source = '{% load thumbnail %}' + source
         return Template(source).render(context)
 
-    def verify_thumbnail(self, expected_size, expected_filename):
+    def verify_thumbnail(self, expected_size, options, source_filename=None,
+                         transparent=False):
+        if source_filename is None:
+            source_filename = self.RELATIVE_PIC_NAME
+        self.assert_(isinstance(options, dict))
         # Verify that the thumbnail file exists
+        expected_filename = get_thumbnailer(self.storage, source_filename)\
+            .get_thumbnail_name(options, transparent=transparent)
+        
         self.assert_(self.storage.exists(expected_filename),
                      'Thumbnail file %r not found' % expected_filename)
 
         # Verify the thumbnail has the expected dimensions
         image = Image.open(self.storage.open(expected_filename))
         self.assertEqual(image.size, expected_size)
+
+        return expected_filename
 
     def testTagInvalid(self):
         # No args, or wrong number of args
@@ -139,8 +148,7 @@ class ThumbnailTagTest(BaseTest):
         # Basic
         output = self.render_template('src="'
             '{% thumbnail source 240x240 %}"')
-        expected = '%s.240x240_q85.jpg' % self.RELATIVE_PIC_NAME
-        self.verify_thumbnail((240, 180), expected)
+        expected = self.verify_thumbnail((240, 180), {'size': (240, 240)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
 
@@ -148,15 +156,13 @@ class ThumbnailTagTest(BaseTest):
         # as a tuple:
         output = self.render_template('src="'
             '{% thumbnail source size %}"')
-        expected = '%s.90x100_q85.jpg' % self.RELATIVE_PIC_NAME
-        self.verify_thumbnail((90, 68), expected)
+        expected = self.verify_thumbnail((90, 68), {'size': (90, 100)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
         # as a string:
         output = self.render_template('src="'
             '{% thumbnail source strsize %}"')
-        expected = '%s.80x90_q85.jpg' % self.RELATIVE_PIC_NAME
-        self.verify_thumbnail((80, 60), expected)
+        expected = self.verify_thumbnail((80, 60), {'size': (80, 90)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
 
@@ -169,8 +175,8 @@ class ThumbnailTagTest(BaseTest):
         output = self.render_template('src="'
             '{% thumbnail source 240x240 sharpen crop quality=95 %}"')
         # Note that the opts are sorted to ensure a consistent filename.
-        expected = '%s.240x240_q95_crop_sharpen.jpg' % self.RELATIVE_PIC_NAME
-        self.verify_thumbnail((240, 240), expected)
+        expected = self.verify_thumbnail((240, 240), {'size': (240, 240),
+            'crop': True, 'sharpen': True, 'quality': 95})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
 
@@ -183,7 +189,6 @@ class ThumbnailTagTest(BaseTest):
 
         # One dimensional resize
         output = self.render_template('src="{% thumbnail source 100x0 %}"')
-        expected = '%s.100x0_q85.jpg' % self.RELATIVE_PIC_NAME
-        self.verify_thumbnail((100, 75), expected)
+        expected = self.verify_thumbnail((100, 75), {'size': (100, 0)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
