@@ -145,12 +145,13 @@ class ThumbnailFile(ImageFieldFile):
         """
         Return a standard XHTML ``<img ... />`` tag for this field.
 
-        Use ``alt`` to specify alt-text.
+        :param alt: The ``alt=""`` text for the tag. Defaults to ``''``.
 
-        If ``use_size`` isn't set, it will be default to ``True`` or ``False``
-        depending on whether the file storage is local or not.
+        :param use_size: Whether to get the size of the thumbnail image for use in
+            the tag attributes. If ``None`` (default), it will be ``True`` or
+            ``False`` depending on whether the file storage is local or not.
 
-        All other keyword arguments are added as (properly escaped) extra
+        All other keyword parameters are added as (properly escaped) extra
         attributes to the `img` tag.
         """
         if use_size is None:
