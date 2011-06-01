@@ -36,15 +36,42 @@ class TemporaryStorage(FileSystemStorage):
 
 class FakeRemoteStorage(TemporaryStorage):
     """
-    A storage class that acts similar to remote storage.
+    A temporary storage class that acts similar to remote storage.
+
+    It's not thread safe.
     """
+    remote_mode = False
 
     def path(self, *args, **kwargs):
         """
         Raise ``NotImplementedError``, since this is the way that
         easy-thumbnails determines if a storage is remote.
         """
-        raise NotImplementedError
+        if self.remote_mode:
+            raise NotImplementedError
+        return super(FakeRemoteStorage, self).path(*args, **kwargs)
+
+    def exists(self, *args, **kwargs):
+        original_remote_mode = self.remote_mode
+        self.remote_mode = False
+        try:
+            return super(FakeRemoteStorage, self).exists(*args, **kwargs)
+        finally:
+            self.remote_mode = original_remote_mode
+
+    def save(self, *args, **kwargs):
+        self.remote_mode = False
+        try:
+            return super(FakeRemoteStorage, self).save(*args, **kwargs)
+        finally:
+            self.remote_mode = True
+
+    def open(self, *args, **kwargs):
+        self.remote_mode = False
+        try:
+            return super(FakeRemoteStorage, self).open(*args, **kwargs)
+        finally:
+            self.remote_mode = True
 
 
 class BaseTest(TestCase):

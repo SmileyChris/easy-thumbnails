@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.functional import LazyObject
 from django.utils.hashcompat import md5_constructor
 from easy_thumbnails import defaults
 import inspect
@@ -75,6 +76,11 @@ def get_storage_hash(storage):
     Return a hex string hash for a storage object (or string containing
     'full.path.ClassName' referring to a storage object).
     """
+    # If storage is wrapped in a lazy object we need to get the real thing.
+    if isinstance(storage, LazyObject):
+        if storage._wrapped is None:
+            storage._setup()
+        storage = storage._wrapped
     if not isinstance(storage, basestring):
         storage_cls = storage.__class__
         storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)

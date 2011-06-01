@@ -14,16 +14,14 @@ DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
                                         utils.get_setting('DEFAULT_STORAGE'))()
 
 
-def get_thumbnailer(source, relative_name=None):
+def get_thumbnailer(object, relative_name=None):
     """
-    Get a thumbnailer for a source file.
+    Get a :class:`Thumbnailer` for a source file.
 
-    The ``source`` argument must be one of the following:
-
-        * ``Thumbnailer`` instance
+    The ``object`` argument is usually either one of the following:
 
         * ``FieldFile`` instance (i.e. a model instance file/image field
-          property)
+          property). 
 
         * ``File`` or ``Storage`` instance, and for both of these cases the
           ``relative_name`` argument must also be provided
@@ -31,39 +29,44 @@ def get_thumbnailer(source, relative_name=None):
         * A string, which will be used as the relative name (the source will be
           set to the default storage)
 
-        * An object that has an ``easy_thumbnails_relative_name`` attribute,
-          which will be used as the relative name (the source will be
-          set to the default storage unless an ``easy_thumbnails_source``
-          attribute is provided)
+    For rarer needed cases, it can also be one of the following:
+
+        * ``Thumbnailer`` instance (the instance is just returned with no
+          processing)
+
+        * An object with a ``easy_thumbnails_thumbnailer`` attribute (the
+          attribute is simply returned under the assumption it is a Thumbnailer
+          instance)
     """
-    if isinstance(source, Thumbnailer):
-        return source
-    elif isinstance(source, FieldFile):
+    if hasattr(object, 'easy_thumbnails_thumbnailer'):
+        return object.easy_thumbnails_thumbnailer
+    if isinstance(object, Thumbnailer):
+        return object
+    elif isinstance(object, FieldFile):
         if not relative_name:
-            relative_name = source.name
-        return ThumbnailerFieldFile(source.instance, source.field,
+            relative_name = object.name
+        return ThumbnailerFieldFile(object.instance, object.field,
                                     relative_name)
-    if isinstance(source, basestring) and not relative_name:
-        relative_name = source
-        source = default_storage
-        is_storage = True
-    elif hasattr(source, 'easy_thumbnails_relative_name') and not \
-        relative_name:
-        relative_name = source.easy_thumbnails_relative_name
-        source = getattr(source, 'easy_thumbnails_source', default_storage)
-        is_storage = True
-    else:
-        is_storage = isinstance(source, Storage)
+
+    source_image = None
+
+    if isinstance(object, basestring):
+        relative_name = object
+        object = default_storage
+
     if not relative_name:
-        raise ValueError('If source is not a FieldFile or Thumbnailer '
+        raise ValueError('If object is not a FieldFile or Thumbnailer '
                          'instance, the relative name must be provided')
-    elif is_storage:
-        source_image = source.open(relative_name)
-        return Thumbnailer(source_image, relative_name, source_storage=source)
-    elif isinstance(source, File):
-        return Thumbnailer(source.file, relative_name)
-    raise TypeError('Unknown source type, expected a Thumbnailer, FieldFile, '
-                    'File or Storage instance.')
+
+    if isinstance(object, File):
+        source_image = object.file
+    elif isinstance(object, Storage) or object == default_storage:
+        source_image = object.open(relative_name)
+    else:
+        raise TypeError('Unknown object type, expected a Thumbnailer, '
+                        'FieldFile, File or Storage instance.')
+
+    return Thumbnailer(source_image, relative_name)
 
 
 def save_thumbnail(thumbnail_file, storage):
@@ -142,26 +145,27 @@ class ThumbnailFile(ImageFieldFile):
         """
         Return a standard XHTML ``<img ... />`` tag for this field.
 
-        Use :py:attr:`alt` to specify alt-text.
+		:param alt: The ``alt=""`` text for the tag. Defaults to ``''``.
 
-        If :py:attr:`use_size` isn't set, it will be default to ``True`` or
-        ``False`` depending on whether the file storage is local or not.
+		:param use_size: Whether to get the size of the thumbnail image for use in
+            the tag attributes. If ``None`` (default), it will be ``True`` or
+            ``False`` depending on whether the file storage is local or not.
 
-        All other keyword arguments are added as (properly escaped) extra
+        All other keyword parameters are added as (properly escaped) extra
         attributes to the `img` tag.
         """
         if use_size is None:
             try:
-                self.field.storage.path(self.name)
+                self.storage.path(self.name)
                 use_size = True
             except NotImplementedError:
                 use_size = False
-        attrs['alt'] = escape(alt)
-        attrs['src'] = escape(self.url)
+        attrs['alt'] = alt
+        attrs['src'] = self.url
         if use_size:
             attrs.update(dict(width=self.width, height=self.height))
         attrs = ' '.join(['%s="%s"' % (key, escape(value))
-                          for key, value in attrs.items()])
+                          for key, value in sorted(attrs.items())])
         return mark_safe('<img %s />' % attrs)
 
     def _get_file(self):
@@ -217,6 +221,8 @@ class Thumbnailer(File):
         * thumbnail_prefix
         * thumbnail_quality
         * thumbnail_extension
+        * source_generators
+        * thumbnail_processors
     """
     thumbnail_basedir = utils.get_setting('BASEDIR')
     thumbnail_subdir = utils.get_setting('SUBDIR')
@@ -225,6 +231,8 @@ class Thumbnailer(File):
     thumbnail_extension = utils.get_setting('EXTENSION')
     thumbnail_transparency_extension = utils.get_setting(
                                                     'TRANSPARENCY_EXTENSION')
+    source_generators = None
+    thumbnail_processors = None
 
     def __init__(self, file, name=None, source_storage=None,
                  thumbnail_storage=None, *args, **kwargs):
@@ -235,17 +243,19 @@ class Thumbnailer(File):
 
     def generate_thumbnail(self, thumbnail_options):
         """
-        Return a ``ThumbnailFile`` containing a thumbnail image.
+        Return an unsaved ``ThumbnailFile`` containing a thumbnail image.
 
         The thumbnail image is generated using the ``thumbnail_options``
         dictionary.
         """
-        image = engine.generate_source_image(self, thumbnail_options)
+        image = engine.generate_source_image(self, thumbnail_options,
+                                             self.source_generators)
         if image is None:
             raise exceptions.InvalidImageFormatError(
-                "Image file format is not supported!")
+                "The source file does not appear to be an image")
 
-        thumbnail_image = engine.process_image(image, thumbnail_options)
+        thumbnail_image = engine.process_image(image, thumbnail_options,
+                                               self.thumbnail_processors)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 
         filename = self.get_thumbnail_name(thumbnail_options,
@@ -332,8 +342,8 @@ class Thumbnailer(File):
             save_thumbnail(thumbnail, self.thumbnail_storage)
             # Ensure the right thumbnail name is used based on the transparency
             # of the image.
-            filename = (self.is_transparent(thumbnail) and transparent_name or
-                        opaque_name)
+            filename = (self.is_transparent(thumbnail.image) and
+                        transparent_name or opaque_name)
             self.get_thumbnail_cache(filename, create=True, update=True)
 
         return thumbnail
@@ -427,8 +437,25 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         """
         Delete the image, along with any generated thumbnails.
         """
-        # First, delete any related thumbnails.
         source_cache = self.get_source_cache()
+        # First, delete any related thumbnails.
+        self.delete_thumbnails(source_cache)
+        # Next, delete the source image.
+        super(ThumbnailerFieldFile, self).delete(*args, **kwargs)
+        # Finally, delete the source cache entry.
+        if source_cache:
+            source_cache.delete()
+
+    def delete_thumbnails(self, source_cache=None):
+        """
+        Delete any thumbnails generated from the source image.
+
+        :arg source_cache: An optional argument only used for optimisation
+          where the source cache instance is already known.
+        :returns: The number of files deleted.
+        """
+        source_cache = self.get_source_cache()
+        deleted = 0
         if source_cache:
             thumbnail_storage_hash = utils.get_storage_hash(
                                                     self.thumbnail_storage)
@@ -437,12 +464,10 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
                 # same storage as is currently used.
                 if thumbnail_cache.storage_hash == thumbnail_storage_hash:
                     self.thumbnail_storage.delete(thumbnail_cache.name)
-        # Next, delete the source image.
-        super(ThumbnailerFieldFile, self).delete(*args, **kwargs)
-        # Finally, delete the source cache entry (which will also delete any
-        # thumbnail cache entries).
-        if source_cache:
-            source_cache.delete()
+                    # Delete the cache thumbnail instance too.
+                    thumbnail_cache.delete()
+                    deleted += 1
+        return deleted
 
     def get_thumbnails(self, *args, **kwargs):
         """
@@ -469,10 +494,6 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
     def save(self, name, content, *args, **kwargs):
         """
         Save the image.
-
-        If the thumbnail storage is local and differs from the field storage,
-        save a place-holder of the source image there too. This helps to keep
-        the testing of thumbnail existence as a local activity.
 
         The image will be resized down using a ``ThumbnailField`` if
         ``resize_source`` (a dictionary of thumbnail options) is provided by

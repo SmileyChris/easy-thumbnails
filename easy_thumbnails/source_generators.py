@@ -3,7 +3,10 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 
 
 def pil_image(source, **options):
@@ -17,6 +20,6 @@ def pil_image(source, **options):
     source = StringIO(source.read())
     try:
         image = Image.open(source)
-    except:
+    except Exception:
         return
     return image

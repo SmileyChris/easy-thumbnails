@@ -27,16 +27,18 @@ of 100).
 
 The thumbnail tag (and thumbnail generator) accept a ``quality`` option
 which changes the image quality. The default value of 85 can also be changed
-via the ``THUMBNAIL_QUALITY`` :doc:`ref/settings`.
+via the :ref:`THUMBNAIL_QUALITY setting <setting-thumbnail_quality>`.
 
-Similarly, the ``THUMBNAIL_EXTENSION`` and ``THUMBNAIL_TRANSPARENCY_EXTENSION``
+Similarly, the :ref:`THUMBNAIL_EXTENSION <setting-thumbnail_extension>` and
+:ref:`THUMBNAIL_TRANSPARENCY_EXTENSION
+<setting-thumbnail_transparency_extension>`
 settings can be used to specify an alternate image format.
 
-.. py:currentmodule:: easy_thumbnails.processors 
+.. currentmodule:: easy_thumbnails.processors 
 
 .. note:: If you want to drop the transparency layer for a specific thumbnail
           (to ensure it always uses ``THUMBNAIL_EXTENSION``) then use the
-          ``replace_alpha`` option of the :py:func:`colorspace` processor. 
+          ``replace_alpha`` option of the :func:`colorspace` processor. 
 
 Templates
 =========
@@ -46,12 +48,15 @@ make this tag available for use in your template, use::
     
     {% load thumbnail %}
 
+.. _thumbnail_tag:
+
 ``{% thumbnail %}`` tag
 -----------------------
 
 .. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnail
 
-For a full list of options, read the :doc:`ref/processors` documentation.
+For a full list of options, read the :doc:`ref/processors` reference
+documentation.
 
 
 Models
@@ -70,29 +75,47 @@ source images before saving.
 Python
 ======
 
-Thumbnails are generated with a ``Thumbnailer`` instance. For example::
+.. currentmodule:: easy_thumbnails.files
 
-    from easy_thumbnails.files import Thumbnailer
+Easy thumbnails uses a Django ``File``-like object called a
+:class:`Thumbnailer` to generate thumbnail images from the source file which
+it references.
 
-    def square_thumbnail(source):
-        thumbnail_options = dict(size=(100, 100), crop=True, bw=True)
-        return Thumbnailer(source).get_thumbnail(thumbnail_options)
+``get_thumbnailer``
+-------------------
 
-By default, ``get_thumbnail`` saves the file (using file storage). The source
-file used to instanciate the ``Thumbnailer`` must have a ``name`` attribute
-which locates the file relative to the storage root.
+The easy way to create a :class:`Thumbnailer` instance is to use the following
+utility function:
 
-A model's ``ImageField`` provides an appropriate source file but if you need
-to manually create the source file object, you can use the provided
-``ThumbnailFile`` object::
+.. autofunction:: get_thumbnailer
+   :noindex:
 
-	from easy_thumbnails.files import ThumbnailFile
+Once you have an instance, you can use the :meth:`Thumbnailer.get_thumbnail`
+method to retrieve a thumbnail, which will generate it if it doesn't exist (or
+if the source image has been modified since it was created).
 
-	# For an existing file in storage:
-	source = ThumbnailFile('animals/aarvark.jpg')
-	square_thumbnail(source)
-	
-	# For a new file:
+For example, assuming an ``aardvark.jpg`` image exists in the default storage::
+
+    from easy_thumbnails.files import get_thumbnailer
+    
+    thumbnailer = get_thumbnail('animals/aardvark.jpg')
+    
+    thumbnail_options = {'crop': True'} 
+    for size in (50, 100, 250):
+        thumbnail_options.update{'size': (size, size)}
+        thumbnailer.get_thumbnail(thumbnail_options)
+
+Non-Django file objects
+-----------------------
+
+If you need to process a standard file object as opposed to a Django one (i.e.
+one retrieved from a Django file storage), use :func:`get_thumbnailer` and
+provide a ``relative_name`` like this::
+
 	picture = open('/home/zookeeper/pictures/my_anteater.jpg')
-	source = ThumbnailFile('animals/anteater.jpg', file=picture)
-	square_thumbnail(source)
+	thumbnailer = get_thumbnailer(picture, relative_name='animals/anteater.jpg')
+	thumb = thumbnailer.get_thumbnail({'size': (100, 100)})
+
+If you don't even need to save the thumbnail to storage because you are
+planning on using it in some more direct way, you can use the
+:meth:`Thumbnailer.generate_thumbnail` method. 
