@@ -59,9 +59,16 @@ def generate_source_image(source, processor_options, generators=None):
 
     The return value is this image instance or ``None`` if no generators
     return an image.
+
+    If the source file cannot be opened, it will be set to ``None`` and still
+    passed to the generators.
     """
     was_closed = source.closed
-    source.open()
+    try:
+        source.open()
+    except Exception:
+        source = None
+        was_closed = False
     if generators is None:
         generators = SOURCE_GENERATORS
     try:

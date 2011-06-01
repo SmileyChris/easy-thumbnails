@@ -20,6 +20,6 @@ def pil_image(source, **options):
     source = StringIO(source.read())
     try:
         image = Image.open(source)
-    except:
+    except Exception:
         return
     return image
