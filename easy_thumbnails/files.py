@@ -4,7 +4,7 @@ from django.core.files.storage import get_storage_class, default_storage, \
 from django.db.models.fields.files import ImageFieldFile, FieldFile
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from easy_thumbnails import engine, models, utils
+from easy_thumbnails import engine, models, utils, exceptions
 import datetime
 import os
 from django.utils.http import urlquote
@@ -249,6 +249,10 @@ class Thumbnailer(File):
         """
         image = engine.generate_source_image(self, thumbnail_options,
                                              self.source_generators)
+        if image is None:
+            raise exceptions.InvalidImageFormatError(
+                "The source file does not appear to be an image")
+
         thumbnail_image = engine.process_image(image, thumbnail_options,
                                                self.thumbnail_processors)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
