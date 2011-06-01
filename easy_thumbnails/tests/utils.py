@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from easy_thumbnails import defaults
-import os
 import shutil
 import tempfile
 
