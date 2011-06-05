@@ -88,7 +88,6 @@ class ThumbnailNode(Node):
                     raise TemplateSyntaxError("%r is an invalid quality." %
                                               opts['quality'])
                 return self.bail_out(context)
-
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
         except Exception:

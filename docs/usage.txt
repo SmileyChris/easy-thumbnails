@@ -12,7 +12,7 @@ thumbnail images.
 Overview
 ========
 
-The primary function of easy-thumbnail is to create thumbnails based on a
+The primary function of easy-thumbnails is to create thumbnails based on a
 source image on the fly.
 
 So whenever a thumbnail does not exist or if the source was modified
@@ -32,7 +32,13 @@ via the :ref:`THUMBNAIL_QUALITY setting <setting-thumbnail_quality>`.
 Similarly, the :ref:`THUMBNAIL_EXTENSION <setting-thumbnail_extension>` and
 :ref:`THUMBNAIL_TRANSPARENCY_EXTENSION
 <setting-thumbnail_transparency_extension>`
-settings can be used to specify an alternate image format.
+settings can be used to specify an alternate image format. To preserve 
+specific extensions, for instance if you always want to create lossless PNG 
+thumbnails from PNG sources, you can list these extensions in the 
+:ref:`THUMBNAIL_PRESERVE_EXTENSIONS <setting-thumbnail_preserve_extensions>` 
+setting. Instead of a list, you can also set this to ``True`` in order to
+always preserve the original extension. Note that easy-thumbnails already 
+preserves the original extension when it encounters images with transparency.
 
 .. currentmodule:: easy_thumbnails.processors 
 
