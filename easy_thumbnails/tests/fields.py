@@ -59,3 +59,8 @@ class ThumbnailerFieldTest(BaseTest):
         instance.avatar.get_thumbnail({'size': (300, 300)})
         instance.avatar.get_thumbnail({'size': (200, 200)})
         self.assertEqual(len(list(instance.avatar.get_thumbnails())), 2)
+
+    def test_thumbnail_tag(self):
+        instance = TestModel(avatar='avatars/avatar.jpg')
+        thumb = instance.avatar.get_thumbnail({'size': (300, 300)})
+        self.assertTrue(len(thumb.tag()) > 0)
