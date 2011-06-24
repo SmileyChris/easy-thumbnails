@@ -20,3 +20,5 @@ PROCESSORS = (
 SOURCE_GENERATORS = (
     'easy_thumbnails.source_generators.pil_image',
 )
+THUMBNAIL_CHECK_CACHE_MISS = False
+
