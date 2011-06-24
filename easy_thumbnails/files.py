@@ -231,8 +231,7 @@ class Thumbnailer(File):
     thumbnail_extension = utils.get_setting('EXTENSION')
     thumbnail_transparency_extension = utils.get_setting(
                                                     'TRANSPARENCY_EXTENSION')
-    thumbnail_check_cache_miss = utils.get_setting(
-                                                'THUMBNAIL_CHECK_CACHE_MISS')
+    thumbnail_check_cache_miss = utils.get_setting('CHECK_CACHE_MISS')
     source_generators = None
     thumbnail_processors = None
 
