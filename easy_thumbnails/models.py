@@ -6,7 +6,7 @@ import datetime
 class FileManager(models.Manager):
 
     def get_file(self, storage, name, create=False, update_modified=None,
-                 **kwargs):
+                 check_cache_miss=False, **kwargs):
         kwargs.update(dict(storage_hash=utils.get_storage_hash(storage),
                            name=name))
         if create:
@@ -15,12 +15,19 @@ class FileManager(models.Manager):
                 defaults['modified'] = update_modified
             object, created = self.get_or_create(**kwargs)
         else:
+            created = False
             kwargs.pop('defaults', None)
             try:
                 object = self.get(**kwargs)
             except self.model.DoesNotExist:
-                return
-            created = False
+
+                if check_cache_miss and storage.exists(name):
+                    # File already in storage, update cache
+                    object = self.create(**kwargs)
+                    created = True
+                else:
+                    return
+
         if update_modified and object and not created:
             if object.modified != update_modified:
                 self.filter(pk=object.pk).update(modified=update_modified)
