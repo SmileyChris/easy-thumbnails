@@ -21,7 +21,7 @@ def get_thumbnailer(object, relative_name=None):
     The ``object`` argument is usually either one of the following:
 
         * ``FieldFile`` instance (i.e. a model instance file/image field
-          property). 
+          property).
 
         * ``File`` or ``Storage`` instance, and for both of these cases the
           ``relative_name`` argument must also be provided
@@ -231,6 +231,7 @@ class Thumbnailer(File):
     thumbnail_extension = utils.get_setting('EXTENSION')
     thumbnail_transparency_extension = utils.get_setting(
                                                     'TRANSPARENCY_EXTENSION')
+    thumbnail_check_cache_miss = utils.get_setting('CHECK_CACHE_MISS')
     source_generators = None
     thumbnail_processors = None
 
@@ -378,7 +379,8 @@ class Thumbnailer(File):
             update_modified = update_modified or datetime.datetime.utcnow()
         return models.Source.objects.get_file(
             create=create, update_modified=update_modified,
-            storage=self.source_storage, name=self.name)
+            storage=self.source_storage, name=self.name,
+            check_cache_miss=self.thumbnail_check_cache_miss)
 
     def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
         modtime = self.get_thumbnail_modtime(thumbnail_name)
@@ -388,7 +390,8 @@ class Thumbnailer(File):
         source = self.get_source_cache(create=True)
         return models.Thumbnail.objects.get_file(
             create=create, update_modified=update_modified,
-            storage=self.thumbnail_storage, source=source, name=thumbnail_name)
+            storage=self.thumbnail_storage, source=source, name=thumbnail_name,
+            check_cache_miss=self.thumbnail_check_cache_miss)
 
     def get_source_modtime(self):
         try:
