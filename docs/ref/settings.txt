@@ -101,7 +101,7 @@ THUMBNAIL_SOURCE_GENERATORS
 		)
 
 	The :doc:`source_generators` through which the base image is created from
-	the source file. 
+	the source file.
 
 	The order of the processors is the order in which they are sequentially
 	tried.
@@ -123,3 +123,15 @@ THUMBNAIL_TRANSPARENCY_EXTENSION
 
 	The type of image to save thumbnails with a transparency layer (e.g. GIFs
 	or transparent PNGs).
+
+THUMBNAIL_CHECK_CACHE_MISS
+	Default: ``False``
+
+	If this boolean setting is set to ``True``, and a thumbnail cannot
+    be found in the database tables, we ask the storage if it has the
+    thumbnail. If it does we add the row in the database, and we don't
+    need to generate the thumbnail.
+
+    Switch this to True if your easy_thumbnails_thumbnail table has been wiped
+    but your storage still has the thumbnail files.
+
