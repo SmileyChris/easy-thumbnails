@@ -36,6 +36,7 @@ class File(models.Model):
 
     class Meta:
         abstract = True
+        unique_together = (('storage_hash', 'name'),)
 
     def __unicode__(self):
         return self.name
