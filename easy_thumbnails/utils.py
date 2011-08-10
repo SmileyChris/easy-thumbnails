@@ -4,12 +4,19 @@ from django.utils.hashcompat import md5_constructor
 from easy_thumbnails import defaults
 import inspect
 import math
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 
 
 def image_entropy(im):
     """
     Calculate the entropy of an image. Used for "smart cropping".
     """
+    if not isinstance(im, Image.Image):
+        # Can only deal with PIL images. Fall back to a constant entropy.
+        return 0
     hist = im.histogram()
     hist_size = float(sum(hist))
     hist = [h / hist_size for h in hist]
@@ -85,3 +92,15 @@ def get_storage_hash(storage):
         storage_cls = storage.__class__
         storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
     return md5_constructor(storage).hexdigest()
+
+
+def is_transparent(image):
+    """
+    Check to see if an image is transparent.
+    """
+    if not isinstance(image, Image.Image):
+        # Can only deal with PIL images, fall back to the assumption that that
+        # it's not transparent.
+        return False
+    return (image.mode in ('RGBA', 'LA') or
+            (image.mode == 'P' and 'transparency' in image.info))

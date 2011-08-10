@@ -49,8 +49,11 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
         white.
 
     """
-    if bw and im.mode not in ('L', 'LA'):
-        if im.mode == 'RGBA' or (im.mode == 'P' and 'transparency' in im.info):
+    is_transparent = utils.is_transparent(im)
+    if bw:
+        if im.mode in ('L', 'LA'):
+            return im
+        if is_transparent:
             return im.convert('LA')
         else:
             return im.convert('L')
@@ -58,7 +61,7 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     if im.mode in ('L', 'RGB'):
         return im
 
-    if im.mode == 'RGBA' or (im.mode == 'P' and 'transparency' in im.info):
+    if is_transparent:
         if im.mode != 'RGBA':
             im = im.convert('RGBA')
         if not replace_alpha:

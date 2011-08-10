@@ -124,3 +124,50 @@ class ScaleAndCropTest(TestCase):
         size = (110, 1000)
         cropped = processors.scale_and_crop(image, size, crop=True)
         self.assertEqual(cropped.size, size)
+
+
+class ColorspaceTest(TestCase):
+
+    def test_standard(self):
+        image = Image.new('RGB', (800, 600))
+        processed = processors.colorspace(image)
+        self.assertEqual(processed.mode, 'RGB')
+
+        image = Image.new('L', (800, 600))
+        processed = processors.colorspace(image)
+        self.assertEqual(processed.mode, 'L')
+
+    def test_transparent(self):
+        image = Image.new('RGBA', (800, 600))
+        processed = processors.colorspace(image)
+        self.assertEqual(processed.mode, 'RGBA')
+
+        image = Image.new('LA', (800, 600))
+        processed = processors.colorspace(image)
+        self.assertEqual(processed.mode, 'RGBA')
+
+    def test_replace_alpha(self):
+        image = Image.new('RGBA', (800, 600))
+        processed = processors.colorspace(image, replace_alpha='#fff')
+        self.assertEqual(processed.mode, 'RGB')
+
+        image = Image.new('LA', (800, 600))
+        processed = processors.colorspace(image, replace_alpha='#fff')
+        self.assertEqual(processed.mode, 'RGB')
+
+    def test_bw(self):
+        image = Image.new('RGB', (800, 600))
+        processed = processors.colorspace(image, bw=True)
+        self.assertEqual(processed.mode, 'L')
+
+        image = Image.new('RGBA', (800, 600))
+        processed = processors.colorspace(image, bw=True)
+        self.assertEqual(processed.mode, 'LA')
+
+        image = Image.new('L', (800, 600))
+        processed = processors.colorspace(image, bw=True)
+        self.assertEqual(processed.mode, 'L')
+
+        image = Image.new('LA', (800, 600))
+        processed = processors.colorspace(image, bw=True)
+        self.assertEqual(processed.mode, 'LA')

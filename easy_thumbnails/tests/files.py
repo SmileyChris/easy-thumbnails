@@ -1,4 +1,4 @@
-from easy_thumbnails import files
+from easy_thumbnails import files, utils
 from easy_thumbnails.tests import utils as test_utils
 from django.core.files.base import ContentFile
 from StringIO import StringIO
@@ -31,6 +31,25 @@ class FilesTest(test_utils.BaseTest):
             filename)
         self.remote_thumbnailer.thumbnail_storage = self.remote_storage
 
+        # Generate test transparent images.
+        data = StringIO()
+        Image.new('RGBA', (800, 600)).save(data, 'PNG')
+        data.seek(0)
+        image_file = ContentFile(data.read())
+        filename = self.storage.save('transparent.png', image_file)
+        self.transparent_thumbnailer = files.get_thumbnailer(self.storage,
+            filename)
+        self.transparent_thumbnailer.thumbnail_storage = self.storage
+
+        data = StringIO()
+        Image.new('LA', (800, 600)).save(data, 'PNG')
+        data.seek(0)
+        image_file = ContentFile(data.read())
+        filename = self.storage.save('transparent-greyscale.png', image_file)
+        self.transparent_greyscale_thumbnailer = files.get_thumbnailer(
+            self.storage, filename)
+        self.transparent_greyscale_thumbnailer.thumbnail_storage = self.storage
+
     def tearDown(self):
         self.storage.delete_temporary_storage()
         self.remote_storage.delete_temporary_storage()
@@ -60,3 +79,25 @@ class FilesTest(test_utils.BaseTest):
         self.assertEqual(local.tag(**{'rel': 'A&B', 'class': 'fish'}),
             '<img alt="" class="fish" height="75" rel="A&amp;B" '
             'src="%s" width="100" />' % local.url)
+
+    def test_transparent_thumbnailing(self):
+        thumb_file = self.thumbnailer.get_thumbnail(
+            {'size': (100, 100)})
+        thumb_file.seek(0)
+        thumb = Image.open(thumb_file)
+        self.assertFalse(utils.is_transparent(thumb),
+            "%s shouldn't be transparent." % thumb_file.name)
+
+        thumb_file = self.transparent_thumbnailer.get_thumbnail(
+            {'size': (100, 100)})
+        thumb_file.seek(0)
+        thumb = Image.open(thumb_file)
+        self.assertTrue(utils.is_transparent(thumb),
+            "%s should be transparent." % thumb_file.name)
+
+        thumb_file = self.transparent_greyscale_thumbnailer.get_thumbnail(
+            {'size': (100, 100)})
+        thumb_file.seek(0)
+        thumb = Image.open(thumb_file)
+        self.assertTrue(utils.is_transparent(thumb),
+            "%s should be transparent." % thumb_file.name)

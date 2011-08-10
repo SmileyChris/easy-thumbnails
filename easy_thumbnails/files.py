@@ -242,6 +242,10 @@ class Thumbnailer(File):
         self.thumbnail_storage = (thumbnail_storage or
                                   DEFAULT_THUMBNAIL_STORAGE)
 
+    def generate_source_image(self, thumbnail_options):
+        return engine.generate_source_image(self, thumbnail_options,
+                                            self.source_generators)
+
     def generate_thumbnail(self, thumbnail_options):
         """
         Return an unsaved ``ThumbnailFile`` containing a thumbnail image.
@@ -249,8 +253,7 @@ class Thumbnailer(File):
         The thumbnail image is generated using the ``thumbnail_options``
         dictionary.
         """
-        image = engine.generate_source_image(self, thumbnail_options,
-                                             self.source_generators)
+        image = self.generate_source_image(thumbnail_options)
         if image is None:
             raise exceptions.InvalidImageFormatError(
                 "The source file does not appear to be an image")
@@ -260,7 +263,7 @@ class Thumbnailer(File):
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 
         filename = self.get_thumbnail_name(thumbnail_options,
-                            transparent=self.is_transparent(thumbnail_image))
+                            transparent=utils.is_transparent(thumbnail_image))
 
         data = engine.save_image(thumbnail_image, filename=filename,
                                  quality=quality).read()
@@ -343,7 +346,7 @@ class Thumbnailer(File):
             save_thumbnail(thumbnail, self.thumbnail_storage)
             # Ensure the right thumbnail name is used based on the transparency
             # of the image.
-            filename = (self.is_transparent(thumbnail.image) and
+            filename = (utils.is_transparent(thumbnail.image) and
                         transparent_name or opaque_name)
             self.get_thumbnail_cache(filename, create=True, update=True)
 
@@ -410,10 +413,6 @@ class Thumbnailer(File):
             return 0
         except NotImplementedError:
             return None
-
-    def is_transparent(self, image):
-        return (image.mode in ['RGBA', 'LA'] or
-                (image.mode == 'P' and 'transparency' in image.info))
 
 
 class ThumbnailerFieldFile(FieldFile, Thumbnailer):
