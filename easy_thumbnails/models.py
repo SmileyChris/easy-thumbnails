@@ -55,3 +55,6 @@ class Source(File):
 
 class Thumbnail(File):
     source = models.ForeignKey(Source, related_name='thumbnails')
+
+    class Meta:
+        unique_together = (('storage_hash', 'name', 'source'),)
