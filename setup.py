@@ -24,7 +24,7 @@ setup(
     url='http://github.com/SmileyChris/easy-thumbnails',
     #download_url='',
     description='Easy thumbnails for Django',
-    long_description=read_files('README'),
+    long_description=read_files('README.rst'),
     author='Chris Beaven',
     author_email='smileychris@gmail.com',
     platforms=['any'],
