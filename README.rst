@@ -62,7 +62,8 @@ can resize the source image before it is saved::
 Lower level usage
 =================
 
-Thumbnails are generated with a ``Thumbnailer`` instance. For example::
+Thumbnails are generated with a ``Thumbnailer`` instance. Usually you'll use
+the ``get_thumbnailer`` method to generate one of these, for example::
 
     from easy_thumbnails.files import get_thumbnailer
 
@@ -70,30 +71,4 @@ Thumbnails are generated with a ``Thumbnailer`` instance. For example::
         thumbnail_options = dict(size=(100, 100), crop=True, bw=True)
         return get_thumbnailer(source).get_thumbnail(thumbnail_options)
 
-By default, ``get_thumbnail`` saves the file (using file storage). The source
-file used to instanciate the ``Thumbnailer`` must be one of the following:
-
-* ``Thumbnailer`` instance
-
-* ``FieldFile`` instance (i.e. a model instance file/image field
-  property)
-
-* ``File`` or ``Storage`` instance, and for both of these cases the
-  ``relative_name`` argument must also be provided
-
-* A string, which will be used as the relative name (the source will be
-  set to the default storage)
-
-
-The ``ThumbnailFile`` object provided makes this easy::
-
-	from easy_thumbnails import ThumbnailFile
-
-	# For an existing file in storage:
-	source = ThumbnailFile('animals/aarvark.jpg')
-	square_thumbnail(source)
-	
-	# For a new file:
-	picture = open('/home/zookeeper/pictures/my_anteater.jpg')
-	source = ThumbnailFile('animals/anteater.jpg', file=picture)
-	square_thumbnail(source)
+See the docs directory for more comprehensive usage documentation.
