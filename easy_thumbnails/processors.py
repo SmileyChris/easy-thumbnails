@@ -233,31 +233,3 @@ def filters(im, detail=False, sharpen=False, **kwargs):
     if sharpen:
         im = im.filter(ImageFilter.SHARPEN)
     return im
-
-
-def exif_orientation(im, **kwargs):
-    """
-    Rotate (and/or flip) the thumbnail to respect the image's EXIF orientation
-    data.
-    """
-    try:
-        exif = im._getexif()
-    except AttributeError:
-        exif = None
-    if exif:
-        orientation = exif.get(0x0112)
-        if orientation == 2:
-            im = im.transpose(Image.FLIP_LEFT_RIGHT)
-        elif orientation == 3:
-            im = im.rotate(180)
-        elif orientation == 4:
-            im = im.transpose(Image.FLIP_TOP_BOTTOM)
-        elif orientation == 5:
-            im = im.rotate(-90).transpose(Image.FLIP_LEFT_RIGHT)
-        elif orientation == 6:
-            im = im.rotate(-90)
-        elif orientation == 7:
-            im = im.rotate(90).transpose(Image.FLIP_LEFT_RIGHT)
-        elif orientation == 8:
-            im = im.rotate(90)
-    return im

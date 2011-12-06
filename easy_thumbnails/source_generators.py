@@ -8,6 +8,8 @@ try:
 except ImportError:
     import Image
 
+from easy_thumbnails import utils
+
 
 def pil_image(source, **options):
     """
@@ -22,4 +24,7 @@ def pil_image(source, **options):
         image = Image.open(source)
     except Exception:
         return
+    # If EXIF orientation data is present, perform any required reorientation
+    # before passing the data along the processing pipeline.
+    image = utils.exif_orientation(image)
     return image
