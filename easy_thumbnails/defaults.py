@@ -12,6 +12,7 @@ QUALITY = 85
 EXTENSION = 'jpg'
 TRANSPARENCY_EXTENSION = 'png'
 PROCESSORS = (
+    'easy_thumbnails.processors.exif_orientation',
     'easy_thumbnails.processors.colorspace',
     'easy_thumbnails.processors.autocrop',
     'easy_thumbnails.processors.scale_and_crop',
