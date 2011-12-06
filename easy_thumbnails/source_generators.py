@@ -5,9 +5,29 @@ except ImportError:
 
 try:
     from PIL import Image
+    from PIL.ExifTags import TAGS
 except ImportError:
     import Image
 
+# Constants
+EXIF_ORIENTATION_TAG = 'Orientation'
+EXIF_ORIENTATION_CODES = { 8:90, 3:180, 6:270 }
+
+
+def _get_exif_rotation(image):
+    """
+    Returns the rotation angle specified in the EXIF tags or 0 if the
+    Rotation tag is not found.
+    """
+    exif = image._getexif()
+    if exif:
+        for tag, value in exif.items():
+            decoded = TAGS.get(tag, tag)
+
+            if decoded == EXIF_ORIENTATION_TAG:
+                return EXIF_ORIENTATION_CODES.get(value, 0)
+
+    return 0
 
 def pil_image(source, **options):
     """
@@ -20,6 +40,12 @@ def pil_image(source, **options):
     source = StringIO(source.read())
     try:
         image = Image.open(source)
-    except Exception:
+
+        # If EXIF rotation data is present, perform the rotation before
+        # passing the data along the processing pipeline
+        angle = _get_exif_rotation(image)
+        if angle:
+            image = image.rotate(angle)
+    except:
         return
     return image
