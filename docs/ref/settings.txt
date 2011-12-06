@@ -128,10 +128,10 @@ THUMBNAIL_CHECK_CACHE_MISS
 	Default: ``False``
 
 	If this boolean setting is set to ``True``, and a thumbnail cannot
-    be found in the database tables, we ask the storage if it has the
-    thumbnail. If it does we add the row in the database, and we don't
-    need to generate the thumbnail.
+	be found in the database tables, we ask the storage if it has the
+	thumbnail. If it does we add the row in the database, and we don't
+	need to generate the thumbnail.
 
-    Switch this to True if your easy_thumbnails_thumbnail table has been wiped
-    but your storage still has the thumbnail files.
+	Switch this to True if your easy_thumbnails_thumbnail table has been wiped
+	but your storage still has the thumbnail files.
 

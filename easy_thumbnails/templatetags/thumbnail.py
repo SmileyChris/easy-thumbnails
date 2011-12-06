@@ -132,14 +132,14 @@ def thumbnail(parser, token):
     processing the image to a thumbnail such as ``sharpen``, ``crop`` and
     ``quality=90``.
 
-    The thumbnail tag can also place a ``ThumbnailFile`` object in the context,
+    The thumbnail tag can also place a
+    :class:`~easy_thumbnails.files.ThumbnailFile` object in the context,
     providing access to the properties of the thumbnail such as the height and
     width::
 
         {% thumbnail [source] [size] [options] as [variable] %}
 
-    When ``as [variable]`` is used, the tag does not return the absolute URL of
-    the thumbnail.
+    When ``as [variable]`` is used, the tag doesn't output anything.
 
     **Debugging**
 
