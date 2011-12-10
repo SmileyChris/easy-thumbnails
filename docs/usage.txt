@@ -100,9 +100,9 @@ For example, assuming an ``aardvark.jpg`` image exists in the default storage::
     
     thumbnailer = get_thumbnail('animals/aardvark.jpg')
     
-    thumbnail_options = {'crop': True'} 
+    thumbnail_options = {'crop': True} 
     for size in (50, 100, 250):
-        thumbnail_options.update{'size': (size, size)}
+        thumbnail_options.update({'size': (size, size)})
         thumbnailer.get_thumbnail(thumbnail_options)
 
 Non-Django file objects
