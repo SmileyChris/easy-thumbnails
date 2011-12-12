@@ -19,6 +19,8 @@ def pil_image(source, **options):
     # object, PIL may have problems with it. For example, some image types
     # require tell and seek methods that are not present on all storage
     # File objects.
+    if not source:
+        return
     source = StringIO(source.read())
     try:
         image = Image.open(source)
