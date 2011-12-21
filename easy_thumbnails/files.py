@@ -415,6 +415,12 @@ class Thumbnailer(File):
         except NotImplementedError:
             return None
 
+    def open(self, mode='rb'):
+        self.file.open(mode)
+
+    # open() doesn't alter the file's contents, but it does reset the pointer.
+    open.alters_data = True
+
 
 class ThumbnailerFieldFile(FieldFile, Thumbnailer):
     """
