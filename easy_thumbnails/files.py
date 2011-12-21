@@ -455,6 +455,8 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         if source_cache:
             source_cache.delete()
 
+    delete.alters_data = True
+
     def delete_thumbnails(self, source_cache=None):
         """
         Delete any thumbnails generated from the source image.
@@ -478,6 +480,8 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
                     deleted += 1
         return deleted
 
+    delete_thumbnails.alters_data = True
+
     def get_thumbnails(self, *args, **kwargs):
         """
         Return an iterator which returns ThumbnailFile instances.
@@ -500,6 +504,7 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
     A field file which provides some methods for generating (and returning)
     thumbnail images.
     """
+
     def save(self, name, content, *args, **kwargs):
         """
         Save the image.
