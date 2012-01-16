@@ -112,7 +112,7 @@ def exif_orientation(im):
     """
     try:
         exif = im._getexif()
-    except AttributeError:
+    except (AttributeError, KeyError):
         exif = None
     if exif:
         orientation = exif.get(0x0112)
@@ -131,3 +131,4 @@ def exif_orientation(im):
         elif orientation == 8:
             im = im.rotate(90)
     return im
+
