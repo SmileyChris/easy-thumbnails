@@ -124,6 +124,21 @@ THUMBNAIL_TRANSPARENCY_EXTENSION
 	The type of image to save thumbnails with a transparency layer (e.g. GIFs
 	or transparent PNGs).
 
+.. _setting-thumbnail_preserve_extensions:
+
+THUMBNAIL_PRESERVE_EXTENSIONS
+	Default: ``None``
+
+	To preserve specific extensions, for instance if you always want to create lossless PNG thumbnails from PNG sources, you can specify these extensions 
+	using this setting, for example::
+		
+		THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
+
+	Instead of a tuple, you can also set this to ``True`` in order to always 
+	preserve the original extension.
+
+.. _setting-thumbnail_transparency_extension:
+
 THUMBNAIL_CHECK_CACHE_MISS
 	Default: ``False``
 
