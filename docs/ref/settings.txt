@@ -134,6 +134,8 @@ THUMBNAIL_PRESERVE_EXTENSIONS
 	using this setting, for example::
 		
 		THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
+		
+	All extensions should be lowercase.
 
 	Instead of a tuple, you can also set this to ``True`` in order to always 
 	preserve the original extension.
