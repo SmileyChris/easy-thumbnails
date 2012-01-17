@@ -138,8 +138,6 @@ THUMBNAIL_PRESERVE_EXTENSIONS
 	Instead of a tuple, you can also set this to ``True`` in order to always 
 	preserve the original extension.
 
-.. _setting-thumbnail_transparency_extension:
-
 THUMBNAIL_CHECK_CACHE_MISS
 	Default: ``False``
 
