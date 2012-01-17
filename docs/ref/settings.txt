@@ -129,7 +129,8 @@ THUMBNAIL_TRANSPARENCY_EXTENSION
 THUMBNAIL_PRESERVE_EXTENSIONS
 	Default: ``None``
 
-	To preserve specific extensions, for instance if you always want to create lossless PNG thumbnails from PNG sources, you can specify these extensions 
+	To preserve specific extensions, for instance if you always want to create 
+	lossless PNG thumbnails from PNG sources, you can specify these extensions 
 	using this setting, for example::
 		
 		THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
