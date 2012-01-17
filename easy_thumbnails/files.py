@@ -286,15 +286,14 @@ class Thumbnailer(File):
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
         filename = '%s%s' % (self.thumbnail_prefix, source_filename)
-        if transparent:
+        if self.thumbnail_preserve_extensions == True or  \
+            (self.thumbnail_preserve_extensions and  \
+            source_extension.lower() in self.thumbnail_preserve_extensions):
+                extension = source_extension
+        elif transparent:
             extension = self.thumbnail_transparency_extension
         else:
-            if self.thumbnail_preserve_extensions == True or  \
-                (self.thumbnail_preserve_extensions and  \
-                source_extension.lower() in self.thumbnail_preserve_extensions):
-                    extension = source_extension
-            else:
-                extension = self.thumbnail_extension
+            extension = self.thumbnail_extension
         extension = extension or 'jpg'
 
         thumbnail_options = thumbnail_options.copy()
