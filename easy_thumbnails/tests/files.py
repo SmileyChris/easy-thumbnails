@@ -2,11 +2,12 @@ from easy_thumbnails import files, utils
 from easy_thumbnails.tests import utils as test_utils
 from django.core.files.base import ContentFile
 from StringIO import StringIO
+from django.conf import settings
 try:
     from PIL import Image
 except ImportError:
     import Image
-
+from os import path
 
 class FilesTest(test_utils.BaseTest):
     
@@ -30,6 +31,10 @@ class FilesTest(test_utils.BaseTest):
         self.remote_thumbnailer = files.get_thumbnailer(self.remote_storage,
             filename)
         self.remote_thumbnailer.thumbnail_storage = self.remote_storage
+
+        # Create another thumbnailer for extension test.
+        self.ext_thumbnailer = files.get_thumbnailer(self.storage, filename)
+        self.ext_thumbnailer.thumbnail_storage = self.storage
 
         # Generate test transparent images.
         data = StringIO()
@@ -101,3 +106,20 @@ class FilesTest(test_utils.BaseTest):
         thumb = Image.open(thumb_file)
         self.assertTrue(utils.is_transparent(thumb),
             "%s should be transparent." % thumb_file.name)
+
+    def test_extensions(self):
+        self.ext_thumbnailer.thumbnail_extension = 'png'
+        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(path.splitext(thumb.name)[1], '.png')
+
+        self.ext_thumbnailer.thumbnail_preserve_extensions = ('foo',)
+        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(path.splitext(thumb.name)[1], '.png')
+
+        self.ext_thumbnailer.thumbnail_preserve_extensions = True
+        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(path.splitext(thumb.name)[1], '.jpg')
+
+        self.ext_thumbnailer.thumbnail_preserve_extensions = ('foo', 'jpg')
+        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(path.splitext(thumb.name)[1], '.jpg')
