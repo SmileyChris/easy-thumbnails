@@ -98,7 +98,7 @@ For example, assuming an ``aardvark.jpg`` image exists in the default storage::
 
     from easy_thumbnails.files import get_thumbnailer
     
-    thumbnailer = get_thumbnail('animals/aardvark.jpg')
+    thumbnailer = get_thumbnailer('animals/aardvark.jpg')
     
     thumbnail_options = {'crop': True} 
     for size in (50, 100, 250):
