@@ -230,6 +230,7 @@ class Thumbnailer(File):
     thumbnail_prefix = utils.get_setting('PREFIX')
     thumbnail_quality = utils.get_setting('QUALITY')
     thumbnail_extension = utils.get_setting('EXTENSION')
+    thumbnail_preserve_extensions = utils.get_setting('PRESERVE_EXTENSIONS')
     thumbnail_transparency_extension = utils.get_setting(
                                                     'TRANSPARENCY_EXTENSION')
     thumbnail_check_cache_miss = utils.get_setting('CHECK_CACHE_MISS')
@@ -285,7 +286,11 @@ class Thumbnailer(File):
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
         filename = '%s%s' % (self.thumbnail_prefix, source_filename)
-        if transparent:
+        if self.thumbnail_preserve_extensions == True or  \
+            (self.thumbnail_preserve_extensions and  \
+            source_extension.lower() in self.thumbnail_preserve_extensions):
+                extension = source_extension
+        elif transparent:
             extension = self.thumbnail_transparency_extension
         else:
             extension = self.thumbnail_extension
