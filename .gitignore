@@ -1,0 +1,7 @@
+MANIFEST
+dist
+build
+docs/_build
+.tox/
+*.egg
+reports/*
