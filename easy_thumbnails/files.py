@@ -383,9 +383,9 @@ class Thumbnailer(File):
 
     def get_source_cache(self, create=False, update=False):
         modtime = self.get_source_modtime()
-        update_modified = modtime and datetime.datetime.fromtimestamp(modtime)
+        update_modified = modtime and utils.fromtimestamp(modtime)
         if update:
-            update_modified = update_modified or datetime.datetime.utcnow()
+            update_modified = update_modified or utils.now()
         return models.Source.objects.get_file(
             create=create, update_modified=update_modified,
             storage=self.source_storage, name=self.name,
@@ -393,9 +393,9 @@ class Thumbnailer(File):
 
     def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
         modtime = self.get_thumbnail_modtime(thumbnail_name)
-        update_modified = modtime and datetime.datetime.fromtimestamp(modtime)
+        update_modified = modtime and utils.fromtimestamp(modtime)
         if update:
-            update_modified = update_modified or datetime.datetime.utcnow()
+            update_modified = update_modified or utils.now()
         source = self.get_source_cache(create=True)
         return models.Thumbnail.objects.get_file(
             create=create, update_modified=update_modified,
