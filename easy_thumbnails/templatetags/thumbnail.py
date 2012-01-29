@@ -91,9 +91,10 @@ class ThumbnailNode(Node):
 
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
-        except Exception:
+        except Exception, e:
             if raise_errors:
-                raise
+                raise TemplateSyntaxError(u"Couldn't get the thumbnail %s: %s" %
+                                          (source, e))
             return self.bail_out(context)
         # Return the thumbnail file url, or put the file on the context.
         if self.context_name is None:

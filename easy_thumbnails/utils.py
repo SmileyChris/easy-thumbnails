@@ -4,10 +4,24 @@ from django.utils.hashcompat import md5_constructor
 from easy_thumbnails import defaults
 import inspect
 import math
+import datetime
 try:
     from PIL import Image
 except ImportError:
     import Image
+
+try:
+    from django.utils import timezone
+    now = timezone.now
+
+    def fromtimestamp(timestamp):
+        default_timezone = timezone.get_default_timezone()
+        dt = datetime.datetime.fromtimestamp(timestamp)
+        return timezone.make_aware(dt, default_timezone)
+
+except ImportError:
+    now = datetime.datetime.now
+    fromtimestamp = datetime.datetime.fromtimestamp
 
 
 def image_entropy(im):
