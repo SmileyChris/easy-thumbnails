@@ -37,6 +37,11 @@ instance.
   ``[width]x[height]`` format or a tuple containing two integers):
   ``{% thumbnail person.photo size_var %}``.
 
+* you can resize and keep the original image ratio by specifying a
+  0 width or 0 height (for example,
+  ``{% thumbnail person.photo 100x0 %}`` will create a non-cropped 
+  thumbnail which is 100 pixels wide)
+
 *options* are a space separated list of options which are used when processing
 the image to a thumbnail such as ``sharpen``, ``crop`` and ``quality=90``.
 
