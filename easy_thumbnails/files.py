@@ -176,6 +176,8 @@ class ThumbnailFile(ImageFieldFile):
         return self._file
 
     def _set_file(self, value):
+        if value is None:
+            return
         if not isinstance(value, File):
             value = File(value)
         self._file = value
