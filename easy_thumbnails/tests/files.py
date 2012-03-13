@@ -1,33 +1,26 @@
+from os import path
+
 from easy_thumbnails import files, utils
 from easy_thumbnails.tests import utils as test_utils
-from django.core.files.base import ContentFile
-from StringIO import StringIO
-from django.conf import settings
 try:
     from PIL import Image
 except ImportError:
     import Image
-from os import path
+
 
 class FilesTest(test_utils.BaseTest):
-    
+
     def setUp(self):
         super(FilesTest, self).setUp()
         self.storage = test_utils.TemporaryStorage()
         self.remote_storage = test_utils.FakeRemoteStorage()
 
-        # Generate a test image.
-        data = StringIO()
-        Image.new('RGB', (800, 600)).save(data, 'JPEG')
-        data.seek(0)
-        image_file = ContentFile(data.read())
-
-        # Save the test image in both storages.
-        filename = self.storage.save('test.jpg', image_file)
+        # Save a test image in both storages.
+        filename = self.create_image(self.storage, 'test.jpg')
         self.thumbnailer = files.get_thumbnailer(self.storage, filename)
         self.thumbnailer.thumbnail_storage = self.storage
-        
-        filename = self.remote_storage.save('test.jpg', image_file)
+
+        filename = self.create_image(self.remote_storage, 'test.jpg')
         self.remote_thumbnailer = files.get_thumbnailer(self.remote_storage,
             filename)
         self.remote_thumbnailer.thumbnail_storage = self.remote_storage
@@ -37,20 +30,14 @@ class FilesTest(test_utils.BaseTest):
         self.ext_thumbnailer.thumbnail_storage = self.storage
 
         # Generate test transparent images.
-        data = StringIO()
-        Image.new('RGBA', (800, 600)).save(data, 'PNG')
-        data.seek(0)
-        image_file = ContentFile(data.read())
-        filename = self.storage.save('transparent.png', image_file)
+        filename = self.create_image(self.storage, 'transparent.png',
+            image_mode='RGBA', image_format='PNG')
         self.transparent_thumbnailer = files.get_thumbnailer(self.storage,
             filename)
         self.transparent_thumbnailer.thumbnail_storage = self.storage
 
-        data = StringIO()
-        Image.new('LA', (800, 600)).save(data, 'PNG')
-        data.seek(0)
-        image_file = ContentFile(data.read())
-        filename = self.storage.save('transparent-greyscale.png', image_file)
+        filename = self.create_image(self.storage, 'transparent-greyscale.png',
+            image_mode='LA', image_format='PNG')
         self.transparent_greyscale_thumbnailer = files.get_thumbnailer(
             self.storage, filename)
         self.transparent_greyscale_thumbnailer.thumbnail_storage = self.storage
@@ -73,7 +60,7 @@ class FilesTest(test_utils.BaseTest):
         self.assertEqual(remote.tag(use_size=False), '<img alt="" '
             'src="%s" />' % remote.url)
 
-        # Thumbnails on remote storage don't get dimensions...  
+        # Thumbnails on remote storage don't get dimensions...
         self.assertEqual(remote.tag(), '<img alt="" '
             'src="%s" />' % remote.url)
         # ...unless explicitly requested.
