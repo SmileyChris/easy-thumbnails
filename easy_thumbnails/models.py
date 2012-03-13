@@ -1,6 +1,5 @@
 from django.db import models
 from easy_thumbnails import utils
-import datetime
 
 
 class FileManager(models.Manager):

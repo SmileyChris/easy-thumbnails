@@ -5,7 +5,6 @@ from django.db.models.fields.files import ImageFieldFile, FieldFile
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from easy_thumbnails import engine, models, utils, exceptions
-import datetime
 import os
 from django.utils.http import urlquote
 
