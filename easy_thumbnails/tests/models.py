@@ -1,17 +1,10 @@
 """Tests for the models module.
 """
 
-from StringIO import StringIO
-
-from django.core.files.base import ContentFile
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-
 from easy_thumbnails import utils
 from easy_thumbnails.models import Thumbnail, Source
 from easy_thumbnails.tests import utils as test_utils
+
 
 class FileManagerTest(test_utils.BaseTest):
     """Test for FileManager"""
@@ -26,11 +19,7 @@ class FileManagerTest(test_utils.BaseTest):
                 storage_hash=self.storage_hash)
 
         # Generate a test image, save it.
-        data = StringIO()
-        Image.new('RGB', (800, 600)).save(data, 'JPEG')
-        data.seek(0)
-        image_file = ContentFile(data.read())
-        self.filename = self.storage.save('test.jpg', image_file)
+        self.filename = self.create_image(self.storage, 'test.jpg')
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
@@ -82,4 +71,3 @@ class FileManagerTest(test_utils.BaseTest):
             Thumbnail.objects.get(name=self.filename)
         except Thumbnail.DoesNotExist:
             self.fail('Thumb should exist now')
-

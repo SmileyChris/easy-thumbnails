@@ -1,28 +1,22 @@
 from django.conf import settings
-from django.core.files.base import ContentFile
 from django.template import Template, Context, TemplateSyntaxError
-from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
 try:
     from PIL import Image
 except ImportError:
     import Image
-from StringIO import StringIO
+
+from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
 from easy_thumbnails.files import get_thumbnailer
 
 
 class ThumbnailTagTest(BaseTest):
-    RELATIVE_PIC_NAME = 'test.jpg'
     restore_settings = ['THUMBNAIL_DEBUG', 'TEMPLATE_DEBUG']
 
     def setUp(self):
         BaseTest.setUp(self)
         self.storage = TemporaryStorage()
         # Save a test image.
-        data = StringIO()
-        Image.new('RGB', (800, 600)).save(data, 'JPEG')
-        data.seek(0)
-        image_file = ContentFile(data.read())
-        self.storage.save(self.RELATIVE_PIC_NAME, image_file)
+        self.filename = self.create_image(self.storage, 'test.jpg')
 
         # Required so that IOError's get wrapped as TemplateSyntaxError
         settings.TEMPLATE_DEBUG = True
@@ -32,11 +26,11 @@ class ThumbnailTagTest(BaseTest):
         BaseTest.tearDown(self)
 
     def render_template(self, source):
-        source_image = get_thumbnailer(self.storage, self.RELATIVE_PIC_NAME)
+        source_image = get_thumbnailer(self.storage, self.filename)
         source_image.thumbnail_storage = self.storage
         context = Context({
             'source': source_image,
-            'invalid_source': 'not%s' % self.RELATIVE_PIC_NAME,
+            'invalid_source': 'not%s' % self.filename,
             'size': (90, 100),
             'invalid_size': (90, 'fish'),
             'strsize': '80x90',
@@ -48,12 +42,12 @@ class ThumbnailTagTest(BaseTest):
     def verify_thumbnail(self, expected_size, options, source_filename=None,
                          transparent=False):
         if source_filename is None:
-            source_filename = self.RELATIVE_PIC_NAME
+            source_filename = self.filename
         self.assert_(isinstance(options, dict))
         # Verify that the thumbnail file exists
         expected_filename = get_thumbnailer(self.storage, source_filename)\
             .get_thumbnail_name(options, transparent=transparent)
-        
+
         self.assert_(self.storage.exists(expected_filename),
                      'Thumbnail file %r not found' % expected_filename)
 

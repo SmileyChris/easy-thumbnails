@@ -1,15 +1,11 @@
 import os
-from django.db import models
+
 from django.core.files.base import ContentFile
+from django.db import models
+
 from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
 from easy_thumbnails.fields import ThumbnailerField
 from easy_thumbnails.exceptions import InvalidImageFormatError
-
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-from StringIO import StringIO
 
 
 class TestModel(models.Model):
@@ -21,11 +17,7 @@ class ThumbnailerFieldTest(BaseTest):
         BaseTest.setUp(self)
         self.storage = TemporaryStorage()
         # Save a test image.
-        data = StringIO()
-        Image.new('RGB', (800, 600)).save(data, 'JPEG')
-        data.seek(0)
-        image_file = ContentFile(data.read())
-        self.storage.save('avatars/avatar.jpg', image_file)
+        self.create_image(self.storage, 'avatars/avatar.jpg')
         # Set the test model to use the current temporary storage.
         TestModel._meta.get_field('avatar').storage = self.storage
         TestModel._meta.get_field('avatar').thumbnail_storage = self.storage

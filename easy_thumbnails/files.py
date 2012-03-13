@@ -5,7 +5,6 @@ from django.db.models.fields.files import ImageFieldFile, FieldFile
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from easy_thumbnails import engine, models, utils, exceptions
-import datetime
 import os
 from django.utils.http import urlquote
 
@@ -23,20 +22,24 @@ def get_thumbnailer(obj, relative_name=None):
         * ``FieldFile`` instance (i.e. a model instance file/image field
           property).
 
-        * ``File`` or ``Storage`` instance, and for both of these cases the
-          ``relative_name`` argument must also be provided
-
         * A string, which will be used as the relative name (the source will be
-          set to the default storage)
+          set to the default storage).
 
-    For rarer needed cases, it can also be one of the following:
+        * ``Storage`` instance - the ``relative_name`` argument must also be
+          provided.
 
-        * ``Thumbnailer`` instance (the instance is just returned with no
-          processing)
+    Or it could be::
 
-        * An object with a ``easy_thumbnails_thumbnailer`` attribute (the
-          attribute is simply returned under the assumption it is a Thumbnailer
-          instance)
+        * A file-like instance - the ``relative_name`` argument must also be
+          provided.
+
+          In this case, the thumbnailer won't use or create a cached reference
+          to the thumbnail (i.e. a new thumbnail will be created for every
+          :meth:`Thumbnailer.get_thumbnail` call).
+
+    If ``obj`` is a ``Thumbnailer`` instance, it will just be returned. If it's
+    an object with an ``easy_thumbnails_thumbnailer`` then the attribute is
+    simply returned under the assumption it is a Thumbnailer instance)
     """
     if hasattr(obj, 'easy_thumbnails_thumbnailer'):
         return obj.easy_thumbnails_thumbnailer
@@ -47,27 +50,24 @@ def get_thumbnailer(obj, relative_name=None):
             relative_name = obj.name
         return ThumbnailerFieldFile(obj.instance, obj.field, relative_name)
 
-    source_image = None
     source_storage = None
 
     if isinstance(obj, basestring):
-        obj, relative_name = default_storage, obj
+        relative_name = obj
+        obj = None
 
     if not relative_name:
         raise ValueError("If object is not a FieldFile or Thumbnailer "
             "instance, the relative name must be provided")
 
     if isinstance(obj, File):
-        source_image = obj.file
-    elif isinstance(obj, Storage) or obj == default_storage:
-        source_image = obj.open(relative_name)
+        obj = obj.file
+    if isinstance(obj, Storage) or obj == default_storage:
         source_storage = obj
-    else:
-        raise TypeError("Unknown object type, expected a Thumbnailer, "
-            "FieldFile, File or Storage instance.")
+        obj = None
 
-    return Thumbnailer(file=source_image, name=relative_name,
-        source_storage=source_storage)
+    return Thumbnailer(file=obj, name=relative_name,
+        source_storage=source_storage, remote_source=obj is not None)
 
 
 def save_thumbnail(thumbnail_file, storage):
@@ -237,12 +237,13 @@ class Thumbnailer(File):
     source_generators = None
     thumbnail_processors = None
 
-    def __init__(self, file, name=None, source_storage=None,
-                 thumbnail_storage=None, *args, **kwargs):
+    def __init__(self, file=None, name=None, source_storage=None,
+            thumbnail_storage=None, remote_source=False, *args, **kwargs):
         super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
         self.source_storage = source_storage or default_storage
         self.thumbnail_storage = (thumbnail_storage or
-                                  DEFAULT_THUMBNAIL_STORAGE)
+            DEFAULT_THUMBNAIL_STORAGE)
+        self.remote_source = remote_source
 
     def generate_source_image(self, thumbnail_options):
         return engine.generate_source_image(self, thumbnail_options,
@@ -367,6 +368,8 @@ class Thumbnailer(File):
         file modification times are used. Otherwise the database cached
         modification times are used.
         """
+        if self.remote_source:
+            return False
         # Try to use the local file modification times first.
         source_modtime = self.get_source_modtime()
         thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
@@ -382,6 +385,8 @@ class Thumbnailer(File):
         return thumbnail and source.modified <= thumbnail.modified
 
     def get_source_cache(self, create=False, update=False):
+        if self.remote_source:
+            return None
         modtime = self.get_source_modtime()
         update_modified = modtime and utils.fromtimestamp(modtime)
         if update:
@@ -392,6 +397,8 @@ class Thumbnailer(File):
             check_cache_miss=self.thumbnail_check_cache_miss)
 
     def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
+        if self.remote_source:
+            return None
         modtime = self.get_thumbnail_modtime(thumbnail_name)
         update_modified = modtime and utils.fromtimestamp(modtime)
         if update:
@@ -420,8 +427,12 @@ class Thumbnailer(File):
         except NotImplementedError:
             return None
 
-    def open(self, mode='rb'):
-        self.file.open(mode)
+    def open(self, mode=None):
+        if self.closed:
+            self.file = self.source_storage.open(self.name,
+                mode or self.mode or 'rb')
+        else:
+            self.seek(0)
 
     # open() doesn't alter the file's contents, but it does reset the pointer.
     open.alters_data = True

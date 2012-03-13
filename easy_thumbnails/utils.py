@@ -145,4 +145,3 @@ def exif_orientation(im):
         elif orientation == 8:
             im = im.rotate(90)
     return im
-

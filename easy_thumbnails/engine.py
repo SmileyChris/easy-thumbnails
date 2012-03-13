@@ -52,9 +52,9 @@ def save_image(image, destination=None, filename=None, **options):
     return destination
 
 
-def generate_source_image(source, processor_options, generators=None):
+def generate_source_image(source_file, processor_options, generators=None):
     """
-    Processes a source file through a series of source generators, stopping
+    Processes a source ``File`` through a series of source generators, stopping
     once a generator returns an image.
 
     The return value is this image instance or ``None`` if no generators
@@ -63,19 +63,20 @@ def generate_source_image(source, processor_options, generators=None):
     If the source file cannot be opened, it will be set to ``None`` and still
     passed to the generators.
     """
-    was_closed = source.closed
-    try:
-        source.open()
-    except Exception:
-        source = None
-        was_closed = False
+    was_closed = source_file.closed
     if generators is None:
         generators = SOURCE_GENERATORS
     try:
+        source = source_file
+        try:
+            source.open()
+        except Exception:
+            source = None
+            was_closed = False
         for generator in generators:
             image = generator(source, **processor_options)
             if image:
                 return image
     finally:
         if was_closed:
-            source.close()
+            source_file.close()

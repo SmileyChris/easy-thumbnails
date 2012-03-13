@@ -1,9 +1,20 @@
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-from django.test import TestCase
-from easy_thumbnails import defaults
 import shutil
 import tempfile
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
+from django.test import TestCase
+try:
+    from PIL import Image
+except ImportError:
+    import Image
+
+from easy_thumbnails import defaults
 
 
 class TemporaryStorage(FileSystemStorage):
@@ -110,3 +121,14 @@ class BaseTest(TestCase):
             setattr(settings, setting, value)
         elif hasattr(settings, setting):
             delattr(settings._wrapped, setting)
+
+    def create_image(self, storage, filename, size=(800, 600),
+            image_mode='RGB', image_format='JPEG'):
+        """
+        Generate a test image, returning the filename that it was saved as.
+        """
+        data = StringIO()
+        Image.new(image_mode, size).save(data, image_format)
+        data.seek(0)
+        image_file = ContentFile(data.read())
+        return storage.save(filename, image_file)
