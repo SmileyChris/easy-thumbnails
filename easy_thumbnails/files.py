@@ -65,8 +65,8 @@ def get_thumbnailer(obj, relative_name=None):
         raise TypeError("Unknown object type, expected a Thumbnailer, "
             "FieldFile, File or Storage instance.")
 
-    return Thumbnailer(file=source_image, name=relative_name,
-        source_storage=source_storage)
+    return Thumbnailer(file=source, name=relative_name, source_storage=storage,
+        remote_source=remote_source)
 
 
 def save_thumbnail(thumbnail_file, storage):
@@ -236,12 +236,13 @@ class Thumbnailer(File):
     source_generators = None
     thumbnail_processors = None
 
-    def __init__(self, file, name=None, source_storage=None,
-                 thumbnail_storage=None, *args, **kwargs):
+    def __init__(self, file=None, name=None, source_storage=None,
+            thumbnail_storage=None, remote_source=False, *args, **kwargs):
         super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
         self.source_storage = source_storage or default_storage
         self.thumbnail_storage = (thumbnail_storage or
-                                  DEFAULT_THUMBNAIL_STORAGE)
+            DEFAULT_THUMBNAIL_STORAGE)
+        self.remote_source = remote_source
 
     def generate_source_image(self, thumbnail_options):
         return engine.generate_source_image(self, thumbnail_options,
@@ -366,6 +367,8 @@ class Thumbnailer(File):
         file modification times are used. Otherwise the database cached
         modification times are used.
         """
+        if self.remote_source:
+            return False
         # Try to use the local file modification times first.
         source_modtime = self.get_source_modtime()
         thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
@@ -381,6 +384,8 @@ class Thumbnailer(File):
         return thumbnail and source.modified <= thumbnail.modified
 
     def get_source_cache(self, create=False, update=False):
+        if self.remote_source:
+            return None
         modtime = self.get_source_modtime()
         update_modified = modtime and utils.fromtimestamp(modtime)
         if update:
@@ -391,6 +396,8 @@ class Thumbnailer(File):
             check_cache_miss=self.thumbnail_check_cache_miss)
 
     def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
+        if self.remote_source:
+            return None
         modtime = self.get_thumbnail_modtime(thumbnail_name)
         update_modified = modtime and utils.fromtimestamp(modtime)
         if update:
