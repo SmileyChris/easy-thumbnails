@@ -10,7 +10,7 @@ except ImportError:
     import ImageChops
 
 from easy_thumbnails import source_generators
-from unittest import TestCase
+from easy_thumbnails.tests import utils as test_utils
 
 EXIF_REFERENCE = '/9j/4AAQSkZJRgABAQEASABIAAD/4QAiRXhpZgAASUkqAAgAAAABABIBAwABAAAAAQAAAAAAAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH//gAdQ3JlYXRlZCB3aXRoIEdJTVAgb24gYSBNYWMA/8AACwgAHgAeAQERAP/EABgAAAMBAQAAAAAAAAAAAAAAAAAICgkL/8QAPhAAAAIGBgQGEwAAAAAAAAAABxYABAUGFRcICRMUGCUDChkaIyc3ZoinJDQ1OUVHSVdYZ2imqLjI1tfm5//aAAgBAQAAPwC/hBBBIA9tpWdekz1M0ffxQlftVwNon0jKCYGDKMrzHESXxmaY3jgrvO9ES8MQguqx8ndVksNgqdzYLDZah2Ay1W8XW9LVuu6dYWNMU5xtE8HJXS4eYuGM7RnJXea98hBRh3d5ktS73eKL3atha2/D2tlobNAMbVJ3zm+5gffaiKruy/tsfDd/e0QAbdYb2CInvNVN4QsVuFKC8fs/5Fn2ejvMmkpyVyUGIrFacRL5R3jjZcMeUReBMt/6sus03i6dnEng7wdy38ZGIOYuIM+8wgQKJRkhznj5n8CwXNtVNmX67Orf99TVROQLrR3f16c3Rm+Tyj6m/wBqMflRehN9XCX+J//Z'
 EXIF_ORIENTATION = {
@@ -39,14 +39,24 @@ def image_from_b64(data):
     return Image.open(StringIO(data.decode('base64')))
 
 
-class PilImageTest(TestCase):
+class PilImageTest(test_utils.BaseTest):
 
     def test_not_image(self):
         """
-        Non-readable images are passed silently.
+        Non-images are passed silently.
         """
         self.assertEqual(source_generators.pil_image(StringIO('not an image')),
             None)
+
+    def test_nearly_image(self):
+        """
+        Broken images are passed silently.
+        """
+        data = self.create_image(None, None)
+        trunc_data = StringIO()
+        trunc_data.write(data.read()[:-10])
+        trunc_data.seek(0)
+        self.assertEqual(source_generators.pil_image(data), None)
 
     def test_exif_orientation(self):
         """
