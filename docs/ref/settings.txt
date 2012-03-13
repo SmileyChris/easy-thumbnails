@@ -150,4 +150,3 @@ THUMBNAIL_CHECK_CACHE_MISS
 
 	Switch this to True if your easy_thumbnails_thumbnail table has been wiped
 	but your storage still has the thumbnail files.
-

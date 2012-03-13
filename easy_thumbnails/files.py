@@ -22,20 +22,24 @@ def get_thumbnailer(obj, relative_name=None):
         * ``FieldFile`` instance (i.e. a model instance file/image field
           property).
 
-        * ``File`` or ``Storage`` instance, and for both of these cases the
-          ``relative_name`` argument must also be provided
-
         * A string, which will be used as the relative name (the source will be
-          set to the default storage)
+          set to the default storage).
 
-    For rarer needed cases, it can also be one of the following:
+        * ``Storage`` instance - the ``relative_name`` argument must also be
+          provided.
 
-        * ``Thumbnailer`` instance (the instance is just returned with no
-          processing)
+    Or it could be::
 
-        * An object with a ``easy_thumbnails_thumbnailer`` attribute (the
-          attribute is simply returned under the assumption it is a Thumbnailer
-          instance)
+        * A file-like instance - the ``relative_name`` argument must also be
+          provided.
+
+          In this case, the thumbnailer won't use or create a cached reference
+          to the thumbnail (i.e. a new thumbnail will be created for every
+          :meth:`Thumbnailer.get_thumbnail` call).
+
+    If ``obj`` is a ``Thumbnailer`` instance, it will just be returned. If it's
+    an object with an ``easy_thumbnails_thumbnailer`` then the attribute is
+    simply returned under the assumption it is a Thumbnailer instance)
     """
     if hasattr(obj, 'easy_thumbnails_thumbnailer'):
         return obj.easy_thumbnails_thumbnailer
@@ -46,27 +50,24 @@ def get_thumbnailer(obj, relative_name=None):
             relative_name = obj.name
         return ThumbnailerFieldFile(obj.instance, obj.field, relative_name)
 
-    source_image = None
     source_storage = None
 
     if isinstance(obj, basestring):
-        obj, relative_name = default_storage, obj
+        relative_name = obj
+        obj = None
 
     if not relative_name:
         raise ValueError("If object is not a FieldFile or Thumbnailer "
             "instance, the relative name must be provided")
 
     if isinstance(obj, File):
-        source_image = obj.file
-    elif isinstance(obj, Storage) or obj == default_storage:
-        source_image = obj.open(relative_name)
+        obj = obj.file
+    if isinstance(obj, Storage) or obj == default_storage:
         source_storage = obj
-    else:
-        raise TypeError("Unknown object type, expected a Thumbnailer, "
-            "FieldFile, File or Storage instance.")
+        obj = None
 
-    return Thumbnailer(file=source, name=relative_name, source_storage=storage,
-        remote_source=remote_source)
+    return Thumbnailer(file=obj, name=relative_name,
+        source_storage=source_storage, remote_source=obj is not None)
 
 
 def save_thumbnail(thumbnail_file, storage):
