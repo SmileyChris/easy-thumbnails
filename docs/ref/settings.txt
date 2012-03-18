@@ -59,10 +59,10 @@ THUMBNAIL_SUBDIR
 	Save thumbnail images to a sub-directory relative to the source image.
 
 	For example, using the ``{% thumbnail "photos/1.jpg" 150x150 %}`` tag with
-	a ``THUMBNAIL_SUBDIR`` of ``'thumbs'`` would result in the following
+	a ``THUMBNAIL_SUBDIR`` of ``'easy_thumbnails'`` would result in the following
 	thumbnail filename::
 
-		MEDIA_ROOT + 'photos/thumbs/1_jpg_150x150_q85.jpg'
+		MEDIA_ROOT + 'photos/easy_thumbnails/1_jpg_150x150_q85.jpg'
 
 THUMBNAIL_PREFIX
 	Default: ``''``

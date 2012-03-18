@@ -50,5 +50,13 @@ In your Django project's settings module, add easy-thumbnails to your
         'easy_thumbnails',
     )
 
+Next create the two tables in your database that are required by running::
+
+	$  python manage.py syncdb
+	...
+	Creating table easy_thumbnails_source
+	Creating table easy_thumbnails_thumbnail
+	...
+	
 You may also want to set up some :doc:`easy-thumbnails related settings
 <ref/settings>`.

@@ -526,13 +526,34 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
         Save the image.
 
         The image will be resized down using a ``ThumbnailField`` if
-        ``resize_source`` (a dictionary of thumbnail options) is provided by
+        ``process_source`` (a dictionary of thumbnail options) is provided by
         the field.
         """
-        options = getattr(self.field, 'resize_source', None)
+        options = getattr(self.field, 'process_source', None)
+        #self.alternatives = getattr(self.field, 'alternatives', None)
         if options:
             if not 'quality' in options:
                 options['quality'] = self.thumbnail_quality
             content = Thumbnailer(content).generate_thumbnail(options)
+        #if alternatives:
+        #    for alternative in self.alternatvies:
+        #        if not 'quality' in options:
+        #            options['quality'] = self.thumbnail_quality
+        #        Thumbnailer(content).generate_thumbnail(options)
+         
         super(ThumbnailerImageFieldFile, self).save(name, content, *args,
                                                     **kwargs)
+    def __getattr__(self, attribute):
+        """
+        Hooks  or processes and caches the requested image alternative.
+        """
+        if not self.__dict__.has_key(attribute):
+            # Proceed to alternative image generation only if the attribute
+            # exists in specified  alternatives settings
+            if self.field.alternatives.has_key(attribute):
+                # Check thumbnail exists and generate it if needed
+                processing_opts = self.field.alternatives[attribute]
+                #thumb = ThumbnailerImageFieldFile(instance=self.instance, field=self.field, name=self.name)
+                thumb =  get_thumbnailer(self.name).get_thumbnail(processing_opts)
+                setattr(self, attribute, thumb)
+        return self.__dict__[attribute]
