@@ -1,9 +1,12 @@
+import re
+
 from django.template import Library, Node, VariableDoesNotExist, \
     TemplateSyntaxError
-from easy_thumbnails import utils
-from easy_thumbnails.files import get_thumbnailer
 from django.utils.html import escape
-import re
+
+from easy_thumbnails import utils
+from easy_thumbnails.conf import settings
+from easy_thumbnails.files import get_thumbnailer
 
 register = Library()
 
@@ -41,7 +44,7 @@ class ThumbnailNode(Node):
     def render(self, context):
         # Note that this isn't a global constant because we need to change the
         # value for tests.
-        raise_errors = utils.get_setting('DEBUG')
+        raise_errors = settings.THUMBNAIL_DEBUG
         # Get the source file.
         try:
             source = self.source_var.resolve(context)

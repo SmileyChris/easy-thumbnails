@@ -1,8 +1,8 @@
-from django.conf import settings
 from django.db import models
 
 from easy_thumbnails import files, fields
 from easy_thumbnails.alias import aliases
+from easy_thumbnails.conf import settings
 from easy_thumbnails.tests import utils
 
 

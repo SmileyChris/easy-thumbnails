@@ -1,4 +1,4 @@
-from easy_thumbnails.utils import get_setting
+from easy_thumbnails.conf import settings
 
 
 class Aliases(object):
@@ -22,7 +22,7 @@ class Aliases(object):
         """
         Populate the aliases from the ``THUMBNAIL_ALIASES`` setting.
         """
-        settings_aliases = get_setting('ALIASES')
+        settings_aliases = settings.THUMBNAIL_ALIASES
         if settings_aliases:
             for target, aliases in settings_aliases.items():
                 target_aliases = self._aliases.setdefault(target, {})

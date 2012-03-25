@@ -1,7 +1,7 @@
-from django.conf import settings
-from easy_thumbnails.utils import get_setting
 import os
 import re
+
+from easy_thumbnails.conf import settings
 
 re_thumbnail_file = re.compile(r'(?P<source_filename>.+)_(?P<x>\d+)x(?P<y>\d+)'
                                r'(?:_(?P<options>\w+))?_q(?P<quality>\d+)'
@@ -16,9 +16,9 @@ def all_thumbnails(path, recursive=True, prefix=None, subdir=None):
     Each value is a list of dictionaries as explained in `thumbnails_for_file`.
     """
     if prefix is None:
-        prefix = get_setting('PREFIX')
+        prefix = settings.THUMBNAIL_PREFIX
     if subdir is None:
-        subdir = get_setting('SUBDIR')
+        subdir = settings.THUMBNAIL_SUBDIR
     thumbnail_files = {}
     if not path.endswith('/'):
         path = '%s/' % path
@@ -77,11 +77,11 @@ def thumbnails_for_file(relative_source_path, root=None, basedir=None,
     if root is None:
         root = settings.MEDIA_ROOT
     if prefix is None:
-        prefix = get_setting('PREFIX')
+        prefix = settings.THUMBNAIL_PREFIX
     if subdir is None:
-        subdir = get_setting('SUBDIR')
+        subdir = settings.THUMBNAIL_SUBDIR
     if basedir is None:
-        basedir = get_setting('BASEDIR')
+        basedir = settings.THUMBNAIL_BASEDIR
     source_dir, filename = os.path.split(relative_source_path)
     thumbs_path = os.path.join(root, basedir, source_dir, subdir)
     if not os.path.isdir(thumbs_path):

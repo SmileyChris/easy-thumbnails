@@ -1,10 +1,9 @@
-from django.conf import settings
-from django.utils.functional import LazyObject
-from django.utils.hashcompat import md5_constructor
-from easy_thumbnails import defaults
 import inspect
 import math
 import datetime
+
+from django.utils.functional import LazyObject
+from django.utils.hashcompat import md5_constructor
 try:
     from PIL import Image
 except ImportError:
@@ -22,6 +21,8 @@ try:
 except ImportError:
     now = datetime.datetime.now
     fromtimestamp = datetime.datetime.fromtimestamp
+
+from easy_thumbnails.conf import settings
 
 
 def image_entropy(im):
@@ -56,29 +57,15 @@ def valid_processor_options(processors=None):
     (and/or source generators)
     """
     if processors is None:
-        processors = [dynamic_import(p) for p in get_setting('PROCESSORS') +
-                      get_setting('SOURCE_GENERATORS')]
+        processors = [dynamic_import(p) for p in
+            settings.THUMBNAIL_PROCESSORS +
+            settings.THUMBNAIL_SOURCE_GENERATORS]
     valid_options = set(['size', 'quality'])
     for processor in processors:
         args = inspect.getargspec(processor)[0]
         # Add all arguments apart from the first (the source image).
         valid_options.update(args[1:])
     return list(valid_options)
-
-
-def get_setting(setting, override=None):
-    """
-    Get a thumbnail setting from Django settings module, falling back to the
-    default.
-
-    If override is not None, it will be used instead of the setting.
-    """
-    if override is not None:
-        return override
-    if hasattr(settings, 'THUMBNAIL_%s' % setting):
-        return getattr(settings, 'THUMBNAIL_%s' % setting)
-    else:
-        return getattr(defaults, setting)
 
 
 def is_storage_local(storage):

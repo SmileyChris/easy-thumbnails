@@ -10,10 +10,11 @@ from django.utils.http import urlquote
 
 from easy_thumbnails import engine, models, utils, exceptions
 from easy_thumbnails.alias import aliases
+from easy_thumbnails.conf import settings
 
 
 DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
-                                        utils.get_setting('DEFAULT_STORAGE'))()
+    settings.THUMBNAIL_DEFAULT_STORAGE)()
 
 
 def get_thumbnailer(obj, relative_name=None):
@@ -228,15 +229,15 @@ class Thumbnailer(File):
         * source_generators
         * thumbnail_processors
     """
-    thumbnail_basedir = utils.get_setting('BASEDIR')
-    thumbnail_subdir = utils.get_setting('SUBDIR')
-    thumbnail_prefix = utils.get_setting('PREFIX')
-    thumbnail_quality = utils.get_setting('QUALITY')
-    thumbnail_extension = utils.get_setting('EXTENSION')
-    thumbnail_preserve_extensions = utils.get_setting('PRESERVE_EXTENSIONS')
-    thumbnail_transparency_extension = utils.get_setting(
-                                                    'TRANSPARENCY_EXTENSION')
-    thumbnail_check_cache_miss = utils.get_setting('CHECK_CACHE_MISS')
+    thumbnail_basedir = settings.THUMBNAIL_BASEDIR
+    thumbnail_subdir = settings.THUMBNAIL_SUBDIR
+    thumbnail_prefix = settings.THUMBNAIL_PREFIX
+    thumbnail_quality = settings.THUMBNAIL_QUALITY
+    thumbnail_extension = settings.THUMBNAIL_EXTENSION
+    thumbnail_preserve_extensions = settings.THUMBNAIL_PRESERVE_EXTENSIONS
+    thumbnail_transparency_extension = \
+        settings.THUMBNAIL_TRANSPARENCY_EXTENSION
+    thumbnail_check_cache_miss = settings.THUMBNAIL_CHECK_CACHE_MISS
     source_generators = None
     thumbnail_processors = None
 

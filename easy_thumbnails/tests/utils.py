@@ -5,7 +5,6 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
@@ -14,7 +13,7 @@ try:
 except ImportError:
     import Image
 
-from easy_thumbnails import defaults
+from easy_thumbnails.conf import settings
 
 
 class TemporaryStorage(FileSystemStorage):
