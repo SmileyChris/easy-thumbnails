@@ -20,7 +20,6 @@ def split_args(args):
 
     An argument looks like ``crop``, ``crop="some option"`` or ``crop=my_var``.
     Arguments which provide no value get a value of ``True``.
-
     """
     args_dict = {}
     for arg in args:
@@ -197,4 +196,43 @@ def thumbnail(parser, token):
     return ThumbnailNode(source_var, opts=opts, context_name=context_name)
 
 
+def thumbnailer(source):
+    """
+    Creates a thumbnailer from a ``FileFile``.
+
+    Example usage::
+
+        {% with photo=person.photo|thumbnailer %}
+        {% if photo %}
+            <a href="{{ photo.large.url }}">
+                {{ photo.square.tag }}
+            </a>
+        {% else %}
+            <img href="{% static 'template/fallback.png' %}" alt="" />
+        {% endif %}
+        {% endwith %}
+    """
+    return get_thumbnailer(source)
+
+
+def thumbnail_url(source, alias):
+    """
+    Return the thumbnail url for a source file using an aliased set of
+    thumbnail options.
+
+    If no matching alias is found, returns an empty string.
+
+    Example usage::
+
+        <img href="{{ person.photo|thumbnail_url:'small' }}" alt="">
+    """
+    try:
+        thumb = get_thumbnailer(source)[alias]
+    except Exception:
+        return ''
+    return thumb.url
+
+
 register.tag(thumbnail)
+register.filter(thumbnailer)
+register.filter(thumbnail_url)
