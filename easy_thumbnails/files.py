@@ -2,11 +2,14 @@ from django.core.files.base import File, ContentFile
 from django.core.files.storage import get_storage_class, default_storage, \
     Storage
 from django.db.models.fields.files import ImageFieldFile, FieldFile
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
-from easy_thumbnails import engine, models, utils, exceptions
 import os
+
+from django.utils.safestring import mark_safe
+from django.utils.html import escape
 from django.utils.http import urlquote
+
+from easy_thumbnails import engine, models, utils, exceptions
+from easy_thumbnails.alias import aliases
 
 
 DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
@@ -244,6 +247,17 @@ class Thumbnailer(File):
         self.thumbnail_storage = (thumbnail_storage or
             DEFAULT_THUMBNAIL_STORAGE)
         self.remote_source = remote_source
+        self.alias_target = None
+
+    def __getitem__(self, alias):
+        """
+        Retrieve a thumbnail matching the alias options (or raise a
+        ``KeyError`` if no such alias exists).
+        """
+        options = aliases.get(alias, target=self.alias_target)
+        if not options:
+            raise KeyError(alias)
+        return self.get_thumbnail(options)
 
     def generate_source_image(self, thumbnail_options):
         return engine.generate_source_image(self, thumbnail_options,
@@ -449,6 +463,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         thumbnail_storage = getattr(self.field, 'thumbnail_storage', None)
         if thumbnail_storage:
             self.thumbnail_storage = thumbnail_storage
+        self.alias_target = self
 
     def save(self, name, content, *args, **kwargs):
         """
