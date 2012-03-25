@@ -22,3 +22,5 @@ SOURCE_GENERATORS = (
     'easy_thumbnails.source_generators.pil_image',
 )
 CHECK_CACHE_MISS = False
+
+ALIASES = None
