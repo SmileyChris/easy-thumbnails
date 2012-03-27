@@ -5,3 +5,4 @@ from easy_thumbnails.tests.source_generators import PilImageTest
 from easy_thumbnails.tests.templatetags import ThumbnailTagTest
 from easy_thumbnails.tests.models import FileManagerTest
 from easy_thumbnails.tests.widgets import ImageClearableFileInput
+from easy_thumbnails.tests.aliases import AliasTest, AliasThumbnailerTest
