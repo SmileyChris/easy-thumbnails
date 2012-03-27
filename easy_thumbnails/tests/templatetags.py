@@ -1,10 +1,10 @@
-from django.conf import settings
 from django.template import Template, Context, TemplateSyntaxError
 try:
     from PIL import Image
 except ImportError:
     import Image
 
+from easy_thumbnails.conf import settings
 from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
 from easy_thumbnails.files import get_thumbnailer
 
@@ -78,6 +78,7 @@ class ThumbnailTagTest(BaseTest):
         src_invalid = '{% thumbnail source 240x200 quality=invalid_q %}'
         src_missing = '{% thumbnail source 240x200 quality=missing_q %}'
         # ...with THUMBNAIL_DEBUG = False
+        settings.THUMBNAIL_DEBUG = False
         self.assertEqual(self.render_template(src_invalid), '')
         self.assertEqual(self.render_template(src_missing), '')
         # ...and with THUMBNAIL_DEBUG = True

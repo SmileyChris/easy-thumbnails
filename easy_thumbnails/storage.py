@@ -1,5 +1,6 @@
 from django.core.files.storage import FileSystemStorage
-from easy_thumbnails import utils
+
+from easy_thumbnails.conf import settings
 
 
 class ThumbnailFileSystemStorage(FileSystemStorage):
@@ -11,7 +12,9 @@ class ThumbnailFileSystemStorage(FileSystemStorage):
     standard ``MEDIA_ROOT`` and ``MEDIA_URL`` if the custom settings are blank.
     """
     def __init__(self, location=None, base_url=None, *args, **kwargs):
-        location = utils.get_setting('MEDIA_ROOT', override=location) or None
-        base_url = utils.get_setting('MEDIA_URL', override=base_url) or None
+        if location is None:
+            location = settings.THUMBNAIL_MEDIA_ROOT or None
+        if base_url is None:
+            base_url = settings.THUMBNAIL_MEDIA_URL or None
         super(ThumbnailFileSystemStorage, self).__init__(location, base_url,
-                                                         *args, **kwargs)
+            *args, **kwargs)

@@ -1,9 +1,10 @@
 import os
 import re
+
 from django.db import models
-from django.conf import settings
 from django.core.management.base import NoArgsCommand
-from easy_thumbnails.utils import get_setting
+
+from easy_thumbnails.conf import settings
 
 try:
     set
@@ -11,12 +12,12 @@ except NameError:
     from sets import Set as set     # For Python 2.3
 
 thumb_re = re.compile(r'^%s(.*)\.\d{1,}x\d{1,}_[-\w]*q([1-9]\d?|100)\.jpg' %
-                      get_setting('PREFIX'))
+    settings.THUMBNAIL_PREFIX)
 
 
 def get_thumbnail_path(path):
-    basedir = get_setting('BASEDIR')
-    subdir = get_setting('SUBDIR')
+    basedir = settings.THUMBNAIL_BASEDIR
+    subdir = settings.THUMBNAIL_SUBDIR
     return os.path.join(basedir, path, subdir)
 
 
@@ -38,7 +39,7 @@ def clean_up():
             file_list = os.listdir(os.path.join(settings.MEDIA_ROOT,
                                                 thumbnail_path))
         except OSError:
-            continue # Dir doesn't exists, no thumbnails here.
+            continue   # Dir doesn't exists, no thumbnails here.
         for fn in file_list:
             m = thumb_re.match(fn)
             if m:
@@ -55,7 +56,7 @@ def clean_up():
                 usc_pos = org_fn.rfind("_")
                 if usc_pos != -1:
                     org_fn_alt = "%s.%s" % (org_fn[0:usc_pos],
-                                            org_fn[usc_pos+1:])
+                        org_fn[usc_pos + 1:])
                     org_fn_alt_exists = os.path.isfile(
                         os.path.join(settings.MEDIA_ROOT, path, org_fn_alt))
                 else:

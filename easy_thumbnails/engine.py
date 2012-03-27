@@ -1,20 +1,22 @@
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-from easy_thumbnails import utils
 import os
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
 
+try:
+    from PIL import Image
+except ImportError:
+    import Image
+
+from easy_thumbnails import utils
+from easy_thumbnails.conf import settings
 
 DEFAULT_PROCESSORS = [utils.dynamic_import(p)
-                      for p in utils.get_setting('PROCESSORS')]
+    for p in settings.THUMBNAIL_PROCESSORS]
 
 SOURCE_GENERATORS = [utils.dynamic_import(p)
-                     for p in utils.get_setting('SOURCE_GENERATORS')]
+    for p in settings.THUMBNAIL_SOURCE_GENERATORS]
 
 
 def process_image(source, processor_options, processors=None):
