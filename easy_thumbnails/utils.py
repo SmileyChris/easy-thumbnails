@@ -14,9 +14,11 @@ try:
     now = timezone.now
 
     def fromtimestamp(timestamp):
-        default_timezone = timezone.get_default_timezone()
         dt = datetime.datetime.fromtimestamp(timestamp)
-        return timezone.make_aware(dt, default_timezone)
+        if settings.USE_TZ:
+            default_timezone = timezone.get_default_timezone()
+            return timezone.make_aware(dt, default_timezone)
+        return dt
 
 except ImportError:
     now = datetime.datetime.now
