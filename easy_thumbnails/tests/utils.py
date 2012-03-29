@@ -96,8 +96,6 @@ class BaseTest(TestCase):
         Isolate all settings.
         """
         output = super(BaseTest, self).setUp()
-        settings.USE_TZ = True
-        self.__settings_isolated = settings.isolated
         settings.isolated = True
         return output
 
@@ -105,7 +103,8 @@ class BaseTest(TestCase):
         """
         Restore settings to their original state.
         """
-        settings.isolated = self.__settings_isolated
+        settings.isolated = False
+        settings.revert()
         return super(BaseTest, self).tearDown()
 
     def create_image(self, storage, filename, size=(800, 600),
