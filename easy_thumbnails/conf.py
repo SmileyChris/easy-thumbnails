@@ -31,14 +31,15 @@ class AppSettings(BaseSettings):
             return self._isolated_overrides
         return django_settings
 
-    def __getattr__(self, attr):
+    def __getattribute__(self, attr):
         if attr == attr.upper():
+            override_module = object.__getattribute__(self, 'override_module')
             try:
-                return getattr(self.override_module, attr)
+                return getattr(override_module, attr)
             except AttributeError:
                 pass
         try:
-            return getattr(super(AppSettings, self), attr)
+            return object.__getattribute__(self, attr)
         except AttributeError:
             return getattr(global_settings, attr)
 
