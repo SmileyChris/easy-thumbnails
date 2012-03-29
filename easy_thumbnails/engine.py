@@ -12,12 +12,6 @@ except ImportError:
 from easy_thumbnails import utils
 from easy_thumbnails.conf import settings
 
-DEFAULT_PROCESSORS = [utils.dynamic_import(p)
-    for p in settings.THUMBNAIL_PROCESSORS]
-
-SOURCE_GENERATORS = [utils.dynamic_import(p)
-    for p in settings.THUMBNAIL_SOURCE_GENERATORS]
-
 
 def process_image(source, processor_options, processors=None):
     """
@@ -25,7 +19,8 @@ def process_image(source, processor_options, processors=None):
     the (potentially) altered image.
     """
     if processors is None:
-        processors = DEFAULT_PROCESSORS
+        processors = [utils.dynamic_import(name)
+            for name in settings.THUMBNAIL_PROCESSORS]
     image = source
     for processor in processors:
         image = processor(image, **processor_options)
@@ -67,7 +62,8 @@ def generate_source_image(source_file, processor_options, generators=None):
     """
     was_closed = source_file.closed
     if generators is None:
-        generators = SOURCE_GENERATORS
+        generators = [utils.dynamic_import(name)
+            for name in settings.THUMBNAIL_SOURCE_GENERATORS]
     try:
         source = source_file
         try:
