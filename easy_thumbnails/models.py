@@ -1,5 +1,6 @@
 from django.db import models
-from easy_thumbnails import utils
+
+from easy_thumbnails import utils, signal_handlers
 
 
 class FileManager(models.Manager):
@@ -57,3 +58,7 @@ class Thumbnail(File):
 
     class Meta:
         unique_together = (('storage_hash', 'name', 'source'),)
+
+
+models.signals.pre_save.connect(signal_handlers.find_uncommitted_filefields)
+models.signals.post_save.connect(signal_handlers.signal_committed_filefields)

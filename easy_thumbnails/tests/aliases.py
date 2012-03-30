@@ -1,6 +1,7 @@
 from django.db import models
+from django.core.files.storage import get_storage_class
 
-from easy_thumbnails import files, fields
+from easy_thumbnails import files, fields, signals, signal_handlers
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.tests import utils
@@ -8,12 +9,14 @@ from easy_thumbnails.tests import utils
 
 class Profile(models.Model):
     avatar = fields.ThumbnailerField(upload_to='avatars')
+    logo = models.FileField(upload_to='avatars')
 
     class Meta:
         app_label = 'some_app'
 
 
 class BaseTest(utils.BaseTest):
+    create_file = False
 
     def setUp(self):
         super(BaseTest, self).setUp()
@@ -31,13 +34,26 @@ class BaseTest(utils.BaseTest):
                 'avatar': {'size': (80, 80), 'crop': True},
                 'small': {'size': (20, 20), 'crop': True},
             },
+            'other_app': {
+                'sidebar': {'size': (150, 250)},
+            }
         }
         self.__aliases = aliases._aliases
         aliases._aliases = {}
         aliases.populate_from_settings()
 
+        if self.create_file:
+            self.storage = utils.TemporaryStorage()
+            # Save a test image.
+            self.create_image(self.storage, 'avatars/test.jpg')
+            # Set the test model to use the current temporary storage.
+            Profile._meta.get_field('avatar').storage = self.storage
+            Profile._meta.get_field('avatar').thumbnail_storage = self.storage
+
     def tearDown(self):
         aliases._aliases = self.__aliases
+        if self.create_file:
+            self.storage.delete_temporary_storage()
         super(BaseTest, self).tearDown()
 
 
@@ -131,19 +147,7 @@ class AliasTest(BaseTest):
 
 
 class AliasThumbnailerTest(BaseTest):
-
-    def setUp(self):
-        super(AliasThumbnailerTest, self).setUp()
-        self.storage = utils.TemporaryStorage()
-        # Save a test image.
-        self.create_image(self.storage, 'avatars/test.jpg')
-        # Set the test model to use the current temporary storage.
-        Profile._meta.get_field('avatar').storage = self.storage
-        Profile._meta.get_field('avatar').thumbnail_storage = self.storage
-
-    def tearDown(self):
-        self.storage.delete_temporary_storage()
-        super(AliasThumbnailerTest, self).tearDown()
+    create_file = True
 
     def test_thumbnailer(self):
         thumbnailer = files.get_thumbnailer(self.storage, 'avatars/test.jpg')
@@ -156,3 +160,80 @@ class AliasThumbnailerTest(BaseTest):
         thumbnailer = files.get_thumbnailer(profile.avatar)
         thumb = thumbnailer['small']
         self.assertEqual((thumb.width, thumb.height), (20, 20))
+
+
+class GenerationTest(BaseTest):
+    """
+    Test the ``save_aliases`` signal handler behaviour.
+    """
+    create_file = True
+
+    def setUp(self):
+        super(GenerationTest, self).setUp()
+        signals.saved_file.connect(signal_handlers.save_aliases,
+            sender=Profile)
+        # Fix the standard storage and thumbnail storage to use the test's
+        # temporary location.
+        settings.MEDIA_ROOT = self.storage.temporary_location
+        files.DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
+            settings.THUMBNAIL_DEFAULT_STORAGE)()
+
+    def tearDown(self):
+        signals.saved_file.disconnect(signal_handlers.save_aliases,
+            sender=Profile)
+        super(GenerationTest, self).tearDown()
+        # Revert the thumbnail storage location.
+        files.DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
+            settings.THUMBNAIL_DEFAULT_STORAGE)()
+
+    def fake_save(self, instance):
+        cls = instance.__class__
+        models.signals.pre_save.send(sender=cls, instance=instance)
+        for field in cls._meta.fields:
+            if isinstance(field, models.FileField):
+                getattr(instance, field.name)._committed = True
+        models.signals.post_save.send(sender=cls, instance=instance)
+        return self.storage.listdir('avatars')[1]
+
+    def test_empty(self):
+        """
+        Thumbnails are not generated if there isn't anything to generate...
+        """
+        profile = Profile(avatar=None)
+        files = self.fake_save(profile)
+        self.assertEqual(len(files), 1)
+
+    def test_no_change(self):
+        """
+        Thumbnails are only generated when the file is modified.
+        """
+        profile = Profile(avatar='avatars/test.jpg')
+        files = self.fake_save(profile)
+        self.assertEqual(len(files), 1)
+
+    def test_changed(self):
+        """
+        When a file is modified, thumbnails are built for all matching
+        non-global aliases.
+        """
+        profile = Profile(avatar='avatars/test.jpg')
+        profile.avatar._committed = False
+        files = self.fake_save(profile)
+        # 1 source, 4 thumbs.
+        self.assertEqual(len(files), 5)
+
+    def test_deleted(self):
+        profile = Profile(avatar='avatars/test.jpg')
+        profile.avatar.delete(save=False)
+        files = self.fake_save(profile)
+        self.assertEqual(len(files), 0)
+
+    def test_standard_filefield(self):
+        profile = Profile(avatar='avatars/test.jpg')
+        # Attach a File object to the FileField descriptor, emulating an
+        # upload.
+        profile.logo = self.storage.open(
+            self.create_image(self.storage, 'avatars/second.jpg'))
+        list_files = self.fake_save(profile)
+        # 2 source, 2 thumbs.
+        self.assertEqual(len(list_files), 4)
