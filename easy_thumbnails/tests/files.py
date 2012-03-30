@@ -118,3 +118,8 @@ class FilesTest(test_utils.BaseTest):
 
         settings.USE_TZ = False
         self.thumbnailer.get_thumbnail({'size': (20, 40)})
+
+    def test_thumbnailfile_options(self):
+        opts = {'size': (50, 50), 'crop': True, 'upscale': True}
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        self.assertEqual(thumb.thumbnail_options, opts)

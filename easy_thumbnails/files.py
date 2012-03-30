@@ -125,13 +125,15 @@ class ThumbnailFile(ImageFieldFile):
     This can be used just like a Django model instance's property for a file
     field (i.e. an ``ImageFieldFile`` object).
     """
-    def __init__(self, name, file=None, storage=None, *args, **kwargs):
+    def __init__(self, name, file=None, storage=None, thumbnail_options=None,
+            *args, **kwargs):
         fake_field = FakeField(storage=storage)
         super(ThumbnailFile, self).__init__(FakeInstance(), fake_field, name,
-                                            *args, **kwargs)
+            *args, **kwargs)
         del self.field
         if file:
             self.file = file
+        self.thumbnail_options = thumbnail_options
 
     def _get_image(self):
         """
@@ -297,13 +299,14 @@ class Thumbnailer(File):
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 
         filename = self.get_thumbnail_name(thumbnail_options,
-                            transparent=utils.is_transparent(thumbnail_image))
+            transparent=utils.is_transparent(thumbnail_image))
 
         data = engine.save_image(thumbnail_image, filename=filename,
-                                 quality=quality).read()
+            quality=quality).read()
 
-        thumbnail = ThumbnailFile(filename, ContentFile(data),
-                                  storage=self.thumbnail_storage)
+        thumbnail = ThumbnailFile(filename, file=ContentFile(data),
+            storage=self.thumbnail_storage,
+            thumbnail_options=thumbnail_options)
         thumbnail.image = thumbnail_image
         thumbnail._committed = False
 
@@ -375,9 +378,9 @@ class Thumbnailer(File):
             names = (opaque_name, transparent_name)
         for filename in names:
             if self.thumbnail_exists(filename):
-                thumbnail = ThumbnailFile(name=filename,
-                                          storage=self.thumbnail_storage)
-                return thumbnail
+                return ThumbnailFile(name=filename,
+                    storage=self.thumbnail_storage,
+                    thumbnail_options=thumbnail_options)
 
         thumbnail = self.generate_thumbnail(thumbnail_options)
         if save:
