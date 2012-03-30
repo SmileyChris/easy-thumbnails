@@ -24,6 +24,9 @@ def pil_image(source, **options):
     source = StringIO(source.read())
     try:
         image = Image.open(source)
+        # Fully load the image now to catch any problems with the image
+        # contents.
+        image.load()
     except Exception:
         return
     # If EXIF orientation data is present, perform any required reorientation
