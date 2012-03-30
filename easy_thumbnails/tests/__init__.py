@@ -9,4 +9,5 @@ from easy_thumbnails.tests.aliases import (
     AliasTest,
     AliasThumbnailerTest,
     GenerationTest,
+    GlobalGenerationTest,
 )

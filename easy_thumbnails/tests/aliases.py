@@ -162,16 +162,15 @@ class AliasThumbnailerTest(BaseTest):
         self.assertEqual((thumb.width, thumb.height), (20, 20))
 
 
-class GenerationTest(BaseTest):
-    """
-    Test the ``save_aliases`` signal handler behaviour.
-    """
+class GenerationBase(BaseTest):
     create_file = True
 
+    def get_signal_handler(self):
+        return NotImplementedError("Subclasses should return the handler")
+
     def setUp(self):
-        super(GenerationTest, self).setUp()
-        signals.saved_file.connect(signal_handlers.save_aliases,
-            sender=Profile)
+        super(GenerationBase, self).setUp()
+        signals.saved_file.connect(self.get_signal_handler(), sender=Profile)
         # Fix the standard storage and thumbnail storage to use the test's
         # temporary location.
         settings.MEDIA_ROOT = self.storage.temporary_location
@@ -179,9 +178,9 @@ class GenerationTest(BaseTest):
             settings.THUMBNAIL_DEFAULT_STORAGE)()
 
     def tearDown(self):
-        signals.saved_file.disconnect(signal_handlers.save_aliases,
+        signals.saved_file.disconnect(self.get_signal_handler(),
             sender=Profile)
-        super(GenerationTest, self).tearDown()
+        super(GenerationBase, self).tearDown()
         # Revert the thumbnail storage location.
         files.DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
             settings.THUMBNAIL_DEFAULT_STORAGE)()
@@ -194,6 +193,15 @@ class GenerationTest(BaseTest):
                 getattr(instance, field.name)._committed = True
         models.signals.post_save.send(sender=cls, instance=instance)
         return self.storage.listdir('avatars')[1]
+
+
+class GenerationTest(GenerationBase):
+    """
+    Test the ``generate_aliases`` signal handler behaviour.
+    """
+
+    def get_signal_handler(self):
+        return signal_handlers.generate_aliases
 
     def test_empty(self):
         """
@@ -237,3 +245,31 @@ class GenerationTest(BaseTest):
         list_files = self.fake_save(profile)
         # 2 source, 2 thumbs.
         self.assertEqual(len(list_files), 4)
+
+
+class GlobalGenerationTest(GenerationBase):
+    """
+    Test the ``generate_aliases_global`` signal handler behaviour.
+    """
+
+    def get_signal_handler(self):
+        return signal_handlers.generate_aliases_global
+
+    def test_no_change(self):
+        """
+        Thumbnails are only generated when the file is modified.
+        """
+        profile = Profile(avatar='avatars/test.jpg')
+        files = self.fake_save(profile)
+        self.assertEqual(len(files), 1)
+
+    def test_changed(self):
+        """
+        When a file is modified, thumbnails are built for all matching and
+        project-wide aliases.
+        """
+        profile = Profile(avatar='avatars/test.jpg')
+        profile.avatar._committed = False
+        files = self.fake_save(profile)
+        # 1 source, 4 specific thumbs, 1 project-wide thumb.
+        self.assertEqual(len(files), 6)

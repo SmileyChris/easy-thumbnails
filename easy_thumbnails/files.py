@@ -87,6 +87,22 @@ def save_thumbnail(thumbnail_file, storage):
     return storage.save(filename, thumbnail_file)
 
 
+def generate_all_aliases(fieldfile, include_global):
+    """
+    Generate all of a file's aliases.
+
+    :param fieldfile: A ``FieldFile`` instance.
+    :param include_global: A boolean which determines whether to generate
+        thumbnails for project-wide aliases in addition to field, model, and
+        app specific aliases.
+    """
+    options = aliases.all(fieldfile, include_global=include_global)
+    if options:
+        thumbnailer = get_thumbnailer(fieldfile)
+        for options in options.values():
+            thumbnailer.get_thumbnail(options)
+
+
 class FakeField(object):
     name = 'fake'
 
