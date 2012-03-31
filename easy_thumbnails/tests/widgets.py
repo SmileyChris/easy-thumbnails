@@ -1,6 +1,7 @@
 from easy_thumbnails import widgets
 from easy_thumbnails.files import get_thumbnailer
 from easy_thumbnails.tests import utils as test_utils
+from django.forms.widgets import ClearableFileInput
 
 
 class ImageClearableFileInput(test_utils.BaseTest):
@@ -76,3 +77,13 @@ class ImageClearableFileInput(test_utils.BaseTest):
         self.assertIn(source_filename, html)
         self.assertIn('.80x80_', html)
         self.assertIn('FOO', html)
+
+    def test_render_without_value(self):
+        """
+        If value not passed, use super widget.
+        """
+        widget = widgets.ImageClearableFileInput()
+        base_widget = ClearableFileInput()
+        html = widget.render('photo', None)
+        base_html = base_widget.render('photo', None)
+        self.assertEqual(base_html, html)
