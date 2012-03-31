@@ -28,13 +28,13 @@ class ImageClearableFileInput(ClearableFileInput):
         return thumbnailer.get_thumbnail(self.thumbnail_options)
 
     def render(self, name, value, attrs=None):
-        if value:
-            thumb = self.get_thumbnail(value)
-            substitution = {
-                'template': super(ImageClearableFileInput, self).render(name,
-                    value, attrs),
-                'thumb': thumb.tag(id=self.thumbnail_id(name)),
-                'source_url': value.storage.url(value.name),
-            }
-            return mark_safe(self.template_with_thumbnail % substitution)
-        return super(ImageClearableFileInput, self).render(name, value, attrs)
+        output = super(ImageClearableFileInput, self).render(name, value, attrs)
+        if not value:
+            return output
+        thumb = self.get_thumbnail(value)
+        substitution = {
+            'template': output,
+            'thumb': thumb.tag(id=self.thumbnail_id(name)),
+            'source_url': value.storage.url(value.name),
+        }
+        return mark_safe(self.template_with_thumbnail % substitution)
