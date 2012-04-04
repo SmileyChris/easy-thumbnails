@@ -2,6 +2,10 @@
 Installation
 ============
 
+**Note:** the below is for reference only until it's updated. See README.rst 
+or source code for latest documentation. 
+
+
 Before installing easy-thumbnails, you'll obviously need to have copy of Django
 installed. For the |version| release, Django 1.1 is required.
 

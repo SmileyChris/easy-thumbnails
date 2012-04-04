@@ -2,6 +2,9 @@
 Usage
 =====
 
+**Note:** the below is for reference only until it's updated. See README.rst 
+or source code for latest documentation. 
+
 The simplest and most common way easy-thumbnails is used is via the
 ``{% thumbnail %}`` Django template tag, which generates images from a model
 with an ``ImageField``.
