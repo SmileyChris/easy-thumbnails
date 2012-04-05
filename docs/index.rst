@@ -2,9 +2,6 @@
 easy-thumbnails
 ===============
 
-**Note:** the below is for reference only until it's updated. See README.rst 
-or source code for latest documentation. 
-
 This documentation covers the |version| release of easy-thumbnails, a
 thumbnailing application for Django which is easy to use and customize.
 
