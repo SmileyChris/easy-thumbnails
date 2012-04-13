@@ -11,9 +11,15 @@ except ImportError:
 from easy_thumbnails import utils
 
 
-def pil_image(source, **options):
+def pil_image(source, exif_orientation=True, **options):
     """
     Try to open the source file directly using PIL, ignoring any errors.
+
+    exif_orientation
+
+        If EXIF orientation data is present, perform any required reorientation
+        before passing the data along the processing pipeline.
+
     """
     # Use a StringIO wrapper because if the source is an incomplete file like
     # object, PIL may have problems with it. For example, some image types
@@ -29,7 +35,7 @@ def pil_image(source, **options):
         image.load()
     except Exception:
         return
-    # If EXIF orientation data is present, perform any required reorientation
-    # before passing the data along the processing pipeline.
-    image = utils.exif_orientation(image)
+
+    if exif_orientation:
+        image = utils.exif_orientation(image)
     return image
