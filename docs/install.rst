@@ -59,22 +59,26 @@ Customize available (see docs/ref/settings.rst) settings to tailor your specific
    THUMBNAIL_QUALITY = 85
    THUMBNAIL_SUBDIR = 'easy-thumbnails`
    THUBNAIL_ALIASES =  {
-      'small': {
-         'size': (100, 100),
-      }
-      'banner': {
-         'size': (600, 70),  
-      }
-      'zoomed': {
-         'size': (0, 720), 
-         'quality': 100, 
-         'detail': True, 
-         'replace_alpha': '#fff', 
-         'sharpen' :True, 
-         'bw': True,
-         'crop': 'smart',
-         'upscale' True,
-      }
+      '': {
+            'small': {
+               'size': (100, 100),
+            },
+            'banner': {
+               'size': (600, 70),  
+            },
+       },
+       'accounts.UserProfile': {
+            'zoomed': {
+               'size': (0, 720), 
+               'quality': 100, 
+               'detail': True, 
+               'replace_alpha': '#fff', 
+               'sharpen': True, 
+               'bw': True,
+               'crop': 'smart',
+               'upscale': True,
+           },
+       },   
    }
    
 Run `syncdb` command in the projects root directory to generate required tables::

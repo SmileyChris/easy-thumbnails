@@ -13,7 +13,7 @@ To use this app in your application project install Python Imaging Library if it
 then install the latest::
 
    $ pip install PIL
-   $ pip install easy_thumbnails
+   $ pip install easy-thumbnails
    
 Configuration
 =============
@@ -28,22 +28,26 @@ Add the app to your project settings ``INSTALLED_APPS`` setting (and run ``manag
 Specify global or per model predefined image alternatives through the ``THUMBNAIL_ALIASES`` settings like so::
 
    THUBNAIL_ALIASES =  {
-      'small': {
-         'size': (100, 100),
-      }
-      'banner': {
-         'size': (600, 70),  
-      }
-      'zoomed': {
-         'size': (0, 720), 
-         'quality': 100, 
-         'detail': True, 
-         'replace_alpha': '#fff', 
-         'sharpen' :True, 
-         'bw': True,
-         'crop': 'smart',
-         'upscale' True,
-      }
+      '': {
+            'small': {
+               'size': (100, 100),
+            },
+            'banner': {
+               'size': (600, 70),  
+            },
+       },
+       'accounts.UserProfile': {
+            'zoomed': {
+               'size': (0, 720), 
+               'quality': 100, 
+               'detail': True, 
+               'replace_alpha': '#fff', 
+               'sharpen': True, 
+               'bw': True,
+               'crop': 'smart',
+               'upscale': True,
+           },
+       },   
    }
    
 Run `syncdb` command in the projects root directory to generate required tables::
@@ -59,7 +63,7 @@ Thumbnails (processed images) can be rendered in the template using the  ``{% th
 ``Thumbnailer`` field on an instance {{ person.image.large }} where image is of type ``ThumbnailerImageField``. 
 The latter three require that ``THUMBNAIL_ALIASES`` are specified to work as advertised. 
 
-For a complete full documentation see ``docs/usage.rst``.
+For a complete full documentation see :doc:`docs/usage.rst`.
 
 Tag {% thumbnail %} Usage
 -------------------------
@@ -75,7 +79,7 @@ Filter {% with photo=person.photo|thumbnailer %} Usage
 The thumbnailer filter when applied to an image field returns a ``ThumbnailFile`` instance. The main purpose of this it
 to access predefined ``THUBNAIL_ALIASES``::
 
-   {% load thumbnailer %}
+   {% load thumbnail %}
    {% with photo=person.photo|thumbnailer %}
       {% if photo %}
          <a href="{{ photo.large.url }}">

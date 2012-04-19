@@ -46,10 +46,10 @@ The order does not matter and these options can be any of the below:
    
 - ``quality=[N]`` where N is a number between 1 and 100 specifying output JPG quality. If omitted the default is to 
   85 or as specified by your project's ``THUMBNAIL_QUALITY`` setting.
-- ``autocrop=[False|True]`` default is False. Removes any unnecessary whitespace from the edges of the source image.
+- ``autocrop`` If specified removes any unnecessary whitespace from the edges of the source image.
   This processor should be listed before crop so the whitespace is removed from the source image before it is resized.
-- ``bw=[False|True]`` default is False. Converts image to grayscale. This processor should be listed before 
-  `scale_and_crop` so palette is changed before the image is resized.
+- ``bw`` If specified converts image to grayscale. This processor should be listed before 
+  `scale_and_crop` so palate is changed before the image is resized.
 - ``replace_alpha=#colorcode`` default is leave unchanged, this processor replaces any transparency layer 
   with a solid color. For example, ``replace_alpha='#fff'`` would replace the transparency layer with  white. 
 - ``crop=[smart|scale|W,H]`` default is False, cropping image method, used in conjunction with [size] setting. 
@@ -66,14 +66,13 @@ The order does not matter and these options can be any of the below:
 specified ``var_name``. Example::
    
    {% thumbnail person.photo 100x50 as person_photo %}
-   <img alt={{person.about}} src={{person_photo.url}}>
-documentation.
+   <img alt="{{ person.about }}" src="{{ person_photo.url }}" />
 
 Filter {% with photo=person.photo|thumbnailer %} Usage
 ------------------------------------------------------
 
 The thumbnailer filter when applied to an image field returns a ``ThumbnailFile`` instance. The main purpose of this it
-to access predefined ``THUBNAIL_ALIASES``. To use load the filter by including ``{% load thumbnailer %}`` at top of 
+to access predefined ``THUBNAIL_ALIASES``. To use load the filter by including ``{% load thumbnail %}`` at top of 
 your template and use following syntax::
 
    {% with photo=person.photo|thumbnailer %}
@@ -98,7 +97,7 @@ string is returned. Sample template usage::
 Thumbnailer field on a model instance
 -------------------------------------
 
-Models that utilize the ``ThumbnailerImageField`` field can have their image alises accessed in the template like so::
+Models that utilize the ``ThumbnailerImageField`` field can have their image aliases accessed in the template like so::
 
    <img alt="{{person_instance.about}}" src="{{person_instance.photo.small.url}}">
    
