@@ -1,79 +1,133 @@
 ===============
-Easy Thumbnails
+easy-thumbnails
 ===============
 
-The powerful, yet easy to implement thumbnailing application for Django.
+The powerful, yet easy to implement thumbnailing application for Django. Below is a 'get you going' summary of usage,
+For a complete documentations please see "full documentation":http://easy-thumbnails.readthedocs.org/en/latest/index.html
+or the documentation *docs/* folder. 
 
-To install this application into your project, just add it to your
-``INSTALLED_APPS`` setting (and run ``manage.py syncdb``)::
+Installation
+============
 
-    INSTALLED_APPS = (
+To use this app in your application project install Python Imaging Library if it's not installed on system and 
+then install the latest::
+
+   $ pip install PIL
+   $ pip install easy-thumbnails
+   
+Configuration
+=============
+
+Add the app to your project settings ``INSTALLED_APPS`` setting (and run ``manage.py syncdb``)::
+
+   INSTALLED_APPS = (
         ...
         'easy_thumbnails',
-    )
+   )
 
+Specify global or per model predefined image alternatives through the ``THUMBNAIL_ALIASES`` settings like so::
 
-Template usage
+   THUMBNAIL_ALIASES =  {
+      '': {
+            'small': {
+               'size': (100, 100),
+            },
+            'banner': {
+               'size': (600, 70),  
+            },
+       },
+       'accounts.UserProfile': {
+            'zoomed': {
+               'size': (0, 720), 
+               'quality': 100, 
+               'detail': True, 
+               'replace_alpha': '#fff', 
+               'sharpen': True, 
+               'bw': True,
+               'crop': 'smart',
+               'upscale': True,
+           },
+       },   
+   }
+   
+Run `syncdb` command in the projects root directory to generate required tables::
+
+   $ python manage.py syncdb
+   
+
+Template Usage
 ==============
 
-To generate thumbnails in your template, use the ``{% thumbnail %}`` tag. To
-make this tag available for use in your template, use::
-    
-    {% load thumbnail %}
+Thumbnails (processed images) can be rendered in the template using the  ``{% thumbnail %}`` tag, the shortcut 
+``{% thumbnail_url %}`` tag, the ``{% with photo=person.photo|thumbnailer %}`` filter, or directly by accessing the  
+``Thumbnailer`` field on an instance {{ person.image.large }} where image is of type ``ThumbnailerImageField``. 
+The latter three require that ``THUMBNAIL_ALIASES`` are specified to work as advertised. 
 
-Basic tag Syntax::
+For a complete full documentation see :doc:`docs/usage.rst`.
 
-    {% thumbnail [source] [size] [options] %}
+Tag `thumbnail` Usage
+---------------------
 
-*source* must be a ``File`` object, usually an Image/FileField of a model
-instance.
+Add ``{% load thumbnail %}`` at the top of your template and use syntax ``{% thumbnail source size [options] [as var name] %}``::
 
-*size* can either be:
+   {% thumbnail person.photo 100x50 as person_photo %}
+   <img alt={{person.about}} src={{person_photo.url}}>
 
-* the size in the format ``[width]x[height]`` (for example,
-  ``{% thumbnail person.photo 100x50 %}``) or
+Filter `thumbnailer` Usage
+--------------------------
 
-* a variable containing a valid size (i.e. either a string in the
-  ``[width]x[height]`` format or a tuple containing two integers):
-  ``{% thumbnail person.photo size_var %}``.
+The thumbnailer filter when applied to an image field returns a ``ThumbnailFile`` instance. The main purpose of this it
+to access predefined ``THUBNAIL_ALIASES``::
 
-* you can resize and keep the original image ratio by specifying a
-  0 width or 0 height (for example,
-  ``{% thumbnail person.photo 100x0 %}`` will create a non-cropped 
-  thumbnail which is 100 pixels wide)
+   {% load thumbnail %}
+   {% with photo=person.photo|thumbnailer %}
+      {% if photo %}
+         <a href="{{ photo.large.url }}">
+             {{ photo.square.tag }}
+         </a>
+      {% else %}
+         <img href="{% static 'template/fallback.png' %}" alt="" />
+      {% endif %}
+   {% endwith %}
 
-*options* are a space separated list of options which are used when processing
-the image to a thumbnail such as ``sharpen``, ``crop`` and ``quality=90``.
+Filter `thubmanil_url` Usage
+----------------------------
 
+A shortcut tag that outputs the url for the specified thumbnail alias::
+
+   {% load thumbnail %}
+   <img href="{{ person.photo|thumbnail_url:'small' }}" alt="">
+
+
+Thumbnailer field on a model instance
+-------------------------------------
+
+Models that utilize the ``ThumbnailerImageField`` field can have their image aliases accessed in the template like so::
+
+   <img alt="{{person_instance.about}}" src="{{person_instance.photo.small.url}}">
 
 Model usage
 ===========
 
 You can use the ``ThumbnailerField`` or ``ThumbnailerImageField`` fields (based
 on ``FileField`` and ``ImageField``, respectively) for easier access to
-retrieve (or generate) thumbnail images.
+retrieve (or generate) thumbnail images.::
 
-By passing a ``resize_source`` argument to the ``ThumbnailerImageField``, you
-can resize the source image before it is saved::
+   class Person(models.Model):
+      user = models.ForeginKey(User)
+      photo = ThumbnailerImageField(..., resize_source = {
+               'size': (0, 720), 
+               'quality': 100, 
+               ...
+               'upscale': True)
+               }),        
 
-    class Profile(models.Model):
-        user = models.ForeignKey('auth.User')
-        avatar = ThumbnailerImageField(
-            upload_to='avatars',
-            resize_source=dict(size=(50, 50), crop='smart'),
-        )
+Afterwards specified thumbnail aliases can be access like so in your python code::
 
+   small_photo = person_instance.photo['small']
+   avatar_photo = person_instance.photo['avatar']
 
-Lower level usage
-=================
+Further documentation
+=====================
 
-Thumbnails are generated with a ``Thumbnailer`` instance. Usually you'll use
-the ``get_thumbnailer`` method to generate one of these, for example::
-
-    from easy_thumbnails.files import get_thumbnailer
-
-    def square_thumbnail(source):
-        thumbnail_options = dict(size=(100, 100), crop=True, bw=True)
-        return get_thumbnailer(source).get_thumbnail(thumbnail_options)
-
-See the docs directory for more comprehensive usage documentation.
+Please see ``docs/*`` for further documentation. 
