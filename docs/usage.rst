@@ -20,8 +20,8 @@ as large the original and rendered in black and white.
 Templates
 =========
 
-Tag {% thumbnail %} Usage
--------------------------
+Tag `thumbnail %` Usage
+-----------------------
 
 To generate thumbnails in your template using the ``{% thumbnail %}`` tag make it first available in your template 
 by adding ``{% load thumbnail %}`` at the top. Afterwards tag syntax is as follows::
@@ -68,8 +68,8 @@ specified ``var_name``. Example::
    {% thumbnail person.photo 100x50 as person_photo %}
    <img alt="{{ person.about }}" src="{{ person_photo.url }}" />
 
-Filter {% with photo=person.photo|thumbnailer %} Usage
-------------------------------------------------------
+Filter `thumbnailer` Usage
+--------------------------
 
 The thumbnailer filter when applied to an image field returns a ``ThumbnailFile`` instance. The main purpose of this it
 to access predefined ``THUBNAIL_ALIASES``. To use load the filter by including ``{% load thumbnail %}`` at top of 
@@ -85,12 +85,13 @@ your template and use following syntax::
       {% endif %}
    {% endwith %}
 
-Tag {% thubmanil_url %} Usage
------------------------------
+Filter `thubmanil_url` Usage
+----------------------------
 
 A shortcut tag that outputs the url for the specified thumbnail alias, if the specified alias does not exist an empty
 string is returned. Sample template usage::
 
+   {% load thumbnail %}
    <img href="{{ person.photo|thumbnail_url:'small' }}" alt="">
 
 
