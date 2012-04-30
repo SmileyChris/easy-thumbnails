@@ -27,7 +27,7 @@ Add the app to your project settings ``INSTALLED_APPS`` setting (and run ``manag
 
 Specify global or per model predefined image alternatives through the ``THUMBNAIL_ALIASES`` settings like so::
 
-   THUBNAIL_ALIASES =  {
+   THUMBNAIL_ALIASES =  {
       '': {
             'small': {
                'size': (100, 100),
