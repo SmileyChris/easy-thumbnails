@@ -158,3 +158,11 @@ THUMBNAIL_DEFAULT_OPTIONS
 	thumbnail calls. For example, to make all images greyscale::
 
 		THUMBNAIL_DEFAULT_OPTIONS = {'bw': True}
+
+.. _setting-thumbnail_aliases:
+
+THUMBNAIL_ALIASES
+	Default: ``None``
+
+	A dictionary of predefined alias options for different targets. See the
+	:ref:`usage documentation <thumbnail-aliases>` for details.
