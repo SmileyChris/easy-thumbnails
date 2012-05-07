@@ -72,3 +72,18 @@ class PilImageTest(test_utils.BaseTest):
             self.assertTrue(near_identical(reference, im),
                'EXIF orientation %s did not match reference image' %
                    exif_orientation)
+
+    def test_switch_off_exif_orientation(self):
+        """
+        Images with EXIF orientation data are not reoriented if the
+        ``exif_orientation`` parameter is ``False``.
+        """
+        reference = image_from_b64(EXIF_REFERENCE)
+        data = EXIF_ORIENTATION[2]
+        im = image_from_b64(data)
+        self.assertFalse(near_identical(reference, im))
+
+        im = source_generators.pil_image(StringIO(data.decode('base64')),
+            exif_orientation=False)
+        self.assertFalse(near_identical(reference, im),
+            'Image should not have been modified')
