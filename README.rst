@@ -2,78 +2,122 @@
 Easy Thumbnails
 ===============
 
-The powerful, yet easy to implement thumbnailing application for Django.
+A powerful, yet easy to implement thumbnailing application for Django.
 
-To install this application into your project, just add it to your
-``INSTALLED_APPS`` setting (and run ``manage.py syncdb``)::
+Below is a quick summary of usage. For more comprehensive information, view the
+`full documentation`__ online or the peruse the project's ``docs`` directory.
+
+__: http://easy-thumbnails.readthedocs.org/en/latest/index.html
+
+
+Installation
+============
+
+Run ``pip install easy_thumbnails``, or for the `in-development version`__
+run ``pip install easy_thumbnails==dev``.
+
+Add ``easy_thumbnails`` to your ``INSTALLED_APPS`` setting::
 
     INSTALLED_APPS = (
         ...
         'easy_thumbnails',
     )
 
+If you have South installed then run ``manage.py migrate easy_thumbnails``,
+otherwise just run ``manage.py syncdb``.
 
-Template usage
-==============
 
-To generate thumbnails in your template, use the ``{% thumbnail %}`` tag. To
-make this tag available for use in your template, use::
-    
+Example usage
+=============
+
+Thumbnail options can be predefined in ``settings.THUMBNAIL_ALIASES`` or just
+specified in the template or Python code when run.
+
+Using a predefined alias
+------------------------
+
+Template::
+
     {% load thumbnail %}
+    <img src="{{ profile.photo|thumbnail_url:'avatar' }}" alt="">
 
-Basic tag Syntax::
-
-    {% thumbnail [source] [size] [options] %}
-
-*source* must be a ``File`` object, usually an Image/FileField of a model
-instance.
-
-*size* can either be:
-
-* the size in the format ``[width]x[height]`` (for example,
-  ``{% thumbnail person.photo 100x50 %}``) or
-
-* a variable containing a valid size (i.e. either a string in the
-  ``[width]x[height]`` format or a tuple containing two integers):
-  ``{% thumbnail person.photo size_var %}``.
-
-* you can resize and keep the original image ratio by specifying a
-  0 width or 0 height (for example,
-  ``{% thumbnail person.photo 100x0 %}`` will create a non-cropped 
-  thumbnail which is 100 pixels wide)
-
-*options* are a space separated list of options which are used when processing
-the image to a thumbnail such as ``sharpen``, ``crop`` and ``quality=90``.
-
-
-Model usage
-===========
-
-You can use the ``ThumbnailerField`` or ``ThumbnailerImageField`` fields (based
-on ``FileField`` and ``ImageField``, respectively) for easier access to
-retrieve (or generate) thumbnail images.
-
-By passing a ``resize_source`` argument to the ``ThumbnailerImageField``, you
-can resize the source image before it is saved::
-
-    class Profile(models.Model):
-        user = models.ForeignKey('auth.User')
-        avatar = ThumbnailerImageField(
-            upload_to='avatars',
-            resize_source=dict(size=(50, 50), crop='smart'),
-        )
-
-
-Lower level usage
-=================
-
-Thumbnails are generated with a ``Thumbnailer`` instance. Usually you'll use
-the ``get_thumbnailer`` method to generate one of these, for example::
+Python::
 
     from easy_thumbnails.files import get_thumbnailer
+    thumb_url = get_thumbnailer(profile.photo)['avatar'].url
 
-    def square_thumbnail(source):
-        thumbnail_options = dict(size=(100, 100), crop=True, bw=True)
-        return get_thumbnailer(source).get_thumbnail(thumbnail_options)
+Manually specifying size / options
+----------------------------------
 
-See the docs directory for more comprehensive usage documentation.
+Template::
+
+    {% load thumbnail %}
+    <img src="{% thumbnail profile.photo 50x50 crop %}"
+
+Python::
+
+    from easy_thumbnails.files import get_thumbnailer
+    options = {'size': (100, 100), 'crop': True}
+    thumb_url = get_thumbnailer(profile.photo).get_thumbnail(options).url
+
+
+Fields
+======
+
+You can use ``ThumbnailerImageField`` (or ``ThumbnailerFileField``) for easier
+access to retrieve or generate thumbnail images, or to .
+
+For example:
+
+    from easy_thumbnails.fields import ThumbnailerImageField
+
+    class Profile(models.Model):
+        user = models.OneToOneField('auth.User')
+        photo = ThumbnailerImageField(upload_to='photos', blank=True)
+
+Accessing the field's predefined alias in a template::
+
+    {% load thumbnail %}
+    <img src="{{ profile.photo.avatar.url }}" alt="">
+
+Accessing the field's predefined alias in Python code::
+
+    thumb_url = profile.photo['avatar'].url
+
+
+Thumbnail options
+=================
+
+``crop``
+--------
+
+Before scaling the image down to fit within the ``size`` bounds, it first cuts
+the edges of the image to match the requested aspect ratio.
+
+Use ``crop="smart"`` to try to keep the most interesting part of the image,
+
+Use ``crop="0,10"`` to crop from the left edge and a 10% offset from the
+top edge. Crop from a single edge by leaving dimension empty (e.g.
+``crop=",0"``). Offset from the right / bottom by using negative numbers
+(e.g., crop="-0,-10").
+
+Often used with the ``upscale`` option, which will allow enlarging of the image
+during scaling.
+
+``quality=XX``
+--------------
+
+Changes the quality of the output JPEG thumbnail. Defaults to ``85``.
+
+In Python code, this is given as a separate option to the ``get_thumbnail``
+method rather than just alter the other
+
+Other options
+-------------
+
+Valid thumbnail options are determined by the "thumbnail processors" installed.
+
+See the `reference documentation`__ for a complete list of options provided by
+the default thumbnail processors.
+
+__ http://easy-thumbnails.readthedocs.org/en/latest/ref/processors.html

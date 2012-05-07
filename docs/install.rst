@@ -44,11 +44,14 @@ Configuring your project
 
 In your Django project's settings module, add easy-thumbnails to your
 ``INSTALLED_APPS`` setting::
-    
+
     INSTALLED_APPS = (
         ...
         'easy_thumbnails',
     )
 
-You may also want to set up some :doc:`easy-thumbnails related settings
-<ref/settings>`.
+If you have South installed, run ``python manage.py migrate easy_thumbnails``.
+Otherwise, just run ``python manage.py syncdb``.
+
+You're done! You'll want to head on over now to the
+:doc:`usage documentation <usage>`.
