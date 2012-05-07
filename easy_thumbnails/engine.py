@@ -13,11 +13,20 @@ from easy_thumbnails import utils
 from easy_thumbnails.conf import settings
 
 
+def _use_default_options(options):
+    if not settings.THUMBNAIL_DEFAULT_OPTIONS:
+        return options
+    default_options = settings.THUMBNAIL_DEFAULT_OPTIONS.copy()
+    default_options.update(options)
+    return default_options
+
+
 def process_image(source, processor_options, processors=None):
     """
     Process a source PIL image through a series of image processors, returning
     the (potentially) altered image.
     """
+    processor_options = _use_default_options(processor_options)
     if processors is None:
         processors = [utils.dynamic_import(name)
             for name in settings.THUMBNAIL_PROCESSORS]
@@ -60,6 +69,7 @@ def generate_source_image(source_file, processor_options, generators=None):
     If the source file cannot be opened, it will be set to ``None`` and still
     passed to the generators.
     """
+    processor_options = _use_default_options(processor_options)
     was_closed = source_file.closed
     if generators is None:
         generators = [utils.dynamic_import(name)

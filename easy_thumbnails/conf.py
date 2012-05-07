@@ -115,5 +115,7 @@ class Settings(AppSettings):
 
     THUMBNAIL_ALIASES = None
 
+    THUMBNAIL_DEFAULT_OPTIONS = None
+
 
 settings = Settings()
