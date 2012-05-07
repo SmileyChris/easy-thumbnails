@@ -13,10 +13,6 @@ from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 
 
-DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
-    settings.THUMBNAIL_DEFAULT_STORAGE)()
-
-
 def get_thumbnailer(obj, relative_name=None):
     """
     Get a :class:`Thumbnailer` for a source file.
@@ -96,10 +92,10 @@ def generate_all_aliases(fieldfile, include_global):
         thumbnails for project-wide aliases in addition to field, model, and
         app specific aliases.
     """
-    options = aliases.all(fieldfile, include_global=include_global)
-    if options:
+    all_options = aliases.all(fieldfile, include_global=include_global)
+    if all_options:
         thumbnailer = get_thumbnailer(fieldfile)
-        for options in options.values():
+        for options in all_options.values():
             thumbnailer.get_thumbnail(options)
 
 
@@ -239,23 +235,9 @@ class Thumbnailer(File):
     You can subclass this object and override the following properties to
     change the defaults (pulled from the default settings):
 
-        * thumbnail_basedir
-        * thumbnail_subdir
-        * thumbnail_prefix
-        * thumbnail_quality
-        * thumbnail_extension
         * source_generators
         * thumbnail_processors
     """
-    thumbnail_basedir = settings.THUMBNAIL_BASEDIR
-    thumbnail_subdir = settings.THUMBNAIL_SUBDIR
-    thumbnail_prefix = settings.THUMBNAIL_PREFIX
-    thumbnail_quality = settings.THUMBNAIL_QUALITY
-    thumbnail_extension = settings.THUMBNAIL_EXTENSION
-    thumbnail_preserve_extensions = settings.THUMBNAIL_PRESERVE_EXTENSIONS
-    thumbnail_transparency_extension = \
-        settings.THUMBNAIL_TRANSPARENCY_EXTENSION
-    thumbnail_check_cache_miss = settings.THUMBNAIL_CHECK_CACHE_MISS
     source_generators = None
     thumbnail_processors = None
 
@@ -263,10 +245,23 @@ class Thumbnailer(File):
             thumbnail_storage=None, remote_source=False, *args, **kwargs):
         super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
         self.source_storage = source_storage or default_storage
-        self.thumbnail_storage = (thumbnail_storage or
-            DEFAULT_THUMBNAIL_STORAGE)
+        if not thumbnail_storage:
+            thumbnail_storage = get_storage_class(
+                settings.THUMBNAIL_DEFAULT_STORAGE)()
+        self.thumbnail_storage = thumbnail_storage
         self.remote_source = remote_source
         self.alias_target = None
+
+        # Set default properties. For backwards compatibilty, check to see
+        # if the attribute exists already (it could be set as a class property
+        # on a subclass) before getting it from settings.
+        for default in ('basedir', 'subdir', 'prefix', 'quality', 'extension',
+                'preserve_extensions', 'transparency_extension',
+                'check_cache_miss'):
+            attr_name = 'thumbnail_%s' % default
+            if getattr(self, attr_name, None) is None:
+                value = getattr(settings, attr_name.upper())
+                setattr(self, attr_name, value)
 
     def __getitem__(self, alias):
         """

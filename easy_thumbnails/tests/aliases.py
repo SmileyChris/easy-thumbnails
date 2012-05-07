@@ -171,19 +171,13 @@ class GenerationBase(BaseTest):
     def setUp(self):
         super(GenerationBase, self).setUp()
         signals.saved_file.connect(self.get_signal_handler(), sender=Profile)
-        # Fix the standard storage and thumbnail storage to use the test's
-        # temporary location.
+        # Fix the standard storage to use the test's temporary location.
         settings.MEDIA_ROOT = self.storage.temporary_location
-        files.DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
-            settings.THUMBNAIL_DEFAULT_STORAGE)()
 
     def tearDown(self):
         signals.saved_file.disconnect(self.get_signal_handler(),
             sender=Profile)
         super(GenerationBase, self).tearDown()
-        # Revert the thumbnail storage location.
-        files.DEFAULT_THUMBNAIL_STORAGE = get_storage_class(
-            settings.THUMBNAIL_DEFAULT_STORAGE)()
 
     def fake_save(self, instance):
         cls = instance.__class__
