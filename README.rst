@@ -36,6 +36,14 @@ specified in the template or Python code when run.
 Using a predefined alias
 ------------------------
 
+Given the following setting:
+
+    THUMBNAIL_ALIASES = {
+        '': {
+            'avatar': {'size': (50, 50), 'crop': True},
+        },
+    }
+
 Template::
 
     {% load thumbnail %}

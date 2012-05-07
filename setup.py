@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from distutils.core import setup
+import easy_thumbnails
 
 
 def read_files(*filenames):
@@ -18,7 +19,7 @@ def read_files(*filenames):
 
 setup(
     name='easy-thumbnails',
-    version='1.0',
+    version=easy_thumbnails.VERSION,
     url='http://github.com/SmileyChris/easy-thumbnails',
     description='Easy thumbnails for Django',
     long_description=read_files('README.rst'),

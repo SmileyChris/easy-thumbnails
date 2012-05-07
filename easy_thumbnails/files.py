@@ -28,7 +28,7 @@ def get_thumbnailer(obj, relative_name=None):
         * ``Storage`` instance - the ``relative_name`` argument must also be
           provided.
 
-    Or it could be::
+    Or it could be:
 
         * A file-like instance - the ``relative_name`` argument must also be
           provided.

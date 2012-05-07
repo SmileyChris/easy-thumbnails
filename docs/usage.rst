@@ -2,60 +2,153 @@
 Usage
 =====
 
-The simplest and most common way easy-thumbnails is used is via the
-``{% thumbnail %}`` Django template tag, which generates images from a model
-with an ``ImageField``.
+The common way easy-thumbnails is used is via the ``{% thumbnail %}`` template
+tag or ``thumbnail_url`` filter, which generates
+images from a model with an ``ImageField``.
 
-A Python class is also provided which can be used to assist generation of
-thumbnail images.
+Custom database fields are also available for simpler access.
+
+The underlying Python code can be used for lower-level generation of thumbnail
+images.
 
 Overview
 ========
 
-The primary function of easy-thumbnail is to create thumbnails based on a
-source image on the fly.
+The primary function of easy-thumbnails is to dynamically create thumbnails
+based on a source image.
 
 So whenever a thumbnail does not exist or if the source was modified
 more recently than the existing thumbnail, a new thumbnail is generated (and
 saved).
 
-Image quality and format
-------------------------
+Thumbnail aliases can be defined in the
+:ref:`THUMBNAIL_ALIASES <setting-thumbnail_aliases>` setting, providing
+predefined thumbnail options. This also allows for generation of thumbnails
+when the source image is uploaded.
 
-The default format used to save thumbnail images is a JPEG of quality 85 (out
-of 100).
+Thumbnail options
+-----------------
 
-The thumbnail tag (and thumbnail generator) accept a ``quality`` option
-which changes the image quality. The default value of 85 can also be changed
-via the :ref:`THUMBNAIL_QUALITY setting <setting-thumbnail_quality>`.
+To generate a thumbnail of a source image, you specify options which are
+used by the image processors to generate the required image.
 
-Similarly, the :ref:`THUMBNAIL_EXTENSION <setting-thumbnail_extension>` and
-:ref:`THUMBNAIL_TRANSPARENCY_EXTENSION
-<setting-thumbnail_transparency_extension>`
-settings can be used to specify an alternate image format. To preserve 
-specific extensions, for instance if you always want to create lossless PNG 
-thumbnails from PNG sources, you can specify these extensions using the 
-:ref:`THUMBNAIL_PRESERVE_EXTENSIONS <setting-thumbnail_preserve_extensions>` 
-setting. 
+``size`` is a required option, and defines the bounds that the generated image
+must fit within.
 
-.. currentmodule:: easy_thumbnails.processors 
+Other options are only provided if the given functionality is required:
+   
+- ``quality=<N>`` where N is an integer between 1 and 100 specifying output
+  JPEG quality. The default is 85.
+- ``autocrop`` removes any unnecessary whitespace from the edges of the source
+  image.
+- ``bw`` converts the image to grayscale.
+- ``replace_alpha=#colorcode`` replaces any transparency layer with a solid
+  color.
+- ``crop=<smart|scale|W,H>`` cuts the edges of the image to match the aspect
+  ratio of ``size`` before resizing. 
 
-.. note:: If you want to drop the transparency layer for a specific thumbnail
-          (to ensure it always uses ``THUMBNAIL_EXTENSION``) then use the
-          ``replace_alpha`` option of the :func:`colorspace` processor. 
+  - `smart` means the image is incrementally cropped down to the requested size
+    by removing slices from edges with the least entropy. 
+  - `scale` means at least one dimension fits within the size dimensions given.
+  - `W,H` modifies the cropping origin behavior:
+
+    - ``crop="0,0"`` will crop from the left and top edges.
+    - ``crop="-10,-0"`` will crop from the right edge (with a 10% offset) and
+      the bottom edge.
+    - ``crop=",0"`` will keep the default behavior for the x axis (horizontally
+      centering the image) and crop from the top edge.
+
+For a complete and detailed list of options, see the :doc:`ref/processors`
+reference documentation.
+
+
+.. _thumbnail-aliases:
+
+Thumbnail aliases
+=================
+
+You can specify an alias that will be available for any ``ImageField``, for a
+specific app, a specific model, or even just a specific model's field.
+
+An alias may be available project-wide, or set to target a specific app, model
+or field.
+
+The setting is defined like this::
+
+    THUMBNAIL_ALIASES = {
+        <target>: {
+            <alias name>: <alias options dictionary>,
+            ...
+        },
+        ...
+    }
+
+Use the target ``''`` for project-wide aliases.
+Otherwise, the target should be a string which defines the scope of the
+contained aliases:
+
+    * ``'sprocket.Widget.image'`` would make the aliases available to only the
+      'image' field of a 'Widget' model in an app named 'sprocket'.
+    * ``'sprocket.Widget'`` would apply to any field in the 'Widget' model.
+    * ``'sprocket'`` would target any field in any model in the app.
+
+
+Pregeneration
+-------------
+
+Some provided signal handlers (along with a new ``saved_file`` signal) allow
+for you to have the relevant aliases generated when a file is uploaded.
+
+.. automodule:: easy_thumbnails.signal_handlers
+    :members: generate_aliases, generate_aliases_global
+
+In a module that will be executed when Django loads (such as a ``models.py``
+file), register one of these signal handlers. For example::
+
+    from easy_thumbnails.signals import saved_file
+    from easy_thumbnails.signal_handlers import generate_aliases_global
+
+    saved_file.connect(generate_aliases_global)
+
+
+Setting aliases for your third-party app
+----------------------------------------
+
+If you have a distributable app that uses easy-thumbnails and want to provide
+an alias, you can modify the aliases at runtime.
+
+For example, put something like this in a module that will execute when Django
+initializes (such as ``models.py``)::
+
+    from easy_thumbnails.alias import aliases
+    if not aliases.get('badge'):
+        aliases.set('badge', {'size': (150, 80), 'crop': True})
+
 
 Templates
 =========
 
-To generate thumbnails in your template, use the ``{% thumbnail %}`` tag. To
-make this tag available for use in your template, use::
+To make the easy-thumbnail template library available for use in your template,
+use::
     
     {% load thumbnail %}
+
+
+.. _thumbnail_url_filter:
+
+``thumbnail_url`` filter
+------------------------
+
+.. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnail_url
+
 
 .. _thumbnail_tag:
 
 ``{% thumbnail %}`` tag
 -----------------------
+
+If you want to create a thumbnail *without* providing an alias, use this tag to
+generate the thumbnail by specifying all of the required options.
 
 .. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnail
 
