@@ -22,7 +22,7 @@ setup(
     version=easy_thumbnails.VERSION,
     url='http://github.com/SmileyChris/easy-thumbnails',
     description='Easy thumbnails for Django',
-    long_description=read_files('README.rst'),
+    long_description=read_files('README.rst', 'CHANGES.rst'),
     author='Chris Beaven',
     author_email='smileychris@gmail.com',
     platforms=['any'],
