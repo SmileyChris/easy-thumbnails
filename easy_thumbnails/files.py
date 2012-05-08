@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from django.utils.html import escape
 from django.utils.http import urlquote
 
-from easy_thumbnails import engine, models, utils, exceptions
+from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 
@@ -380,6 +380,7 @@ class Thumbnailer(File):
         thumbnail = self.generate_thumbnail(thumbnail_options)
         if save:
             save_thumbnail(thumbnail, self.thumbnail_storage)
+            signals.thumbnail_created.send(sender=thumbnail)
             # Ensure the right thumbnail name is used based on the transparency
             # of the image.
             filename = (utils.is_transparent(thumbnail.image) and
