@@ -1,6 +1,6 @@
 from os import path
 
-from easy_thumbnails import files, utils
+from easy_thumbnails import files, utils, signals
 from easy_thumbnails.tests import utils as test_utils
 from easy_thumbnails.conf import settings
 try:
@@ -129,3 +129,10 @@ class FilesTest(test_utils.BaseTest):
         opts = {'size': (50, 50)}
         thumb = self.thumbnailer.get_thumbnail(opts)
         self.assertEqual((thumb.width, thumb.height), (50, 50))
+
+    def test_thumbnail_created_signal(self):
+        def signal_handler(sender, *args, **kwargs):
+            sender.signal_received = True
+        signals.thumbnail_created.connect(signal_handler)
+        thumb = self.thumbnailer.get_thumbnail({'size': (10, 20)})
+        self.assertTrue(hasattr(thumb, 'signal_received'))
