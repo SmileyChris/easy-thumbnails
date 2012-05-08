@@ -7,7 +7,7 @@ A powerful, yet easy to implement thumbnailing application for Django.
 Below is a quick summary of usage. For more comprehensive information, view the
 `full documentation`__ online or the peruse the project's ``docs`` directory.
 
-__: http://easy-thumbnails.readthedocs.org/en/latest/index.html
+__ http://easy-thumbnails.readthedocs.org/en/latest/index.html
 
 
 Installation
@@ -16,7 +16,7 @@ Installation
 Run ``pip install easy_thumbnails``, or for the `in-development version`__
 run ``pip install easy_thumbnails==dev``.
 
-__: https://github.com/SmileyChris/easy-thumbnails/tarball/master#egg=easy_thumbnails-dev
+__ https://github.com/SmileyChris/easy-thumbnails/tarball/master#egg=easy_thumbnails-dev
 
 Add ``easy_thumbnails`` to your ``INSTALLED_APPS`` setting::
 
