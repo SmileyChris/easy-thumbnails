@@ -16,6 +16,8 @@ Installation
 Run ``pip install easy_thumbnails``, or for the `in-development version`__
 run ``pip install easy_thumbnails==dev``.
 
+__: https://github.com/SmileyChris/easy-thumbnails/tarball/master#egg=easy_thumbnails-dev
+
 Add ``easy_thumbnails`` to your ``INSTALLED_APPS`` setting::
 
     INSTALLED_APPS = (
@@ -36,7 +38,7 @@ specified in the template or Python code when run.
 Using a predefined alias
 ------------------------
 
-Given the following setting:
+Given the following setting::
 
     THUMBNAIL_ALIASES = {
         '': {
@@ -75,7 +77,7 @@ Fields
 You can use ``ThumbnailerImageField`` (or ``ThumbnailerFileField``) for easier
 access to retrieve or generate thumbnail images, or to .
 
-For example:
+For example::
 
     from easy_thumbnails.fields import ThumbnailerImageField
 
