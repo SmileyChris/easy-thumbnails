@@ -131,8 +131,13 @@ class FilesTest(test_utils.BaseTest):
         self.assertEqual((thumb.width, thumb.height), (50, 50))
 
     def test_thumbnail_created_signal(self):
+
         def signal_handler(sender, *args, **kwargs):
             sender.signal_received = True
+
         signals.thumbnail_created.connect(signal_handler)
-        thumb = self.thumbnailer.get_thumbnail({'size': (10, 20)})
-        self.assertTrue(hasattr(thumb, 'signal_received'))
+        try:
+            thumb = self.thumbnailer.get_thumbnail({'size': (10, 20)})
+            self.assertTrue(hasattr(thumb, 'signal_received'))
+        finally:
+            signals.thumbnail_created.disconnect(signal_handler)
