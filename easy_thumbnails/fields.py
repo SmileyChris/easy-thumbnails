@@ -41,7 +41,8 @@ class ThumbnailerImageField(ThumbnailerField, ImageField):
     ``resize_source`` keyword argument, passing it a usual thumbnail option
     dictionary. For example::
 
-        ThumbnailField(..., resize_source=dict(size=(100, 100), sharpen=True))
+        ThumbnailerImageField(
+            ..., resize_source=dict(size=(100, 100), sharpen=True))
     """
     attr_class = files.ThumbnailerImageFieldFile
 
