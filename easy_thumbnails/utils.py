@@ -115,7 +115,7 @@ def exif_orientation(im):
     """
     try:
         exif = im._getexif()
-    except (AttributeError, IndexError, KeyError):
+    except (AttributeError, IndexError, KeyError, OSError):
         exif = None
     if exif:
         orientation = exif.get(0x0112)
