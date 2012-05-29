@@ -156,6 +156,18 @@ For a full list of options, read the :doc:`ref/processors` reference
 documentation.
 
 
+Fallback images
+----------------------------------------
+
+If you need to support fallback or default images at template level you can
+use::
+    
+    {% thumbnail object.image|default:'img/default_image.png' 50x50 %}
+
+It only works for images within the media storage location, usually where your
+{{ MEDIA_ROOT }} points to.
+
+
 Models
 ======
 
