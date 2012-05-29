@@ -165,7 +165,7 @@ use::
     {% thumbnail object.image|default:'img/default_image.png' 50x50 %}
 
 It only works for images within the media storage location, usually where your
-{{ STATIC_URL }} points to.
+{{ MEDIA_ROOT }} points to.
 
 
 Models
