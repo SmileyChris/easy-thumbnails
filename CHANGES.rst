@@ -1,8 +1,8 @@
 Changes
 =======
 
-dev
----
+1.0.2
+-----
 
 * Catch an OSError exception when trying to get the EXIF data of a touchy
   image.
