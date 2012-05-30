@@ -1,6 +1,11 @@
 Changes
 =======
 
+1.0.3
+-----
+
+* Changed the exception to catch from 1.0.2 to IOError.
+
 1.0.2
 -----
 
