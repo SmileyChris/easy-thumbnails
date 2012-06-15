@@ -49,7 +49,7 @@ copyright = u'2009, Chris Beaven'
 # built documents.
 #
 # The short X.Y version.
-version = easy_thumbnails.VERSION
+version = '.'.join(easy_thumbnails.VERSION.split('.')[:2])
 # The full version, including alpha/beta/rc tags.
 release = easy_thumbnails.VERSION
 

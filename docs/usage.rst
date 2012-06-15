@@ -67,8 +67,11 @@ reference documentation.
 Thumbnail aliases
 =================
 
-You can specify an alias that will be available for any ``ImageField``, for a
-specific app, a specific model, or even just a specific model's field.
+An alias is a specific set of thumbnail options.
+
+Using aliases gives you a single location to define all of your standard
+thumbnail sizes/options, and avoids repetition of thumbnail options in your
+code and templates.
 
 An alias may be available project-wide, or set to target a specific app, model
 or field.
