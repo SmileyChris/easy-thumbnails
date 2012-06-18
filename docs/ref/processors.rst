@@ -68,8 +68,8 @@ Next, add the processor to
 :ref:`THUMBNAIL_PROCESSORS <setting-thumbnail_processors>` in your settings
 module::
 
-    from easy_thumbnails import defaults
+    from easy_thumbnails.conf import Settings as easy_thumbnails_defaults
 
-    THUMBNAIL_PROCESSORS = defaults.PROCESSORS + (
+    THUMBNAIL_PROCESSORS = easy_thumbnails_defaults.THUMBNAIL_PROCESSORS + (
         'wb_project.thumbnail_processors.whizzbang_processor',
     )
