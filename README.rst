@@ -130,4 +130,4 @@ Valid thumbnail options are determined by the "thumbnail processors" installed.
 See the `reference documentation`__ for a complete list of options provided by
 the default thumbnail processors.
 
-__ http://easy-thumbnails.readthedocs.org/en/latest/ref/processors.html
+__ http://easy-thumbnails.readthedocs.org/en/latest/ref/processors/
