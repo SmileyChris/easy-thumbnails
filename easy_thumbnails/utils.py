@@ -15,7 +15,7 @@ try:
 
     def fromtimestamp(timestamp):
         dt = datetime.datetime.fromtimestamp(timestamp)
-        if settings.USE_TZ:
+        if getattr(settings, 'USE_TZ', False):
             default_timezone = timezone.get_default_timezone()
             return timezone.make_aware(dt, default_timezone)
         return dt
