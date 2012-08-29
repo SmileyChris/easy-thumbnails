@@ -1,6 +1,15 @@
 Changes
 =======
 
+1.1
+---
+
+* Added a way to avoid generating thumbnails if they don't exist already (with
+  a signal to deal with them elsewhere).
+
+* Added a ``thumbnailer_passive`` filter to allow templates to use the
+  non-generating thumbnails functionality when dealing with aliases.
+
 1.0.3
 -----
 
