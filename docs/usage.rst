@@ -202,8 +202,8 @@ utility function:
    :noindex:
 
 Once you have an instance, you can use the :meth:`Thumbnailer.get_thumbnail`
-method to retrieve a thumbnail, which will generate it if it doesn't exist (or
-if the source image has been modified since it was created).
+method to retrieve a thumbnail, which will (by default) generate it if it
+doesn't exist (or if the source image has been modified since it was created).
 
 For example, assuming an ``aardvark.jpg`` image exists in the default storage::
 

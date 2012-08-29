@@ -131,12 +131,63 @@ class FilesTest(test.BaseTest):
 
     def test_thumbnail_created_signal(self):
 
-        def signal_handler(sender, *args, **kwargs):
+        def signal_handler(sender, **kwargs):
             sender.signal_received = True
 
         signals.thumbnail_created.connect(signal_handler)
         try:
             thumb = self.thumbnailer.get_thumbnail({'size': (10, 20)})
             self.assertTrue(hasattr(thumb, 'signal_received'))
+        finally:
+            signals.thumbnail_created.disconnect(signal_handler)
+
+    def test_passive_thumbnailer(self):
+        options = {'size': (10, 10)}
+
+        # Explicitly using the generate=False option on get_thumbnail won't
+        # generate a missing thumb.
+        thumb = self.thumbnailer.get_thumbnail(options, generate=False)
+        self.assertEqual(thumb, None)
+
+        # If the thumbnailer has generate=False, get_thumbnail won't generate a
+        # missing thumb by default.
+        self.thumbnailer.generate = False
+        thumb = self.thumbnailer.get_thumbnail(options)
+        self.assertEqual(thumb, None)
+
+        # If the thumbnailer has generate=False, get_thumbnail with
+        # generate=True will stiff force generation a missing thumb.
+        thumb = self.thumbnailer.get_thumbnail(options, generate=True)
+        self.assertTrue(thumb)
+
+        # If the thumbnailer has generate=False, get_thumbnail will still
+        # return existing thumbnails.
+        thumb = self.thumbnailer.get_thumbnail(options)
+        self.assertTrue(thumb)
+
+        # Explicitly using the generate=False option on get_thumbnail will
+        # still return existing thumbnails.
+        thumb = self.thumbnailer.get_thumbnail(options, generate=False)
+        self.assertTrue(thumb)
+
+    def test_thumbnail_missed_signal(self):
+
+        def signal_handler(sender, **kwargs):
+            sender.missed_signal = kwargs.get('options')
+
+        signals.thumbnail_missed.connect(signal_handler)
+        try:
+            # Standard generation doesn't trigger signal.
+            self.thumbnailer.get_thumbnail({'size': (100, 100)})
+            self.assertFalse(hasattr(self.thumbnailer, 'missed_signal'))
+            # Retrieval doesn't trigger signal.
+            self.thumbnailer.get_thumbnail({'size': (100, 100)},
+                generate=False)
+            self.assertFalse(hasattr(self.thumbnailer, 'missed_signal'))
+            # A thumbnail miss does trigger it.
+            options = {'size': (10, 20)}
+            thumb = self.thumbnailer.get_thumbnail(options, generate=False)
+            self.assertEqual(thumb, None)
+            self.assertEqual(self.thumbnailer.missed_signal, options)
         finally:
             signals.thumbnail_created.disconnect(signal_handler)

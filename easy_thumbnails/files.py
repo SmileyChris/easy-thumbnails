@@ -242,7 +242,8 @@ class Thumbnailer(File):
     thumbnail_processors = None
 
     def __init__(self, file=None, name=None, source_storage=None,
-            thumbnail_storage=None, remote_source=False, *args, **kwargs):
+            thumbnail_storage=None, remote_source=False, generate=True, *args,
+            **kwargs):
         super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
         self.source_storage = source_storage or default_storage
         if not thumbnail_storage:
@@ -251,6 +252,7 @@ class Thumbnailer(File):
         self.thumbnail_storage = thumbnail_storage
         self.remote_source = remote_source
         self.alias_target = None
+        self.generate = generate
 
         # Set default properties. For backwards compatibilty, check to see
         # if the attribute exists already (it could be set as a class property
@@ -353,15 +355,22 @@ class Thumbnailer(File):
 
         return os.path.join(basedir, path, subdir, filename)
 
-    def get_thumbnail(self, thumbnail_options, save=True):
+    def get_thumbnail(self, thumbnail_options, save=True, generate=None):
         """
         Return a ``ThumbnailFile`` containing a thumbnail.
 
-        It the file already exists, it will simply be returned.
+        If a matching thumbnail already exists, it will simply be returned.
 
-        Otherwise a new thumbnail image is generated using the
-        ``thumbnail_options`` dictionary. If the ``save`` argument is ``True``
-        (default), the generated thumbnail will be saved too.
+        By default (unless the ``Thumbnailer`` was instanciated with
+        ``generate=False``), thumbnails that don't exist are generated.
+        Otherwise ``None`` is returned.
+
+        Force the generation behaviour by setting the ``generate`` param to
+        either ``True`` or ``False`` as required.
+
+        The new thumbnail image is generated using the ``thumbnail_options``
+        dictionary. If the ``save`` argument is ``True`` (default), the
+        generated thumbnail will be saved too.
         """
         opaque_name = self.get_thumbnail_name(thumbnail_options,
                                               transparent=False)
@@ -376,6 +385,13 @@ class Thumbnailer(File):
                 return ThumbnailFile(name=filename,
                     storage=self.thumbnail_storage,
                     thumbnail_options=thumbnail_options)
+
+        if generate is None:
+            generate = self.generate
+        if not generate:
+            signals.thumbnail_missed.send(sender=self,
+                options=thumbnail_options)
+            return
 
         thumbnail = self.generate_thumbnail(thumbnail_options)
         if save:
