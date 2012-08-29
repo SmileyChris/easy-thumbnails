@@ -4,16 +4,17 @@ try:
 except ImportError:
     import Image
 
-from easy_thumbnails import test
+from django.core.files import storage
+
+from easy_thumbnails import test, alias
 from easy_thumbnails.conf import settings
 from easy_thumbnails.files import get_thumbnailer
 
 
-class ThumbnailTagTest(test.BaseTest):
-    restore_settings = ['THUMBNAIL_DEBUG', 'TEMPLATE_DEBUG']
+class Base(test.BaseTest):
 
     def setUp(self):
-        super(ThumbnailTagTest, self).setUp()
+        super(Base, self).setUp()
         self.storage = test.TemporaryStorage()
         # Save a test image.
         self.filename = self.create_image(self.storage, 'test.jpg')
@@ -23,14 +24,15 @@ class ThumbnailTagTest(test.BaseTest):
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
-        super(ThumbnailTagTest, self).tearDown()
+        super(Base, self).tearDown()
 
     def render_template(self, source):
         source_image = get_thumbnailer(self.storage, self.filename)
         source_image.thumbnail_storage = self.storage
         context = Context({
             'source': source_image,
-            'invalid_source': 'not%s' % self.filename,
+            'filename': self.filename,
+            'invalid_filename': 'not%s' % self.filename,
             'size': (90, 100),
             'invalid_size': (90, 'fish'),
             'strsize': '80x90',
@@ -56,6 +58,10 @@ class ThumbnailTagTest(test.BaseTest):
         self.assertEqual(image.size, expected_size)
 
         return expected_filename
+
+
+class ThumbnailTagTest(Base):
+    restore_settings = ['THUMBNAIL_DEBUG', 'TEMPLATE_DEBUG']
 
     def testTagInvalid(self):
         # No args, or wrong number of args
@@ -187,3 +193,78 @@ class ThumbnailTagTest(test.BaseTest):
         expected = self.verify_thumbnail((100, 75), {'size': (100, 0)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
+
+
+class ThumbnailerBase(Base):
+    restore_settings = ['THUMBNAIL_ALIASES', 'THUMBNAIL_MEDIA_ROOT']
+
+    def setUp(self):
+        super(ThumbnailerBase, self).setUp()
+        settings.THUMBNAIL_MEDIA_ROOT = self.storage.path('')
+        settings.THUMBNAIL_ALIASES = {
+            '': {
+                'small': {'size': (20, 20), 'crop': True},
+            },
+        }
+        alias.aliases.populate_from_settings()
+        # Make the temporary storage location the default storage for now.
+        self._old_default_storage = storage.default_storage._wrapped
+        storage.default_storage._wrapped = self.storage
+
+    def tearDown(self):
+        # Put the default storage back how we found it.
+        storage.default_storage._wrapped = self._old_default_storage
+        super(ThumbnailerBase, self).tearDown()
+        # Repopulate the aliases (setting reverted by super)
+        alias.aliases.populate_from_settings()
+
+
+class ThumbnailerFilterTest(ThumbnailerBase):
+
+    def test_get(self):
+        src = '{% with t=filename|thumbnailer %}'\
+            '{{ t.small.url }}{% endwith %}'
+        output = self.render_template(src)
+        expected = self.verify_thumbnail((20, 20),
+            settings.THUMBNAIL_ALIASES['']['small'])
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, expected_url)
+
+    def test_invalid(self):
+        src = '{% with t=invalid_filename|thumbnailer %}'\
+            '{{ t.small.url }}{% endwith %}'
+        output = self.render_template(src)
+        self.assertEqual(output, '')
+
+
+class ThumbnailerPassiveFilterTest(ThumbnailerBase):
+
+    def test_check_generate(self):
+        src = '{% with t=filename|thumbnailer_passive %}'\
+            '{{ t.generate }}{% endwith %}'
+        output = self.render_template(src)
+        self.assertEqual(output, 'False')
+
+    def test_get_existing(self):
+        options = settings.THUMBNAIL_ALIASES['']['small']
+        # Pregenerate the thumbnail.
+        get_thumbnailer(self.storage, self.filename).get_thumbnail(options)
+
+        src = '{% with t=filename|thumbnailer_passive %}'\
+            '{{ t.small.url }}{% endwith %}'
+        output = self.render_template(src)
+        expected = self.verify_thumbnail((20, 20), options)
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, expected_url)
+
+    def test_get_missing(self):
+        src = '{% with t=filename|thumbnailer_passive %}'\
+            '{{ t.small.url }}{% endwith %}'
+        output = self.render_template(src)
+        self.assertEqual(output, '')
+
+    def test_invalid(self):
+        src = '{% with t=invalid_filename|thumbnailer_passive %}'\
+            '{{ t.small.url }}{% endwith %}'
+        output = self.render_template(src)
+        self.assertEqual(output, '')

@@ -199,9 +199,9 @@ def thumbnail(parser, token):
     return ThumbnailNode(source_var, opts=opts, context_name=context_name)
 
 
-def thumbnailer(source):
+def thumbnailer(obj):
     """
-    Creates a thumbnailer from a ``FileFile``.
+    Creates a thumbnailer from an object (usually a ``FileField``).
 
     Example usage::
 
@@ -215,7 +215,32 @@ def thumbnailer(source):
         {% endif %}
         {% endwith %}
     """
-    return get_thumbnailer(source)
+    return get_thumbnailer(obj)
+
+
+def thumbnailer_passive(obj):
+    """
+    Creates a thumbnailer from an object (usually a ``FileFile``) that won't
+    generate new thumbnails.
+
+    This is useful if you are using another process to generate the thumbnails
+    rather than having them generated on the fly if they are missing.
+
+    Example usage::
+
+        {% with avatar=person.avatar|thumbnailer_passive %}
+            {% with avatar_thumb=avatar.small %}
+                {% if avatar_thumb %}
+                    <img src="{{ avatar_thumb.url }}" alt="" />
+                {% else %}
+                    <img src="{% static 'img/default-avatar-small.png' %}" alt="" />
+                {% endif %}
+            {% endwith %}
+        {% endwith %}
+    """
+    thumbnailer = get_thumbnailer(obj)
+    thumbnailer.generate = False
+    return thumbnailer
 
 
 def thumbnail_url(source, alias):
@@ -238,4 +263,5 @@ def thumbnail_url(source, alias):
 
 register.tag(thumbnail)
 register.filter(thumbnailer)
+register.filter(thumbnailer_passive)
 register.filter(thumbnail_url)
