@@ -170,6 +170,20 @@ Where the image string is relative to your default storage (usually the
 ``MEDIA_ROOT`` setting).
 
 
+.. _thumbnailer_filters:
+
+``thumbnailer`` filters
+-----------------------
+
+There are two filters that you can use if you want to get direct access to a
+thumbnailer in your template. This can be useful when dealing with aliased
+thumbnails.
+
+.. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnailer
+
+.. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnailer_passive
+
+
 Models
 ======
 
