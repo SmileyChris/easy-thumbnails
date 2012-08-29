@@ -1,18 +1,17 @@
 """Tests for the models module.
 """
 
-from easy_thumbnails import utils
+from easy_thumbnails import utils, test
 from easy_thumbnails.models import Thumbnail, Source
-from easy_thumbnails.tests import utils as test_utils
 
 
-class FileManagerTest(test_utils.BaseTest):
+class FileManagerTest(test.BaseTest):
     """Test for FileManager"""
 
     def setUp(self):
         super(FileManagerTest, self).setUp()
 
-        self.storage = test_utils.TemporaryStorage()
+        self.storage = test.TemporaryStorage()
         self.storage_hash = utils.get_storage_hash(self.storage)
         self.source = Source.objects.create(
                 name='Test source',

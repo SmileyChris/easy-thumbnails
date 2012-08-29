@@ -1,14 +1,12 @@
-from easy_thumbnails import widgets
-from easy_thumbnails.files import get_thumbnailer
-from easy_thumbnails.tests import utils as test_utils
+from easy_thumbnails import widgets, test
 from django.forms.widgets import ClearableFileInput
 
 
-class ImageClearableFileInput(test_utils.BaseTest):
+class ImageClearableFileInput(test.BaseTest):
 
     def setUp(self):
         super(ImageClearableFileInput, self).setUp()
-        self.storage = test_utils.TemporaryStorage()
+        self.storage = test.TemporaryStorage()
 
     def tearDown(self):
         self.storage.delete_temporary_storage()

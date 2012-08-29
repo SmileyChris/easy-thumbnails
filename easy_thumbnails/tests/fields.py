@@ -3,7 +3,7 @@ import os
 from django.core.files.base import ContentFile
 from django.db import models
 
-from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
+from easy_thumbnails import test
 from easy_thumbnails.fields import ThumbnailerField
 from easy_thumbnails.exceptions import InvalidImageFormatError
 
@@ -12,10 +12,10 @@ class TestModel(models.Model):
     avatar = ThumbnailerField(upload_to='avatars')
 
 
-class ThumbnailerFieldTest(BaseTest):
+class ThumbnailerFieldTest(test.BaseTest):
     def setUp(self):
-        BaseTest.setUp(self)
-        self.storage = TemporaryStorage()
+        super(ThumbnailerFieldTest, self).setUp()
+        self.storage = test.TemporaryStorage()
         # Save a test image.
         self.create_image(self.storage, 'avatars/avatar.jpg')
         # Set the test model to use the current temporary storage.
@@ -24,7 +24,7 @@ class ThumbnailerFieldTest(BaseTest):
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
-        BaseTest.tearDown(self)
+        super(ThumbnailerFieldTest, self).tearDown()
 
     def test_generate_thumbnail(self):
         instance = TestModel(avatar='avatars/avatar.jpg')

@@ -4,17 +4,17 @@ try:
 except ImportError:
     import Image
 
+from easy_thumbnails import test
 from easy_thumbnails.conf import settings
-from easy_thumbnails.tests.utils import BaseTest, TemporaryStorage
 from easy_thumbnails.files import get_thumbnailer
 
 
-class ThumbnailTagTest(BaseTest):
+class ThumbnailTagTest(test.BaseTest):
     restore_settings = ['THUMBNAIL_DEBUG', 'TEMPLATE_DEBUG']
 
     def setUp(self):
-        BaseTest.setUp(self)
-        self.storage = TemporaryStorage()
+        super(ThumbnailTagTest, self).setUp()
+        self.storage = test.TemporaryStorage()
         # Save a test image.
         self.filename = self.create_image(self.storage, 'test.jpg')
 
@@ -23,7 +23,7 @@ class ThumbnailTagTest(BaseTest):
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
-        BaseTest.tearDown(self)
+        super(ThumbnailTagTest, self).tearDown()
 
     def render_template(self, source):
         source_image = get_thumbnailer(self.storage, self.filename)

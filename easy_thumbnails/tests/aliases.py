@@ -1,10 +1,9 @@
 from django.db import models
-from django.core.files.storage import get_storage_class
 
 from easy_thumbnails import files, fields, signals, signal_handlers
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
-from easy_thumbnails.tests import utils
+from easy_thumbnails import test
 
 
 class Profile(models.Model):
@@ -15,7 +14,7 @@ class Profile(models.Model):
         app_label = 'some_app'
 
 
-class BaseTest(utils.BaseTest):
+class BaseTest(test.BaseTest):
     create_file = False
 
     def setUp(self):
@@ -43,7 +42,7 @@ class BaseTest(utils.BaseTest):
         aliases.populate_from_settings()
 
         if self.create_file:
-            self.storage = utils.TemporaryStorage()
+            self.storage = test.TemporaryStorage()
             # Save a test image.
             self.create_image(self.storage, 'avatars/test.jpg')
             # Set the test model to use the current temporary storage.

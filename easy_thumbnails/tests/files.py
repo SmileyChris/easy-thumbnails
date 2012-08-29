@@ -1,7 +1,6 @@
 from os import path
 
-from easy_thumbnails import files, utils, signals
-from easy_thumbnails.tests import utils as test_utils
+from easy_thumbnails import files, utils, signals, test
 from easy_thumbnails.conf import settings
 try:
     from PIL import Image
@@ -9,12 +8,12 @@ except ImportError:
     import Image
 
 
-class FilesTest(test_utils.BaseTest):
+class FilesTest(test.BaseTest):
 
     def setUp(self):
         super(FilesTest, self).setUp()
-        self.storage = test_utils.TemporaryStorage()
-        self.remote_storage = test_utils.FakeRemoteStorage()
+        self.storage = test.TemporaryStorage()
+        self.remote_storage = test.FakeRemoteStorage()
 
         # Save a test image in both storages.
         filename = self.create_image(self.storage, 'test.jpg')
