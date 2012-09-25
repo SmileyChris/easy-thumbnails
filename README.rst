@@ -13,8 +13,8 @@ __ http://easy-thumbnails.readthedocs.org/en/latest/index.html
 Installation
 ============
 
-Run ``pip install easy_thumbnails``, or for the `in-development version`__
-run ``pip install easy_thumbnails==dev``.
+Run ``pip install easy-thumbnails``, or for the `in-development version`__
+run ``pip install easy-thumbnails==dev``.
 
 __ https://github.com/SmileyChris/easy-thumbnails/tarball/master#egg=easy_thumbnails-dev
 
