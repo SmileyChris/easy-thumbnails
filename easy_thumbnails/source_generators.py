@@ -9,6 +9,12 @@ except ImportError:
     import Image
 
 from easy_thumbnails import utils
+import logging
+import select
+import subprocess
+
+
+logger = logging.getLogger(__name__)
 
 
 def pil_image(source, exif_orientation=True, **options):
@@ -39,3 +45,25 @@ def pil_image(source, exif_orientation=True, **options):
     if exif_orientation:
         image = utils.exif_orientation(image)
     return image
+
+
+def ffmpeg(source, **options):
+    """
+    Try and use ffmpeg to process the source, ignoring any errors.
+
+    Requires the ``ffmpeg`` command to be installed and on the ``PATH``.
+    """
+    # Take the first frame, scale it to display aspect ratio (DAR), output as
+    # an image.
+    proc = subprocess.Popen(["ffmpeg", "-i", "-", "-vframes", "1",
+                             "-vf", "scale=ih*dar:ih", "-f", "image2",
+                             "-"],
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    (stdout, stderr) = utils.communicate(proc, source)
+    if proc.returncode != 0:
+        logger.warning("ffmpeg failed with return code %d" % proc.returncode)
+        logger.debug(stderr)
+        return
+    return pil_image(stdout)

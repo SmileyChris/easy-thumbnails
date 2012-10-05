@@ -25,6 +25,19 @@ except ImportError:
     fromtimestamp = datetime.datetime.fromtimestamp
 
 from easy_thumbnails.conf import settings
+from functools import partial
+import logging
+import select
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+from threading import Thread
+
+PIPE_BUFFER = getattr(select, "PIPE_BUF", 512)  # select.PIPE_BUF only >= 2.7
+logger = logging.getLogger(__name__)
 
 
 def image_entropy(im):
@@ -134,3 +147,84 @@ def exif_orientation(im):
         elif orientation == 8:
             im = im.rotate(90)
     return im
+
+
+def consume(fd):
+    """
+    Reads from a file into a StringIO.
+
+    Python blocks reads from files, so a thread is used to read into a
+    StringIO. See http://stackoverflow.com/a/4896288/253686 for further
+    explanation
+
+    Don't use the returned `StringIO` until the thread has finished.
+
+    :returns: `tuple` of ``(StringIO, Thread)``
+    """
+    def worker(fd, buf):
+        read = partial(fd.read, PIPE_BUFFER)
+        for chunk in iter(read, b''):
+            buf.write(chunk)
+        fd.close()
+
+    output = StringIO()
+    thread = Thread(target=worker, args=(fd, output))
+    thread.daemon = True  # thread dies with Python
+    thread.start()
+    return (output, thread)
+
+
+def communicate(process, input):
+    """
+    Communicate with process, chunking *input* to stdin.
+
+    This differs from `subprocess.communicate` in that *input* is a file-like
+    stream, not a string. The return values are also `StringIO`, not strings.
+
+    :param process: `Popen` object
+    :param   input: file-like stream
+    :returns: `tuple` of ``(stdout, stderr)`` (each is a `StringIO`)
+
+    As with `subprocess.communicate`, *stderr* and *stdout* are buffered in
+    memory, and are `None` unless `subprocess.PIPE` was specified in `Popen`.
+    """
+    consumers = []
+    error, output = None, None
+
+    if process.stderr is not None:
+        (error, consumer) = consume(process.stderr)
+        consumers.append(consumer)
+
+    if process.stdout is not None:
+        (output, consumer) = consume(process.stdout)
+        consumers.append(consumer)
+
+    try:
+        read = partial(input.read, PIPE_BUFFER)
+        for buf in iter(read, b''):
+            try:
+                process.stdin.write(buf)
+            except:
+                # The process has closed stdin, it's probably finished executing
+                break
+        else:
+            process.stdin.close()
+    except:
+        # If we can't read the input, something's gone horrible wrong.
+        logger.exception("Failed to read from input stream, skipping...")
+        process.kill()
+        return
+
+    # read everything from stdout/stderr
+    for consumer in consumers:
+        consumer.join()
+
+    # rewind
+    if output is not None:
+        output.seek(0)
+    if error is not None:
+        error.seek(0)
+
+    process.wait()  # populate process.returncode
+
+    return (output, error)
