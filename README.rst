@@ -62,7 +62,7 @@ Manually specifying size / options
 Template::
 
     {% load thumbnail %}
-    <img src="{% thumbnail profile.photo 50x50 crop %}"
+    <img src="{% thumbnail profile.photo 50x50 crop %}" />
 
 Python::
 
