@@ -1,4 +1,5 @@
 from easy_thumbnails import widgets, test
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms.widgets import ClearableFileInput
 
 
@@ -85,3 +86,22 @@ class ImageClearableFileInput(test.BaseTest):
         html = widget.render('photo', None)
         base_html = base_widget.render('photo', None)
         self.assertEqual(base_html, html)
+
+    def test_render_uploaded(self):
+        """
+        The widget treats UploadedFile as no input.
+
+        Rationale:
+        When widget is used in ModelForm and the form (submitted with upload)
+        is not valid, widget should discard the value (just like standard
+        Django ClearableFileInput does).
+        """
+        widget = widgets.ImageClearableFileInput()
+        base_widget = ClearableFileInput()
+        file_name = 'test.jpg'
+        image = self.create_image(None, file_name) # storage=None to get raw content
+        upload_file = SimpleUploadedFile(file_name, image.getvalue())
+        html = widget.render('photo', upload_file)
+        base_html = base_widget.render('photo', upload_file)
+        self.assertEqual(base_html, html)
+        self.assertNotIn(file_name, html) # Widget is empty
