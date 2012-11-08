@@ -4,12 +4,14 @@ from django.core.files.base import ContentFile
 from django.db import models
 
 from easy_thumbnails import test
-from easy_thumbnails.fields import ThumbnailerField
+from easy_thumbnails.fields import ThumbnailerField, ThumbnailerImageField
 from easy_thumbnails.exceptions import InvalidImageFormatError
 
 
 class TestModel(models.Model):
     avatar = ThumbnailerField(upload_to='avatars')
+    picture = ThumbnailerImageField(upload_to='pictures',
+                                    resize_source=dict(size=(10, 10)))
 
 
 class ThumbnailerFieldTest(test.BaseTest):
@@ -76,3 +78,11 @@ class ThumbnailerFieldTest(test.BaseTest):
         instance.avatar.get_thumbnail({'size': (300, 300)})
         instance.avatar.get_thumbnail({'size': (200, 200)})
         self.assertEqual(len(list(instance.avatar.get_thumbnails())), 2)
+
+    def test_saving_image_field_with_resize_source(self):
+        # Ensure that saving ThumbnailerImageField with resize_source enabled
+        # using instance.field.save() does not fail
+        instance = TestModel(avatar='avatars/avatar.jpg')
+        instance.picture.save('file.jpg',
+                              ContentFile(instance.avatar.file.read()))
+        self.assertEqual(instance.picture.width, 10)

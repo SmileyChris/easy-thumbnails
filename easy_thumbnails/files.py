@@ -580,6 +580,6 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
         if options:
             if not 'quality' in options:
                 options['quality'] = self.thumbnail_quality
-            content = Thumbnailer(content).generate_thumbnail(options)
+            content = Thumbnailer(content, name).generate_thumbnail(options)
         super(ThumbnailerImageFieldFile, self).save(name, content, *args,
                                                     **kwargs)
