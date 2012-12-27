@@ -3,7 +3,12 @@ import math
 import datetime
 
 from django.utils.functional import LazyObject
-from django.utils.hashcompat import md5_constructor
+
+try:
+    from hashlib import md5 as md5_constructor
+except ImportError:
+    from django.utils.hashcompat import md5_constructor
+
 try:
     from PIL import Image
 except ImportError:
