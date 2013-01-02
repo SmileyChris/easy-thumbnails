@@ -49,7 +49,7 @@ Given the following setting::
 Template::
 
     {% load thumbnail %}
-    <img src="{{ profile.photo|thumbnail_url:'avatar' }}" alt="">
+    <img src="{{ profile.photo|thumbnail_url:'avatar' }}" alt="" />
 
 Python::
 
@@ -62,7 +62,7 @@ Manually specifying size / options
 Template::
 
     {% load thumbnail %}
-    <img src="{% thumbnail profile.photo 50x50 crop %}" />
+    <img src="{% thumbnail profile.photo 50x50 crop %}" alt="" />
 
 Python::
 
@@ -75,7 +75,7 @@ Fields
 ======
 
 You can use ``ThumbnailerImageField`` (or ``ThumbnailerFileField``) for easier
-access to retrieve or generate thumbnail images, or to .
+access to retrieve or generate thumbnail images.
 
 For example::
 
@@ -88,7 +88,7 @@ For example::
 Accessing the field's predefined alias in a template::
 
     {% load thumbnail %}
-    <img src="{{ profile.photo.avatar.url }}" alt="">
+    <img src="{{ profile.photo.avatar.url }}" alt="" />
 
 Accessing the field's predefined alias in Python code::
 
