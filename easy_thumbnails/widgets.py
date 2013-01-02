@@ -29,7 +29,7 @@ class ImageClearableFileInput(ClearableFileInput):
 
     def render(self, name, value, attrs=None):
         output = super(ImageClearableFileInput, self).render(name, value, attrs)
-        if not value:
+        if not value or not hasattr(value, 'storage'):
             return output
         thumb = self.get_thumbnail(value)
         substitution = {
