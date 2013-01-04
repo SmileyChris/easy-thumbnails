@@ -114,6 +114,44 @@ file), register one of these signal handlers. For example::
     saved_file.connect(generate_aliases_global)
 
 
+Asynchronous Pregeneration
+--------------------------
+
+For some use cases, it may not be necessary to have the relevant aliases
+generated at the exact moment a file is uploaded. As an alternative, the
+pregeneration task can be queued and executed by a background process.
+
+The following example uses `django-celery 
+<http://pypi.python.org/pypi/django-celery>`_ in conjunction with `Celery 
+<http://celeryproject.org>`_ to achieve this.
+
+models.py::
+
+    from django.dispatch import receiver
+    from easy_thumbnails.signals import saved_file
+    from myapp import tasks
+    
+    @receiver(saved_file)
+    def generate_thumbnails_async(sender, fieldfile, **kwargs):
+        tasks.generate_thumbnails.delay(
+            model=sender, pk=fieldfile.instance.pk,
+            field=fieldfile.field.name)
+
+tasks.py::
+
+    from celery import task
+    from easy_thumbnails.files import generate_all_aliases
+    
+    @task
+    def generate_thumbnails(model, pk, field):
+        instance = model._default_manager.get(pk=pk)
+        fieldfile = getattr(instance, field)
+        generate_all_aliases(fieldfile, include_global=True)
+
+This results in a more responsive experience for the user, particularly
+when dealing with large files and/or remote storage.
+
+
 Setting aliases for your third-party app
 ----------------------------------------
 
