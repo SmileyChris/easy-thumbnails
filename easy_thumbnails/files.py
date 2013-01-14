@@ -259,7 +259,7 @@ class Thumbnailer(File):
         # on a subclass) before getting it from settings.
         for default in ('basedir', 'subdir', 'prefix', 'quality', 'extension',
                 'preserve_extensions', 'transparency_extension',
-                'check_cache_miss'):
+                'check_cache_miss', 'force_extension'):
             attr_name = 'thumbnail_%s' % default
             if getattr(self, attr_name, None) is None:
                 value = getattr(settings, attr_name.upper())
@@ -318,15 +318,18 @@ class Thumbnailer(File):
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
         filename = '%s%s' % (self.thumbnail_prefix, source_filename)
-        if self.thumbnail_preserve_extensions == True or  \
-            (self.thumbnail_preserve_extensions and  \
-            source_extension.lower() in self.thumbnail_preserve_extensions):
-                extension = source_extension
-        elif transparent:
-            extension = self.thumbnail_transparency_extension
-        else:
+        if self.thumbnail_force_extension:
             extension = self.thumbnail_extension
-        extension = extension or 'jpg'
+        else:
+            if self.thumbnail_preserve_extensions == True or  \
+                (self.thumbnail_preserve_extensions and  \
+                source_extension.lower() in self.thumbnail_preserve_extensions):
+                    extension = source_extension
+            elif transparent:
+                extension = self.thumbnail_transparency_extension
+            else:
+                extension = self.thumbnail_extension
+            extension = extension or 'jpg'
 
         thumbnail_options = thumbnail_options.copy()
         size = tuple(thumbnail_options.pop('size'))
