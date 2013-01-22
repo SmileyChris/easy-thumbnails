@@ -1,6 +1,13 @@
 Changes
 =======
 
+1.2
+---
+
+* Django 1.5 compatibility.
+
+* Fixed a problem with the ``ImageClearableFileInput`` widget.
+
 1.1
 ---
 
