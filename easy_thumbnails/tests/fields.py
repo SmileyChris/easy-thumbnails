@@ -83,6 +83,6 @@ class ThumbnailerFieldTest(test.BaseTest):
         # Ensure that saving ThumbnailerImageField with resize_source enabled
         # using instance.field.save() does not fail
         instance = TestModel(avatar='avatars/avatar.jpg')
-        instance.picture.save('file.jpg',
-                              ContentFile(instance.avatar.file.read()))
+        instance.picture.save(
+            'file.jpg', ContentFile(instance.avatar.file.read()), save=False)
         self.assertEqual(instance.picture.width, 10)
