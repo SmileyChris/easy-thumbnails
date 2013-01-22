@@ -222,8 +222,8 @@ class ThumbnailFile(ImageFieldFile):
 
     def open(self, mode=None, *args, **kwargs):
         if self.closed and self.name:
-            self.file = self.storage.open(self.name,
-                mode or getattr(self, 'mode', None) or 'rb')
+            mode = mode or getattr(self, 'mode', None) or 'rb'
+            self.file = self.storage.open(self.name, mode)
         else:
             return super(ThumbnailFile, self).open(mode, *args, **kwargs)
 
@@ -476,8 +476,8 @@ class Thumbnailer(File):
 
     def open(self, mode=None):
         if self.closed:
-            self.file = self.source_storage.open(self.name,
-                mode or getattr(self, 'mode', None) or 'rb')
+            mode = mode or getattr(self, 'mode', None) or 'rb'
+            self.file = self.source_storage.open(self.name, mode)
         else:
             self.seek(0)
 
