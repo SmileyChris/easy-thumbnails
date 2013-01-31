@@ -4,8 +4,12 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 from django.core.files.storage import default_storage
-from django.utils.hashcompat import md5_constructor
 import pickle
+try:
+    from hashlib import md5 as md5_constructor
+except ImportError:
+    from django.utils.hashcompat import md5_constructor
+
 
 class Migration(DataMigration):
     """
