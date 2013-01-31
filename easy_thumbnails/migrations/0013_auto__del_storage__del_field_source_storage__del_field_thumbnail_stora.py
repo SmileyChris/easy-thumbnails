@@ -5,7 +5,11 @@ from south.v2 import SchemaMigration
 from django.db import models
 from django.core.files.storage import default_storage
 import pickle
-from django.utils.hashcompat import md5_constructor
+try:
+    from hashlib import md5 as md5_constructor
+except ImportError:
+    from django.utils.hashcompat import md5_constructor
+
 
 class Migration(SchemaMigration):
 
