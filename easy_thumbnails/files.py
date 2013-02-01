@@ -280,13 +280,17 @@ class Thumbnailer(File):
         return engine.generate_source_image(self, thumbnail_options,
                                             self.source_generators)
 
-    def generate_thumbnail(self, thumbnail_options):
+    def generate_thumbnail(self, thumbnail_options, high_resolution=False):
         """
         Return an unsaved ``ThumbnailFile`` containing a thumbnail image.
 
         The thumbnail image is generated using the ``thumbnail_options``
         dictionary.
         """
+        orig_size = thumbnail_options['size']
+        if high_resolution:
+            thumbnail_options = thumbnail_options.copy()
+            thumbnail_options['size'] = (orig_size[0] * 2, orig_size[1] * 2)
         image = self.generate_source_image(thumbnail_options)
         if image is None:
             raise exceptions.InvalidImageFormatError(
@@ -296,8 +300,15 @@ class Thumbnailer(File):
                                                self.thumbnail_processors)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 
+        # restore original size to fake smaller image
+        thumbnail_options['size'] = orig_size
+
         filename = self.get_thumbnail_name(thumbnail_options,
             transparent=utils.is_transparent(thumbnail_image))
+        if high_resolution:
+            filename_parts = filename.split('.')
+            filename_parts[-2] += '@2x'
+            filename = '.'.join(filename_parts)
 
         data = engine.save_image(thumbnail_image, filename=filename,
             quality=quality).read()
@@ -404,6 +415,10 @@ class Thumbnailer(File):
                         transparent_name or opaque_name)
             self.get_thumbnail_cache(filename, create=True, update=True)
 
+            if settings.THUMBNAIL_HIGH_RESOLUTION:
+                thumbnail_2x = self.generate_thumbnail(thumbnail_options,
+                                                       high_resolution=True)
+                save_thumbnail(thumbnail_2x, self.thumbnail_storage)
         return thumbnail
 
     def thumbnail_exists(self, thumbnail_name):
