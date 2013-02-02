@@ -306,9 +306,7 @@ class Thumbnailer(File):
         filename = self.get_thumbnail_name(thumbnail_options,
             transparent=utils.is_transparent(thumbnail_image))
         if high_resolution:
-            filename_parts = filename.split('.')
-            filename_parts[-2] += '@2x'
-            filename = '.'.join(filename_parts)
+            filename = self.get_high_resolution_filename(filename)
 
         data = engine.save_image(thumbnail_image, filename=filename,
             quality=quality).read()
@@ -320,6 +318,13 @@ class Thumbnailer(File):
         thumbnail._committed = False
 
         return thumbnail
+
+    @staticmethod
+    def get_high_resolution_filename(filename):
+        filename_parts = filename.split('.')
+        filename_parts[-2] += '@2x'
+        filename = '.'.join(filename_parts)
+        return filename
 
     def get_thumbnail_name(self, thumbnail_options, transparent=False):
         """
@@ -435,6 +440,9 @@ class Thumbnailer(File):
         # Try to use the local file modification times first.
         source_modtime = self.get_source_modtime()
         thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
+        if settings.THUMBNAIL_HIGH_RESOLUTION:
+            thumbnail_name_2x = self.get_high_resolution_filename(thumbnail_name)
+            thumbnail_modtime = min(thumbnail_modtime, self.get_thumbnail_modtime(thumbnail_name_2x))
         # The thumbnail modification time will be 0 if there was an OSError,
         # in which case it will still be used (but always return False).
         if source_modtime and thumbnail_modtime is not None:
@@ -444,7 +452,12 @@ class Thumbnailer(File):
         if not source:
             return False
         thumbnail = self.get_thumbnail_cache(thumbnail_name)
-        return thumbnail and source.modified <= thumbnail.modified
+        thumbnail_modtime = thumbnail.modified
+        if thumbnail and settings.THUMBNAIL_HIGH_RESOLUTION:
+            thumbnail = self.get_thumbnail_cache(thumbnail_name_2x)
+            if thumbnail:
+                thumbnail_modtime = min(thumbnail_modtime, thumbnail.modified)
+        return thumbnail and source.modified <= thumbnail_modtime
 
     def get_source_cache(self, create=False, update=False):
         if self.remote_source:
