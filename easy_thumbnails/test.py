@@ -108,7 +108,7 @@ class BaseTest(TestCase):
         return super(BaseTest, self).tearDown()
 
     def create_image(self, storage, filename, size=(800, 600),
-            image_mode='RGB', image_format='JPEG'):
+                     image_mode='RGB', image_format='JPEG'):
         """
         Generate a test image, returning the filename that it was saved as.
 

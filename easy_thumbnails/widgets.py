@@ -32,7 +32,8 @@ class ImageClearableFileInput(ClearableFileInput):
         return thumbnailer.get_thumbnail(self.thumbnail_options)
 
     def render(self, name, value, attrs=None):
-        output = super(ImageClearableFileInput, self).render(name, value, attrs)
+        output = super(ImageClearableFileInput, self).render(
+            name, value, attrs)
         if not value or not hasattr(value, 'storage'):
             return output
         thumb = self.get_thumbnail(value)

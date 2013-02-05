@@ -11,7 +11,8 @@ try:
 except NameError:
     from sets import Set as set     # For Python 2.3
 
-thumb_re = re.compile(r'^%s(.*)\.\d{1,}x\d{1,}_[-\w]*q([1-9]\d?|100)\.jpg' %
+thumb_re = re.compile(
+    r'^%s(.*)\.\d{1,}x\d{1,}_[-\w]*q([1-9]\d?|100)\.jpg' %
     settings.THUMBNAIL_PREFIX)
 
 
@@ -51,12 +52,12 @@ def clean_up():
                 # org_fn_alt is the expected original filename with extension
                 org_fn = m.group(1)
                 org_fn_exists = os.path.isfile(
-                            os.path.join(settings.MEDIA_ROOT, path, org_fn))
+                    os.path.join(settings.MEDIA_ROOT, path, org_fn))
 
                 usc_pos = org_fn.rfind("_")
                 if usc_pos != -1:
-                    org_fn_alt = "%s.%s" % (org_fn[0:usc_pos],
-                        org_fn[usc_pos + 1:])
+                    org_fn_alt = "%s.%s" % (
+                        org_fn[0:usc_pos], org_fn[usc_pos + 1:])
                     org_fn_alt_exists = os.path.isfile(
                         os.path.join(settings.MEDIA_ROOT, path, org_fn_alt))
                 else:

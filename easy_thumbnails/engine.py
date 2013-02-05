@@ -28,7 +28,8 @@ def process_image(source, processor_options, processors=None):
     """
     processor_options = _use_default_options(processor_options)
     if processors is None:
-        processors = [utils.dynamic_import(name)
+        processors = [
+            utils.dynamic_import(name)
             for name in settings.THUMBNAIL_PROCESSORS]
     image = source
     for processor in processors:
@@ -72,7 +73,8 @@ def generate_source_image(source_file, processor_options, generators=None):
     processor_options = _use_default_options(processor_options)
     was_closed = source_file.closed
     if generators is None:
-        generators = [utils.dynamic_import(name)
+        generators = [
+            utils.dynamic_import(name)
             for name in settings.THUMBNAIL_SOURCE_GENERATORS]
     try:
         source = source_file

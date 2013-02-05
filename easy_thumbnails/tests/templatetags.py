@@ -148,37 +148,38 @@ class ThumbnailTagTest(Base):
         settings.THUMBNAIL_DEBUG = True
 
         # Basic
-        output = self.render_template('src="'
-            '{% thumbnail source 240x240 %}"')
+        output = self.render_template(
+            'src="{% thumbnail source 240x240 %}"')
         expected = self.verify_thumbnail((240, 180), {'size': (240, 240)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
 
         # Size from context variable
         # as a tuple:
-        output = self.render_template('src="'
-            '{% thumbnail source size %}"')
+        output = self.render_template(
+            'src="{% thumbnail source size %}"')
         expected = self.verify_thumbnail((90, 68), {'size': (90, 100)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
         # as a string:
-        output = self.render_template('src="'
-            '{% thumbnail source strsize %}"')
+        output = self.render_template(
+            'src="{% thumbnail source strsize %}"')
         expected = self.verify_thumbnail((80, 60), {'size': (80, 90)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
 
         # On context
-        output = self.render_template('height:'
-            '{% thumbnail source 240x240 as thumb %}{{ thumb.height }}')
+        output = self.render_template(
+            'height:{% thumbnail source 240x240 as thumb %}{{ thumb.height }}')
         self.assertEqual(output, 'height:180')
 
         # With options and quality
-        output = self.render_template('src="'
-            '{% thumbnail source 240x240 sharpen crop quality=95 %}"')
+        output = self.render_template(
+            'src="{% thumbnail source 240x240 sharpen crop quality=95 %}"')
         # Note that the opts are sorted to ensure a consistent filename.
-        expected = self.verify_thumbnail((240, 240), {'size': (240, 240),
-            'crop': True, 'sharpen': True, 'quality': 95})
+        expected = self.verify_thumbnail(
+            (240, 240),
+            {'size': (240, 240), 'crop': True, 'sharpen': True, 'quality': 95})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
 
@@ -228,8 +229,8 @@ class ThumbnailerFilterTest(ThumbnailerBase):
             '{{ t.small.url }}{% endwith %}'
         )
         output = self.render_template(src)
-        expected = self.verify_thumbnail((20, 20),
-            settings.THUMBNAIL_ALIASES['']['small'])
+        expected = self.verify_thumbnail(
+            (20, 20), settings.THUMBNAIL_ALIASES['']['small'])
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, expected_url)
 

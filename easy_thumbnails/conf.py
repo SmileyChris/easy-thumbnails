@@ -77,8 +77,8 @@ class AppSettings(BaseSettings):
             # reverted.
             if attr not in self._added:
                 try:
-                    self._changed.setdefault(attr,
-                        getattr(django_settings, attr))
+                    self._changed.setdefault(
+                        attr, getattr(django_settings, attr))
                 except AttributeError:
                     self._added.append(attr)
             return setattr(django_settings, attr, value)

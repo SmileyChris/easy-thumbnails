@@ -64,8 +64,8 @@ class ScaleAndCropTest(TestCase):
         expected = image.crop([700, 0, 800, 600])
         self.assertImagesEqual(br_crop, expected)
 
-        x_offset_crop = processors.scale_and_crop(image, (150, 600),
-            crop='10,-10')
+        x_offset_crop = processors.scale_and_crop(
+            image, (150, 600), crop='10,-10')
         expected = image.crop([15, 0, 165, 600])
 
         self.assertImagesEqual(x_offset_crop, expected)

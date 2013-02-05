@@ -30,8 +30,8 @@ class ImageClearableFileInput(test.BaseTest):
         # Changing the options won't change the thumbnail options in the widget
         # now.
         options['crop'] = False
-        self.assertEqual(widget.thumbnail_options,
-            {'size': (300, 100), 'crop': True})
+        self.assertEqual(
+            widget.thumbnail_options, {'size': (300, 100), 'crop': True})
 
     def test_render(self):
         """
@@ -101,9 +101,10 @@ class ImageClearableFileInput(test.BaseTest):
         widget = widgets.ImageClearableFileInput()
         base_widget = ClearableFileInput()
         file_name = 'test.jpg'
-        image = self.create_image(None, file_name) # storage=None to get raw content
+        # storage=None to get raw content.
+        image = self.create_image(None, file_name)
         upload_file = SimpleUploadedFile(file_name, image.getvalue())
         html = widget.render('photo', upload_file)
         base_html = base_widget.render('photo', upload_file)
         self.assertEqual(base_html, html)
-        self.assertNotIn(file_name, html) # Widget is empty
+        self.assertNotIn(file_name, html)   # Widget is empty.

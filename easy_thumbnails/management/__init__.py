@@ -43,8 +43,8 @@ def all_thumbnails(path, recursive=True, prefix=None, subdir=None):
                 source_path, source_filename = os.path.split(source_filename)
                 if not source_filename.startswith(prefix):
                     continue
-                source_filename = os.path.join(source_path,
-                    source_filename[len(prefix):])
+                source_filename = os.path.join(
+                    source_path, source_filename[len(prefix):])
             d['options'] = d['options'] and d['options'].split('_') or []
             if subdir and rel_dir.endswith(subdir):
                 rel_dir = rel_dir[:-len(subdir)]

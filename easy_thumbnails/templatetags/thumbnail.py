@@ -50,14 +50,13 @@ class ThumbnailNode(Node):
             source = self.source_var.resolve(context)
         except VariableDoesNotExist:
             if raise_errors:
-                raise VariableDoesNotExist("Variable '%s' does not exist." %
-                        self.source_var)
+                raise VariableDoesNotExist(
+                    "Variable '%s' does not exist." % self.source_var)
             return self.bail_out(context)
         if not source:
             if raise_errors:
                 raise TemplateSyntaxError(
-                    "Variable '%s' is an invalid source." % self.source_var
-                )
+                    "Variable '%s' is an invalid source." % self.source_var)
             return self.bail_out(context)
         # Resolve the thumbnail option values.
         try:
@@ -87,16 +86,16 @@ class ThumbnailNode(Node):
                 opts['quality'] = int(opts['quality'])
             except (TypeError, ValueError):
                 if raise_errors:
-                    raise TemplateSyntaxError("%r is an invalid quality." %
-                                              opts['quality'])
+                    raise TemplateSyntaxError(
+                        "%r is an invalid quality." % opts['quality'])
                 return self.bail_out(context)
 
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
         except Exception, e:
             if raise_errors:
-                raise TemplateSyntaxError(u"Couldn't get the thumbnail %s: %s" %
-                                          (source, e))
+                raise TemplateSyntaxError(
+                    u"Couldn't get the thumbnail %s: %s" % (source, e))
             return self.bail_out(context)
         # Return the thumbnail file url, or put the file on the context.
         if self.context_name is None:
@@ -168,7 +167,8 @@ def thumbnail(parser, token):
         context_name = None
 
     if len(args) < 3:
-        raise TemplateSyntaxError("Invalid syntax. Expected "
+        raise TemplateSyntaxError(
+            "Invalid syntax. Expected "
             "'{%% %s source size [option1 option2 ...] %%}' or "
             "'{%% %s source size [option1 option2 ...] as variable %%}'" %
             (tag, tag))
@@ -233,7 +233,8 @@ def thumbnailer_passive(obj):
                 {% if avatar_thumb %}
                     <img src="{{ avatar_thumb.url }}" alt="" />
                 {% else %}
-                    <img src="{% static 'img/default-avatar-small.png' %}" alt="" />
+                    <img src="{% static 'img/default-avatar-small.png' %}"
+                        alt="" />
                 {% endif %}
             {% endwith %}
         {% endwith %}

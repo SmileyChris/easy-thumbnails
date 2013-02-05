@@ -64,7 +64,8 @@ def valid_processor_options(processors=None):
     (and/or source generators)
     """
     if processors is None:
-        processors = [dynamic_import(p) for p in
+        processors = [
+            dynamic_import(p) for p in
             settings.THUMBNAIL_PROCESSORS +
             settings.THUMBNAIL_SOURCE_GENERATORS]
     valid_options = set(['size', 'quality'])

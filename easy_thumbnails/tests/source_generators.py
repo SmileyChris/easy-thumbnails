@@ -44,8 +44,8 @@ class PilImageTest(test.BaseTest):
         """
         Non-images are passed silently.
         """
-        self.assertEqual(source_generators.pil_image(StringIO('not an image')),
-            None)
+        self.assertEqual(
+            source_generators.pil_image(StringIO('not an image')), None)
 
     def test_nearly_image(self):
         """
@@ -68,9 +68,10 @@ class PilImageTest(test.BaseTest):
             self.assertFalse(near_identical(reference, im))
 
             im = source_generators.pil_image(StringIO(data.decode('base64')))
-            self.assertTrue(near_identical(reference, im),
-               'EXIF orientation %s did not match reference image' %
-                   exif_orientation)
+            self.assertTrue(
+                near_identical(reference, im),
+                'EXIF orientation %s did not match reference image' %
+                exif_orientation)
 
     def test_switch_off_exif_orientation(self):
         """
@@ -82,7 +83,8 @@ class PilImageTest(test.BaseTest):
         im = image_from_b64(data)
         self.assertFalse(near_identical(reference, im))
 
-        im = source_generators.pil_image(StringIO(data.decode('base64')),
-            exif_orientation=False)
-        self.assertFalse(near_identical(reference, im),
+        im = source_generators.pil_image(
+            StringIO(data.decode('base64')), exif_orientation=False)
+        self.assertFalse(
+            near_identical(reference, im),
             'Image should not have been modified')
