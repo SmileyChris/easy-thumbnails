@@ -92,8 +92,8 @@ class Settings(AppSettings):
 
     THUMBNAIL_DEBUG = False
 
-    THUMBNAIL_DEFAULT_STORAGE = 'easy_thumbnails.storage.'\
-        'ThumbnailFileSystemStorage'
+    THUMBNAIL_DEFAULT_STORAGE = (
+        'easy_thumbnails.storage.ThumbnailFileSystemStorage')
     THUMBNAIL_MEDIA_ROOT = ''
     THUMBNAIL_MEDIA_URL = ''
 

@@ -1,6 +1,6 @@
 from django.core.files.base import File, ContentFile
-from django.core.files.storage import get_storage_class, default_storage, \
-    Storage
+from django.core.files.storage import (
+    get_storage_class, default_storage, Storage)
 from django.db.models.fields.files import ImageFieldFile, FieldFile
 import os
 
@@ -319,10 +319,10 @@ class Thumbnailer(File):
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
         filename = '%s%s' % (self.thumbnail_prefix, source_filename)
-        if self.thumbnail_preserve_extensions == True or  \
-            (self.thumbnail_preserve_extensions and  \
-            source_extension.lower() in self.thumbnail_preserve_extensions):
-                extension = source_extension
+        preserve_extensions = self.thumbnail_preserve_extensions
+        if preserve_extensions and (preserve_extensions == True or
+                source_extension.lower() in preserve_extensions):
+            extension = source_extension
         elif transparent:
             extension = self.thumbnail_transparency_extension
         else:

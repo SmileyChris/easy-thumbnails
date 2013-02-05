@@ -47,8 +47,9 @@ class Base(test.BaseTest):
             source_filename = self.filename
         self.assert_(isinstance(options, dict))
         # Verify that the thumbnail file exists
-        expected_filename = get_thumbnailer(self.storage, source_filename)\
-            .get_thumbnail_name(options, transparent=transparent)
+        thumbnailer = get_thumbnailer(self.storage, source_filename)
+        expected_filename = thumbnailer.get_thumbnail_name(
+            options, transparent=transparent)
 
         self.assert_(self.storage.exists(expected_filename),
                      'Thumbnail file %r not found' % expected_filename)
@@ -222,8 +223,10 @@ class ThumbnailerBase(Base):
 class ThumbnailerFilterTest(ThumbnailerBase):
 
     def test_get(self):
-        src = '{% with t=filename|thumbnailer %}'\
+        src = (
+            '{% with t=filename|thumbnailer %}'
             '{{ t.small.url }}{% endwith %}'
+        )
         output = self.render_template(src)
         expected = self.verify_thumbnail((20, 20),
             settings.THUMBNAIL_ALIASES['']['small'])
@@ -231,8 +234,10 @@ class ThumbnailerFilterTest(ThumbnailerBase):
         self.assertEqual(output, expected_url)
 
     def test_invalid(self):
-        src = '{% with t=invalid_filename|thumbnailer %}'\
+        src = (
+            '{% with t=invalid_filename|thumbnailer %}'
             '{{ t.small.url }}{% endwith %}'
+        )
         output = self.render_template(src)
         self.assertEqual(output, '')
 
@@ -240,8 +245,10 @@ class ThumbnailerFilterTest(ThumbnailerBase):
 class ThumbnailerPassiveFilterTest(ThumbnailerBase):
 
     def test_check_generate(self):
-        src = '{% with t=filename|thumbnailer_passive %}'\
+        src = (
+            '{% with t=filename|thumbnailer_passive %}'
             '{{ t.generate }}{% endwith %}'
+        )
         output = self.render_template(src)
         self.assertEqual(output, 'False')
 
@@ -250,21 +257,27 @@ class ThumbnailerPassiveFilterTest(ThumbnailerBase):
         # Pregenerate the thumbnail.
         get_thumbnailer(self.storage, self.filename).get_thumbnail(options)
 
-        src = '{% with t=filename|thumbnailer_passive %}'\
+        src = (
+            '{% with t=filename|thumbnailer_passive %}'
             '{{ t.small.url }}{% endwith %}'
+        )
         output = self.render_template(src)
         expected = self.verify_thumbnail((20, 20), options)
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, expected_url)
 
     def test_get_missing(self):
-        src = '{% with t=filename|thumbnailer_passive %}'\
+        src = (
+            '{% with t=filename|thumbnailer_passive %}'
             '{{ t.small.url }}{% endwith %}'
+        )
         output = self.render_template(src)
         self.assertEqual(output, '')
 
     def test_invalid(self):
-        src = '{% with t=invalid_filename|thumbnailer_passive %}'\
+        src = (
+            '{% with t=invalid_filename|thumbnailer_passive %}'
             '{{ t.small.url }}{% endwith %}'
+        )
         output = self.render_template(src)
         self.assertEqual(output, '')

@@ -1,7 +1,7 @@
 import re
 
-from django.template import Library, Node, VariableDoesNotExist, \
-    TemplateSyntaxError
+from django.template import (
+    Library, Node, VariableDoesNotExist, TemplateSyntaxError)
 from django.utils.html import escape
 
 from easy_thumbnails import utils

@@ -4,10 +4,14 @@ from easy_thumbnails.files import get_thumbnailer
 
 
 class ImageClearableFileInput(ClearableFileInput):
-    template_with_initial = u'%(clear_template)s<br />'\
+    template_with_initial = (
+        u'%(clear_template)s<br />'
         u'%(input_text)s: %(input)s'
-    template_with_thumbnail = u'%(template)s<br />'\
+    )
+    template_with_thumbnail = (
+        u'%(template)s<br />'
         u'<a href="%(source_url)s" target="_blank">%(thumb)s</a>'
+    )
 
     def __init__(self, thumbnail_options=None, attrs=None):
         thumbnail_options = thumbnail_options or {}
