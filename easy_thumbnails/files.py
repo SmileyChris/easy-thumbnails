@@ -1,6 +1,6 @@
 from django.core.files.base import File, ContentFile
-from django.core.files.storage import get_storage_class, default_storage, \
-    Storage
+from django.core.files.storage import (get_storage_class, default_storage,
+                                       Storage)
 from django.db.models.fields.files import ImageFieldFile, FieldFile
 import os
 
