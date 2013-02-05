@@ -76,7 +76,8 @@ class AliasTest(BaseTest):
         self.assertEqual(
             aliases.get('banner', target='some_app.Profile.avatar'),
             {'size': (600, 80), 'crop': True})
-        self.assertEqual(aliases.get('banner', target='some_app.Profile'),
+        self.assertEqual(
+            aliases.get('banner', target='some_app.Profile'),
             {'size': (600, 80), 'crop': True})
         self.assertEqual(aliases.get('banner', target='some_app'), None)
 
@@ -95,21 +96,24 @@ class AliasTest(BaseTest):
             None)
 
     def test_all(self):
-        self.assertEqual(aliases.all(),
+        self.assertEqual(
+            aliases.all(),
             {
                 'large': {'size': (500, 500)},
                 'medium': {'size': (300, 300)},
                 'small': {'size': (100, 100)},
             })
 
-        self.assertEqual(aliases.all('unknown_app'),
+        self.assertEqual(
+            aliases.all('unknown_app'),
             {
                 'large': {'size': (500, 500)},
                 'medium': {'size': (300, 300)},
                 'small': {'size': (100, 100)},
             })
 
-        self.assertEqual(aliases.all('some_app.Profile'),
+        self.assertEqual(
+            aliases.all('some_app.Profile'),
             {
                 'banner': {'size': (600, 80), 'crop': True},
                 'large': {'size': (200, 200)},
@@ -117,7 +121,8 @@ class AliasTest(BaseTest):
                 'small': {'size': (100, 100)},
             })
 
-        self.assertEqual(aliases.all('some_app.Profile.avatar'),
+        self.assertEqual(
+            aliases.all('some_app.Profile.avatar'),
             {
                 'avatar': {'size': (80, 80), 'crop': True},
                 'banner': {'size': (600, 80), 'crop': True},
@@ -174,8 +179,8 @@ class GenerationBase(BaseTest):
         settings.MEDIA_ROOT = self.storage.temporary_location
 
     def tearDown(self):
-        signals.saved_file.disconnect(self.get_signal_handler(),
-            sender=Profile)
+        signals.saved_file.disconnect(
+            self.get_signal_handler(), sender=Profile)
         super(GenerationBase, self).tearDown()
 
     def fake_save(self, instance):

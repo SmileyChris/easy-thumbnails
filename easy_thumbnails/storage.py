@@ -16,5 +16,5 @@ class ThumbnailFileSystemStorage(FileSystemStorage):
             location = settings.THUMBNAIL_MEDIA_ROOT or None
         if base_url is None:
             base_url = settings.THUMBNAIL_MEDIA_URL or None
-        super(ThumbnailFileSystemStorage, self).__init__(location, base_url,
-            *args, **kwargs)
+        super(ThumbnailFileSystemStorage, self).__init__(
+            location, base_url, *args, **kwargs)

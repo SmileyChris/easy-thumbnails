@@ -77,8 +77,8 @@ class AppSettings(BaseSettings):
             # reverted.
             if attr not in self._added:
                 try:
-                    self._changed.setdefault(attr,
-                        getattr(django_settings, attr))
+                    self._changed.setdefault(
+                        attr, getattr(django_settings, attr))
                 except AttributeError:
                     self._added.append(attr)
             return setattr(django_settings, attr, value)
@@ -92,8 +92,8 @@ class Settings(AppSettings):
 
     THUMBNAIL_DEBUG = False
 
-    THUMBNAIL_DEFAULT_STORAGE = 'easy_thumbnails.storage.'\
-        'ThumbnailFileSystemStorage'
+    THUMBNAIL_DEFAULT_STORAGE = (
+        'easy_thumbnails.storage.ThumbnailFileSystemStorage')
     THUMBNAIL_MEDIA_ROOT = ''
     THUMBNAIL_MEDIA_URL = ''
 

@@ -21,8 +21,8 @@ class FilesTest(test.BaseTest):
         self.thumbnailer.thumbnail_storage = self.storage
 
         filename = self.create_image(self.remote_storage, 'test.jpg')
-        self.remote_thumbnailer = files.get_thumbnailer(self.remote_storage,
-            filename)
+        self.remote_thumbnailer = files.get_thumbnailer(
+            self.remote_storage, filename)
         self.remote_thumbnailer.thumbnail_storage = self.remote_storage
 
         # Create another thumbnailer for extension test.
@@ -30,14 +30,16 @@ class FilesTest(test.BaseTest):
         self.ext_thumbnailer.thumbnail_storage = self.storage
 
         # Generate test transparent images.
-        filename = self.create_image(self.storage, 'transparent.png',
-            image_mode='RGBA', image_format='PNG')
-        self.transparent_thumbnailer = files.get_thumbnailer(self.storage,
-            filename)
+        filename = self.create_image(
+            self.storage, 'transparent.png', image_mode='RGBA',
+            image_format='PNG')
+        self.transparent_thumbnailer = files.get_thumbnailer(
+            self.storage, filename)
         self.transparent_thumbnailer.thumbnail_storage = self.storage
 
-        filename = self.create_image(self.storage, 'transparent-greyscale.png',
-            image_mode='LA', image_format='PNG')
+        filename = self.create_image(
+            self.storage, 'transparent-greyscale.png', image_mode='LA',
+            image_format='PNG')
         self.transparent_greyscale_thumbnailer = files.get_thumbnailer(
             self.storage, filename)
         self.transparent_greyscale_thumbnailer.thumbnail_storage = self.storage
@@ -51,24 +53,28 @@ class FilesTest(test.BaseTest):
         local = self.thumbnailer.get_thumbnail({'size': (100, 100)})
         remote = self.remote_thumbnailer.get_thumbnail({'size': (100, 100)})
 
-        self.assertEqual(local.tag(), '<img alt="" height="75" '
+        self.assertEqual(
+            local.tag(), '<img alt="" height="75" src="%s" width="100" '
+            '/>' % local.url)
+        self.assertEqual(
+            local.tag(alt='A & B'), '<img alt="A &amp; B" height="75" '
             'src="%s" width="100" />' % local.url)
-        self.assertEqual(local.tag(alt='A & B'), '<img alt="A &amp; B" '
-            'height="75" src="%s" width="100" />' % local.url)
 
         # Can turn off dimensions.
-        self.assertEqual(remote.tag(use_size=False), '<img alt="" '
-            'src="%s" />' % remote.url)
+        self.assertEqual(
+            remote.tag(use_size=False), '<img alt="" src="%s" />' % remote.url)
 
         # Thumbnails on remote storage don't get dimensions...
-        self.assertEqual(remote.tag(), '<img alt="" '
-            'src="%s" />' % remote.url)
+        self.assertEqual(
+            remote.tag(), '<img alt="" src="%s" />' % remote.url)
         # ...unless explicitly requested.
-        self.assertEqual(remote.tag(use_size=True), '<img alt="" height="75" '
-            'src="%s" width="100" />' % remote.url)
+        self.assertEqual(
+            remote.tag(use_size=True),
+            '<img alt="" height="75" src="%s" width="100" />' % remote.url)
 
         # All other arguments are passed through as attributes.
-        self.assertEqual(local.tag(**{'rel': 'A&B', 'class': 'fish'}),
+        self.assertEqual(
+            local.tag(**{'rel': 'A&B', 'class': 'fish'}),
             '<img alt="" class="fish" height="75" rel="A&amp;B" '
             'src="%s" width="100" />' % local.url)
 
@@ -77,21 +83,24 @@ class FilesTest(test.BaseTest):
             {'size': (100, 100)})
         thumb_file.seek(0)
         thumb = Image.open(thumb_file)
-        self.assertFalse(utils.is_transparent(thumb),
+        self.assertFalse(
+            utils.is_transparent(thumb),
             "%s shouldn't be transparent." % thumb_file.name)
 
         thumb_file = self.transparent_thumbnailer.get_thumbnail(
             {'size': (100, 100)})
         thumb_file.seek(0)
         thumb = Image.open(thumb_file)
-        self.assertTrue(utils.is_transparent(thumb),
+        self.assertTrue(
+            utils.is_transparent(thumb),
             "%s should be transparent." % thumb_file.name)
 
         thumb_file = self.transparent_greyscale_thumbnailer.get_thumbnail(
             {'size': (100, 100)})
         thumb_file.seek(0)
         thumb = Image.open(thumb_file)
-        self.assertTrue(utils.is_transparent(thumb),
+        self.assertTrue(
+            utils.is_transparent(thumb),
             "%s should be transparent." % thumb_file.name)
 
     def test_extensions(self):
@@ -181,8 +190,8 @@ class FilesTest(test.BaseTest):
             self.thumbnailer.get_thumbnail({'size': (100, 100)})
             self.assertFalse(hasattr(self.thumbnailer, 'missed_signal'))
             # Retrieval doesn't trigger signal.
-            self.thumbnailer.get_thumbnail({'size': (100, 100)},
-                generate=False)
+            self.thumbnailer.get_thumbnail(
+                {'size': (100, 100)}, generate=False)
             self.assertFalse(hasattr(self.thumbnailer, 'missed_signal'))
             # A thumbnail miss does trigger it.
             options = {'size': (10, 20)}

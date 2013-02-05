@@ -1,6 +1,6 @@
 from django.core.files.base import File, ContentFile
-from django.core.files.storage import get_storage_class, default_storage, \
-    Storage
+from django.core.files.storage import (
+    get_storage_class, default_storage, Storage)
 from django.db.models.fields.files import ImageFieldFile, FieldFile
 import os
 
@@ -57,8 +57,9 @@ def get_thumbnailer(obj, relative_name=None):
         obj = None
 
     if not relative_name:
-        raise ValueError("If object is not a FieldFile or Thumbnailer "
-            "instance, the relative name must be provided")
+        raise ValueError(
+            "If object is not a FieldFile or Thumbnailer instance, the "
+            "relative name must be provided")
 
     if isinstance(obj, File):
         obj = obj.file
@@ -66,8 +67,9 @@ def get_thumbnailer(obj, relative_name=None):
         source_storage = obj
         obj = None
 
-    return Thumbnailer(file=obj, name=relative_name,
-        source_storage=source_storage, remote_source=obj is not None)
+    return Thumbnailer(
+        file=obj, name=relative_name, source_storage=source_storage,
+        remote_source=obj is not None)
 
 
 def save_thumbnail(thumbnail_file, storage):
@@ -122,10 +124,10 @@ class ThumbnailFile(ImageFieldFile):
     field (i.e. an ``ImageFieldFile`` object).
     """
     def __init__(self, name, file=None, storage=None, thumbnail_options=None,
-            *args, **kwargs):
+                 *args, **kwargs):
         fake_field = FakeField(storage=storage)
-        super(ThumbnailFile, self).__init__(FakeInstance(), fake_field, name,
-            *args, **kwargs)
+        super(ThumbnailFile, self).__init__(
+            FakeInstance(), fake_field, name, *args, **kwargs)
         del self.field
         if file:
             self.file = file
@@ -166,9 +168,9 @@ class ThumbnailFile(ImageFieldFile):
 
         :param alt: The ``alt=""`` text for the tag. Defaults to ``''``.
 
-        :param use_size: Whether to get the size of the thumbnail image for use in
-            the tag attributes. If ``None`` (default), it will be ``True`` or
-            ``False`` depending on whether the file storage is local or not.
+        :param use_size: Whether to get the size of the thumbnail image for use
+            in the tag attributes. If ``None`` (default), it will be ``True``
+            or ``False`` depending on whether the file storage is local or not.
 
         All other keyword parameters are added as (properly escaped) extra
         attributes to the `img` tag.
@@ -243,8 +245,8 @@ class Thumbnailer(File):
     thumbnail_processors = None
 
     def __init__(self, file=None, name=None, source_storage=None,
-            thumbnail_storage=None, remote_source=False, generate=True, *args,
-            **kwargs):
+                 thumbnail_storage=None, remote_source=False, generate=True,
+                 *args, **kwargs):
         super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
         self.source_storage = source_storage or default_storage
         if not thumbnail_storage:
@@ -258,7 +260,8 @@ class Thumbnailer(File):
         # Set default properties. For backwards compatibilty, check to see
         # if the attribute exists already (it could be set as a class property
         # on a subclass) before getting it from settings.
-        for default in ('basedir', 'subdir', 'prefix', 'quality', 'extension',
+        for default in (
+                'basedir', 'subdir', 'prefix', 'quality', 'extension',
                 'preserve_extensions', 'transparency_extension',
                 'check_cache_miss'):
             attr_name = 'thumbnail_%s' % default
@@ -296,14 +299,16 @@ class Thumbnailer(File):
                                                self.thumbnail_processors)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 
-        filename = self.get_thumbnail_name(thumbnail_options,
+        filename = self.get_thumbnail_name(
+            thumbnail_options,
             transparent=utils.is_transparent(thumbnail_image))
 
-        data = engine.save_image(thumbnail_image, filename=filename,
-            quality=quality).read()
+        img = engine.save_image(
+            thumbnail_image, filename=filename, quality=quality)
+        data = img.read()
 
-        thumbnail = ThumbnailFile(filename, file=ContentFile(data),
-            storage=self.thumbnail_storage,
+        thumbnail = ThumbnailFile(
+            filename, file=ContentFile(data), storage=self.thumbnail_storage,
             thumbnail_options=thumbnail_options)
         thumbnail.image = thumbnail_image
         thumbnail._committed = False
@@ -319,10 +324,11 @@ class Thumbnailer(File):
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
         filename = '%s%s' % (self.thumbnail_prefix, source_filename)
-        if self.thumbnail_preserve_extensions == True or  \
-            (self.thumbnail_preserve_extensions and  \
-            source_extension.lower() in self.thumbnail_preserve_extensions):
-                extension = source_extension
+        preserve_extensions = self.thumbnail_preserve_extensions
+        if preserve_extensions and (
+                preserve_extensions is True or
+                source_extension.lower() in preserve_extensions):
+            extension = source_extension
         elif transparent:
             extension = self.thumbnail_transparency_extension
         else:
@@ -347,7 +353,7 @@ class Thumbnailer(File):
 
         filename_parts = [filename]
         if ('%(opts)s' in self.thumbnail_basedir or
-            '%(opts)s' in self.thumbnail_subdir):
+                '%(opts)s' in self.thumbnail_subdir):
             if extension != source_extension:
                 filename_parts.append(extension)
         else:
@@ -383,15 +389,15 @@ class Thumbnailer(File):
             names = (opaque_name, transparent_name)
         for filename in names:
             if self.thumbnail_exists(filename):
-                return ThumbnailFile(name=filename,
-                    storage=self.thumbnail_storage,
+                return ThumbnailFile(
+                    name=filename, storage=self.thumbnail_storage,
                     thumbnail_options=thumbnail_options)
 
         if generate is None:
             generate = self.generate
         if not generate:
-            signals.thumbnail_missed.send(sender=self,
-                options=thumbnail_options)
+            signals.thumbnail_missed.send(
+                sender=self, options=thumbnail_options)
             return
 
         thumbnail = self.generate_thumbnail(thumbnail_options)
@@ -533,7 +539,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         deleted = 0
         if source_cache:
             thumbnail_storage_hash = utils.get_storage_hash(
-                                                    self.thumbnail_storage)
+                self.thumbnail_storage)
             for thumbnail_cache in source_cache.thumbnails.all():
                 # Only attempt to delete the file if it was stored using the
                 # same storage as is currently used.
@@ -554,7 +560,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         source_cache = self.get_source_cache()
         if source_cache:
             thumbnail_storage_hash = utils.get_storage_hash(
-                                                    self.thumbnail_storage)
+                self.thumbnail_storage)
             for thumbnail_cache in source_cache.thumbnails.all():
                 # Only iterate files which are stored using the current
                 # thumbnail storage.
