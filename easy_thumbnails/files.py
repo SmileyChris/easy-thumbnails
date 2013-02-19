@@ -304,9 +304,8 @@ class Thumbnailer(File):
         thumbnail_options['size'] = orig_size
 
         filename = self.get_thumbnail_name(thumbnail_options,
-            transparent=utils.is_transparent(thumbnail_image))
-        if high_resolution:
-            filename = self.get_high_resolution_filename(filename)
+            transparent=utils.is_transparent(thumbnail_image),
+            high_resolution=high_resolution)
 
         data = engine.save_image(thumbnail_image, filename=filename,
             quality=quality).read()
@@ -319,14 +318,8 @@ class Thumbnailer(File):
 
         return thumbnail
 
-    @staticmethod
-    def get_high_resolution_filename(filename):
-        filename_parts = filename.split('.')
-        filename_parts[-2] += '@2x'
-        filename = '.'.join(filename_parts)
-        return filename
-
-    def get_thumbnail_name(self, thumbnail_options, transparent=False):
+    def get_thumbnail_name(self, thumbnail_options, transparent=False,
+                           high_resolution=False):
         """
         Return a thumbnail filename for the given ``thumbnail_options``
         dictionary and ``source_name`` (which defaults to the File's ``name``
@@ -368,6 +361,8 @@ class Thumbnailer(File):
                 filename_parts.append(extension)
         else:
             filename_parts += [all_opts, extension]
+        if high_resolution:
+            filename_parts[-2] += '@2x'
         filename = '.'.join(filename_parts)
 
         return os.path.join(basedir, path, subdir, filename)
@@ -441,7 +436,9 @@ class Thumbnailer(File):
         source_modtime = self.get_source_modtime()
         thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
         if settings.THUMBNAIL_HIGH_RESOLUTION:
-            thumbnail_name_2x = self.get_high_resolution_filename(thumbnail_name)
+            filename_parts = thumbnail_name.split('.')
+            filename_parts[-2] += '@2x'
+            thumbnail_name_2x = '.'.join(filename_parts)
             thumbnail_modtime = min(thumbnail_modtime, self.get_thumbnail_modtime(thumbnail_name_2x))
         # The thumbnail modification time will be 0 if there was an OSError,
         # in which case it will still be used (but always return False).
