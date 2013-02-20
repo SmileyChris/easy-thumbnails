@@ -436,9 +436,8 @@ class Thumbnailer(File):
         source_modtime = self.get_source_modtime()
         thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
         if settings.THUMBNAIL_HIGH_RESOLUTION:
-            filename_parts = thumbnail_name.split('.')
-            filename_parts[-2] += '@2x'
-            thumbnail_name_2x = '.'.join(filename_parts)
+            filename_parts = os.path.splitext(thumbnail_name)
+            thumbnail_name_2x = '%s@2x%s' % filename_parts
             thumbnail_modtime = min(thumbnail_modtime, self.get_thumbnail_modtime(thumbnail_name_2x))
         # The thumbnail modification time will be 0 if there was an OSError,
         # in which case it will still be used (but always return False).
