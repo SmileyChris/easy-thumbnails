@@ -287,8 +287,8 @@ class Thumbnailer(File):
         The thumbnail image is generated using the ``thumbnail_options``
         dictionary.
         """
-        orig_size = thumbnail_options['size']
         if high_resolution:
+            orig_size = thumbnail_options['size']  # remember original size
             thumbnail_options = thumbnail_options.copy()
             thumbnail_options['size'] = (orig_size[0] * 2, orig_size[1] * 2)
         image = self.generate_source_image(thumbnail_options)
@@ -300,8 +300,8 @@ class Thumbnailer(File):
                                                self.thumbnail_processors)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 
-        # restore original size to fake smaller image
-        thumbnail_options['size'] = orig_size
+        if high_resolution:
+            thumbnail_options['size'] = orig_size  # restore original size
 
         filename = self.get_thumbnail_name(thumbnail_options,
             transparent=utils.is_transparent(thumbnail_image),
