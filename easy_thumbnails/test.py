@@ -1,9 +1,5 @@
 import shutil
 import tempfile
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
@@ -14,6 +10,7 @@ except ImportError:
     import Image
 
 from easy_thumbnails.conf import settings
+from easy_thumbnails import compat
 
 
 class TemporaryStorage(FileSystemStorage):
@@ -115,7 +112,7 @@ class BaseTest(TestCase):
         If ``storage`` is ``None``, the StringIO containing the image data
         will be passed instead.
         """
-        data = StringIO()
+        data = compat.BytesIO()
         Image.new(image_mode, size).save(data, image_format)
         data.seek(0)
         if not storage:

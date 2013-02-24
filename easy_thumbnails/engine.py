@@ -1,17 +1,12 @@
 import os
 try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
-try:
     from PIL import Image
 except ImportError:
     import Image
 
 from easy_thumbnails import utils
 from easy_thumbnails.conf import settings
-
+from easy_thumbnails import compat
 
 def _use_default_options(options):
     if not settings.THUMBNAIL_DEFAULT_OPTIONS:
@@ -42,7 +37,7 @@ def save_image(image, destination=None, filename=None, **options):
     Save a PIL image.
     """
     if destination is None:
-        destination = StringIO()
+        destination = compat.BytesIO()
     filename = filename or ''
     format = Image.EXTENSION.get(os.path.splitext(filename)[1], 'JPEG')
     if format == 'JPEG':

@@ -1,4 +1,5 @@
 from easy_thumbnails.conf import settings
+from easy_thumbnails import compat
 
 
 class Aliases(object):
@@ -110,7 +111,7 @@ class Aliases(object):
         The assumption is that if it is not ``None`` and not a string, it is
         a Django ``FieldFile`` object.
         """
-        if not target or isinstance(target, basestring):
+        if not target or isinstance(target, compat.string_types):
             return target
         model = target.instance.__class__
         return '%s.%s.%s' % (
