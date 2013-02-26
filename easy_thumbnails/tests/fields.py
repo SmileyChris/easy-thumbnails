@@ -49,9 +49,9 @@ class ThumbnailerFieldTest(test.BaseTest):
             instance.avatar.get_thumbnail({'size': (200, 200)}).path,
             instance.avatar.get_thumbnail({'size': (100, 100)}).path,
         )
-        self.assert_(os.path.exists(source_path))
+        self.assertTrue(os.path.exists(source_path))
         for path in thumb_paths:
-            self.assert_(os.path.exists(path))
+            self.assertTrue(os.path.exists(path))
         instance.avatar.delete(save=False)
         self.assertFalse(os.path.exists(source_path))
         for path in thumb_paths:
@@ -65,11 +65,11 @@ class ThumbnailerFieldTest(test.BaseTest):
             instance.avatar.get_thumbnail({'size': (200, 200)}).path,
             instance.avatar.get_thumbnail({'size': (100, 100)}).path,
         )
-        self.assert_(os.path.exists(source_path))
+        self.assertTrue(os.path.exists(source_path))
         for path in thumb_paths:
-            self.assert_(os.path.exists(path))
+            self.assertTrue(os.path.exists(path))
         instance.avatar.delete_thumbnails()
-        self.assert_(os.path.exists(source_path))
+        self.assertTrue(os.path.exists(source_path))
         for path in thumb_paths:
             self.assertFalse(os.path.exists(path))
 

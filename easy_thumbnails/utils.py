@@ -4,10 +4,7 @@ import datetime
 
 from django.utils.functional import LazyObject
 
-try:
-    from hashlib import md5 as md5_constructor
-except ImportError:
-    from django.utils.hashcompat import md5_constructor
+from hashlib import md5 as md5_constructor
 
 try:
     from PIL import Image
@@ -30,6 +27,7 @@ except ImportError:
     fromtimestamp = datetime.datetime.fromtimestamp
 
 from easy_thumbnails.conf import settings
+from easy_thumbnails import compat
 
 
 def image_entropy(im):
@@ -97,10 +95,10 @@ def get_storage_hash(storage):
         if storage._wrapped is None:
             storage._setup()
         storage = storage._wrapped
-    if not isinstance(storage, basestring):
+    if not isinstance(storage, compat.string_types):
         storage_cls = storage.__class__
         storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
-    return md5_constructor(storage).hexdigest()
+    return md5_constructor(storage.encode('utf8')).hexdigest()
 
 
 def is_transparent(image):

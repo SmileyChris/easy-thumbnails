@@ -1,14 +1,10 @@
 try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
-try:
     from PIL import Image
 except ImportError:
     import Image
 
 from easy_thumbnails import utils
+from easy_thumbnails import compat
 
 
 def pil_image(source, exif_orientation=True, **options):
@@ -27,7 +23,7 @@ def pil_image(source, exif_orientation=True, **options):
     # File objects.
     if not source:
         return
-    source = StringIO(source.read())
+    source = compat.BytesIO(source.read())
     try:
         image = Image.open(source)
         # Fully load the image now to catch any problems with the image

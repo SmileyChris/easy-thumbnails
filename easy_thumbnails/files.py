@@ -11,6 +11,7 @@ from django.utils.http import urlquote
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
+from easy_thumbnails import compat
 
 
 def get_thumbnailer(obj, relative_name=None):
@@ -52,7 +53,7 @@ def get_thumbnailer(obj, relative_name=None):
 
     source_storage = None
 
-    if isinstance(obj, basestring):
+    if isinstance(obj, compat.string_types):
         relative_name = obj
         obj = None
 
@@ -340,8 +341,8 @@ class Thumbnailer(File):
         quality = thumbnail_options.pop('quality', self.thumbnail_quality)
         initial_opts = ['%sx%s' % size, 'q%s' % quality]
 
-        opts = thumbnail_options.items()
-        opts.sort()   # Sort the options so the file name is consistent.
+        # Sort the options so the file name is consistent.
+        opts = sorted(thumbnail_options.items())
         opts = ['%s' % (v is not True and '%s-%s' % (k, v) or k)
                 for k, v in opts if v]
 

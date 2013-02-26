@@ -23,5 +23,7 @@ INSTALLED_APPS = [
     'easy_thumbnails.tests',
 ]
 
+SECRET_KEY = '123,sdjfhgu7113o4tsdfy-gkasdhfgi7v293984753'
+
 # This is only needed for the 1.4.X test environment
 USE_TZ = True
