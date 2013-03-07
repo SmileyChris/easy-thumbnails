@@ -11,7 +11,12 @@ def find_uncommitted_filefields(sender, instance, **kwargs):
     :func:`signal_committed_filefields` post_save handler.
     """
     uncommitted = instance._uncommitted_filefields = []
-    for field in sender._meta.fields:
+    
+    fields = sender._meta.fields
+    if kwargs.get('update_fields', None):
+        update_fields = set(kwargs['update_fields'])
+        fields = update_fields.intersection(fields)
+    for field in fields:
         if isinstance(field, FileField):
             if not getattr(instance, field.name)._committed:
                 uncommitted.append(field.name)
