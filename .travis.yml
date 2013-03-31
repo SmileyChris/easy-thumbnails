@@ -1,11 +1,18 @@
 language: python
+
 python:
   - "2.6"
   - "2.7"
+
 env:
   - PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.4.5
   - PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.5.1
+
+before_script:
+  - sudo apt-get install python-imaging
+
 install: 
   - pip install --use-mirrors PIL Django==$DJANGO_VERSION
+
 script: 
   - django-admin.py test easy_thumbnails --settings=easy_thumbnails.test_settings
