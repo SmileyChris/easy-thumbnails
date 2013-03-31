@@ -8,7 +8,7 @@ env:
   - PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.4.5
   - PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.5.1
 
-before_script:
+before_install:
   - sudo apt-get install python-imaging
 
 install: 
