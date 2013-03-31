@@ -25,3 +25,5 @@ INSTALLED_APPS = [
 
 # This is only needed for the 1.4.X test environment
 USE_TZ = True
+
+SECRET_KEY = 'test'
