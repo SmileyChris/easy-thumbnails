@@ -310,8 +310,12 @@ class Thumbnailer(File):
                     "The source file does not appear to be an image")
             thumb = engine.process_image(image, thumbnail_options,
                                                    self.thumbnail_processors)
+            del image
             thumbnail_images.append(thumb)
 
+        del images
+        gc.collect()
+        
         thumbnail_image = thumbnail_images[0]
             
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
