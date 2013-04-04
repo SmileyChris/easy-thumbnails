@@ -1,7 +1,8 @@
-from os import path
-
 from easy_thumbnails import files, utils, signals, test
 from easy_thumbnails.conf import settings
+from os import path
+import shutil
+
 try:
     from PIL import Image
 except ImportError:
@@ -43,6 +44,14 @@ class FilesTest(test.BaseTest):
         self.transparent_greyscale_thumbnailer = files.get_thumbnailer(
             self.storage, filename)
         self.transparent_greyscale_thumbnailer.thumbnail_storage = self.storage
+
+        # Generate test GIF image.
+        filename = 'animated.gif'
+        shutil.copyfile(path.join(path.dirname(__file__), 'test_data', filename), path.join(self.storage.temporary_location, filename))
+        self.gif_thumbnailer = files.get_thumbnailer(
+            self.storage, filename)
+        self.gif_thumbnailer.thumbnail_storage = self.storage
+        self.storage.temporary_location
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
@@ -102,6 +111,14 @@ class FilesTest(test.BaseTest):
         self.assertTrue(
             utils.is_transparent(thumb),
             "%s should be transparent." % thumb_file.name)
+        
+    def test_gif_thumbnailing(self):
+        thumb_file = self.gif_thumbnailer.get_thumbnail(
+            {'size': (100, 100)})
+        thumb_file.seek(0)
+        thumb = Image.open(thumb_file)
+        self.assertEqual(thumb.format, 'GIF',
+            "%s should be a GIF file." % thumb_file.name)
 
     def test_extensions(self):
         self.ext_thumbnailer.thumbnail_extension = 'png'

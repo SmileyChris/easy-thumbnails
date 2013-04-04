@@ -152,9 +152,10 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
     if scale < 1.0 or (scale > 1.0 and upscale):
         # Resize the image to the target size boundary. Round the scaled
         # boundary sizes to avoid floating point errors.
+        resample = kwargs.get('resample')
         im = im.resize((int(round(source_x * scale)),
                         int(round(source_y * scale))),
-                       resample=Image.ANTIALIAS)
+                       resample=(resample if resample != None else Image.ANTIALIAS))
 
     if crop:
         # Use integer values now.
