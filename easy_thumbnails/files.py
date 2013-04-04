@@ -312,9 +312,7 @@ class Thumbnailer(File):
                                                    self.thumbnail_processors)
             del image
             thumbnail_images.append(thumb)
-
         del images
-        gc.collect()
         
         thumbnail_image = thumbnail_images[0]
             
@@ -330,6 +328,7 @@ class Thumbnailer(File):
             thumbnail_io.flush()
             data = thumbnail_io.getvalue()
             thumbnail_io.close()
+            del thumbnail_io
             self.close()
         else:
             img = engine.save_image(
