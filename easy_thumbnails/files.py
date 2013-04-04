@@ -6,12 +6,13 @@ from django.utils.html import escape
 from django.utils.http import urlquote
 from django.utils.safestring import mark_safe
 from easy_thumbnails import engine, exceptions, models, utils, signals
-from easy_thumbnails.utils import images2gif
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
-import StringIO
-import os
+from easy_thumbnails.utils import images2gif
 import Image
+import StringIO
+import gc
+import os
 
 
 
@@ -325,10 +326,14 @@ class Thumbnailer(File):
             thumbnail_io.flush()
             data = thumbnail_io.getvalue()
             thumbnail_io.close()
+            self.close()
         else:
             img = engine.save_image(
                 thumbnail_image, filename=filename, quality=quality)
             data = img.read()
+        
+        del thumbnail_images
+        gc.collect()
         
         thumbnail = ThumbnailFile(
             filename, file=ContentFile(data), storage=self.thumbnail_storage,
