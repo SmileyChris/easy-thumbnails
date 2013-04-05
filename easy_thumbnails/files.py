@@ -1,3 +1,4 @@
+from PIL import Image
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import get_storage_class, default_storage, \
     Storage
@@ -9,9 +10,7 @@ from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.utils import images2gif
-import Image
 import StringIO
-import gc
 import os
 
 
@@ -295,11 +294,26 @@ class Thumbnailer(File):
         dictionary.
         """
         
-        is_gif = self.name.endswith('.gif')
+        is_gif = self.name.lower().endswith('.gif')
         if is_gif:
             self.open()
-            images = images2gif.readGif(self.file, False)
-            thumbnail_options['resample'] = Image.NEAREST
+            gif_image = Image.open(self.file)
+            frame_index = 0
+            images = []
+            durations = []
+            base_image = gif_image.convert("RGBA")
+            palette = gif_image.getpalette()
+            while True:
+                try:
+                    gif_image.seek(frame_index)
+                    gif_image.putpalette(palette)
+                    rgba_gif_image = gif_image.convert("RGBA")
+                    base_image.paste(rgba_gif_image, (0,0), rgba_gif_image)
+                    durations.append(gif_image.info['duration'] / 1000.0)
+                    images.append(base_image.copy())
+                except:
+                    break
+                frame_index += 1
         else:
             images = [self.generate_source_image(thumbnail_options)]
         
@@ -308,11 +322,8 @@ class Thumbnailer(File):
             if image is None:
                 raise exceptions.InvalidImageFormatError(
                     "The source file does not appear to be an image")
-            thumb = engine.process_image(image, thumbnail_options,
-                                                   self.thumbnail_processors)
-            del image
+            thumb = engine.process_image(image, thumbnail_options, self.thumbnail_processors)
             thumbnail_images.append(thumb)
-        del images
         
         thumbnail_image = thumbnail_images[0]
             
@@ -324,19 +335,15 @@ class Thumbnailer(File):
 
         if is_gif:
             thumbnail_io = StringIO.StringIO()
-            images2gif.writeGif(thumbnail_io, thumbnail_images)
+            images2gif.writeGif(thumbnail_io, thumbnail_images, duration=durations)
             thumbnail_io.flush()
             data = thumbnail_io.getvalue()
             thumbnail_io.close()
-            del thumbnail_io
             self.close()
         else:
             img = engine.save_image(
                 thumbnail_image, filename=filename, quality=quality)
             data = img.read()
-        
-        del thumbnail_images
-        gc.collect()
         
         thumbnail = ThumbnailFile(
             filename, file=ContentFile(data), storage=self.thumbnail_storage,
@@ -372,7 +379,7 @@ class Thumbnailer(File):
         initial_opts = ['%sx%s' % size, 'q%s' % quality]
 
         opts = thumbnail_options.items()
-        opts.sort()   # Sort the options so the file name is consistent.
+        opts.sort()  # Sort the options so the file name is consistent.
         opts = ['%s' % (v is not True and '%s-%s' % (k, v) or k)
                 for k, v in opts if v]
 

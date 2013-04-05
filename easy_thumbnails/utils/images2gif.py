@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#   Copyright (C) 2012, Almar Klein, Ant1, Marius van Voorden
+#   Copyright (C) 2013, Almar Klein, Ant1, Marius van Voorden, Pascal Beyeler
 #
 #   This code is subject to the (new) BSD license:
 #
@@ -240,7 +240,7 @@ class GifWriter:
         """
         
         bb = '\x21\xF9\x04'
-        bb += chr((dispose << 2) | 3)  # low bit 1 == transparency,
+        bb += chr((dispose & 3) << 2)  # low bit 1 == transparency,
         # 2nd bit 1 == user input , next 3 bits, the low two of which are used,
         # are dispose.
         bb += intToBin( int(duration*100) ) # in 100th of seconds
