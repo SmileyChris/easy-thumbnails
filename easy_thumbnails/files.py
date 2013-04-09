@@ -294,29 +294,32 @@ class Thumbnailer(File):
         dictionary.
         """
         
-        is_gif = self.name.lower().endswith('.gif')
-        if is_gif:
-            self.open()
-            gif_image = Image.open(self.file)
+        self.open()
+        source_image = Image.open(self.file)
+        is_animated_gif = self.name.lower().endswith('.gif') \
+            and source_image.format == 'GIF' \
+            and source_image.info.get('duration') != None
+        if is_animated_gif:
             frame_index = 0
             images = []
             durations = []
-            base_image = gif_image.convert("RGBA")
-            palette = gif_image.getpalette()
+            base_image = source_image.convert("RGBA")
+            palette = source_image.getpalette()
             while True:
                 try:
-                    gif_image.seek(frame_index)
-                    gif_image.putpalette(palette)
-                    rgba_gif_image = gif_image.convert("RGBA")
+                    source_image.seek(frame_index)
+                    if palette == source_image.getpalette():
+                        source_image.putpalette(palette)
+                    rgba_gif_image = source_image.convert("RGBA")
                     base_image.paste(rgba_gif_image, (0,0), rgba_gif_image)
-                    durations.append(gif_image.info['duration'] / 1000.0)
+                    durations.append(source_image.info['duration'] / 1000.0)
                     images.append(base_image.copy())
                 except:
                     break
                 frame_index += 1
         else:
             images = [self.generate_source_image(thumbnail_options)]
-        
+
         thumbnail_images = []
         for image in images:
             if image is None:
@@ -333,7 +336,7 @@ class Thumbnailer(File):
             thumbnail_options,
             transparent=utils.is_transparent(thumbnail_image))
 
-        if is_gif:
+        if is_animated_gif:
             thumbnail_io = StringIO.StringIO()
             images2gif.writeGif(thumbnail_io, thumbnail_images, duration=durations)
             thumbnail_io.flush()
