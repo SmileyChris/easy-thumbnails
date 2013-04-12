@@ -333,7 +333,7 @@ class Thumbnailer(File):
             extension = self.thumbnail_transparency_extension
         else:
             extension = self.thumbnail_extension
-        extension = extension or 'jpg'
+        extension = extension or settings.THUMBNAIL_EXTENSION
 
         thumbnail_options = thumbnail_options.copy()
         size = tuple(thumbnail_options.pop('size'))

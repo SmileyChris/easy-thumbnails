@@ -44,7 +44,8 @@ def save_image(image, destination=None, filename=None, **options):
     if destination is None:
         destination = StringIO()
     filename = filename or ''
-    format = Image.EXTENSION.get(os.path.splitext(filename)[1], 'JPEG')
+    format = Image.EXTENSION.get(os.path.splitext(filename)[1],
+                                 settings.THUMBNAIL_DEFAULT_FORMAT)
     if format == 'JPEG':
         options.setdefault('quality', 85)
         try:
