@@ -6,7 +6,6 @@ import os
 
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
-from django.utils.http import urlquote
 
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
