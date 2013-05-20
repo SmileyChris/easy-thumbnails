@@ -11,6 +11,7 @@ from django.utils.http import urlquote
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
+from easy_thumbnails.models import Thumbnail
 
 
 def get_thumbnailer(obj, relative_name=None):
@@ -99,6 +100,12 @@ def generate_all_aliases(fieldfile, include_global):
         thumbnailer = get_thumbnailer(fieldfile)
         for options in all_options.values():
             thumbnailer.get_thumbnail(options)
+
+        # Because each thumbnail has a modified time that's different from the
+        # source file's modified time, update all thumbnails so they have the
+        # same modified time as the source so when the thumbnails are first
+        # used they aren't regenerated again.
+        Thumbnail.objects.filter(source_id=thumbnailer.source.pk).update(modified=thumbnailer.source.modified)
 
 
 class FakeField(object):
@@ -256,6 +263,7 @@ class Thumbnailer(File):
         self.remote_source = remote_source
         self.alias_target = None
         self.generate = generate
+        self.source = None
 
         # Set default properties. For backwards compatibilty, check to see
         # if the attribute exists already (it could be set as a class property
@@ -431,11 +439,11 @@ class Thumbnailer(File):
         if source_modtime and thumbnail_modtime is not None:
             return thumbnail_modtime and source_modtime <= thumbnail_modtime
         # Fall back to using the database cached modification times.
-        source = self.get_source_cache()
-        if not source:
+        self.source = self.get_source_cache()
+        if not self.source:
             return False
         thumbnail = self.get_thumbnail_cache(thumbnail_name)
-        return thumbnail and source.modified <= thumbnail.modified
+        return thumbnail and self.source.modified <= thumbnail.modified
 
     def get_source_cache(self, create=False, update=False):
         if self.remote_source:
@@ -456,10 +464,11 @@ class Thumbnailer(File):
         update_modified = modtime and utils.fromtimestamp(modtime)
         if update:
             update_modified = update_modified or utils.now()
-        source = self.get_source_cache(create=True)
+        if not self.source:
+            self.source = self.get_source_cache(create=True)
         return models.Thumbnail.objects.get_file(
             create=create, update_modified=update_modified,
-            storage=self.thumbnail_storage, source=source, name=thumbnail_name,
+            storage=self.thumbnail_storage, source=self.source, name=thumbnail_name,
             check_cache_miss=self.thumbnail_check_cache_miss)
 
     def get_source_modtime(self):
