@@ -6,7 +6,6 @@ import os
 
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
-from django.utils.http import urlquote
 
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
@@ -205,22 +204,6 @@ class ThumbnailFile(ImageFieldFile):
         del self._file
 
     file = property(_get_file, _set_file, _del_file)
-
-    def _get_url(self):
-        """
-        Return the full url of this file.
-
-        .. note:: storages should already be quoting the urls, but Django's
-                  built in ``FileSystemStorage`` doesn't.
-                  ``ThumbnailFieldFile`` works around a common case of the file
-                  containing a ``#``, which shouldn't ever be used for a url.
-        """
-        url = super(ThumbnailFile, self).url
-        if '#' in url:
-            url = urlquote(url)
-        return url
-
-    url = property(_get_url)
 
     def open(self, mode=None, *args, **kwargs):
         if self.closed and self.name:
