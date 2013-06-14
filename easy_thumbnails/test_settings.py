@@ -5,6 +5,8 @@ SITE_ID = 1
 MEDIA_ROOT = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
 MEDIA_URL = '/media/'
 
+SECRET_KEY = 'key-for-testing'
+
 DATABASE_ENGINE = 'sqlite3'
 
 DATABASES = {
