@@ -9,7 +9,8 @@ dependent on the options it receives.
 This makes the system very flexible, as the processors an image passes through
 can be defined in :ref:`THUMBNAIL_PROCESSORS <setting-thumbnail_processors>`
 and even overridden by an individual :class:`easy_thumbnails.files.Thumbnailer`
-(via the :attr:`processors` attribute).
+(via the :attr:`~easy_thumbnails.files.Thumbnailer.thumbnail_processors`
+attribute).
 
 Built-in processors
 ===================

@@ -224,7 +224,11 @@ class Thumbnailer(File):
         * source_generators
         * thumbnail_processors
     """
+    #: A list of source generators to use. If ``None``, will use the default
+    #: generators defined in settings.
     source_generators = None
+    #: A list of thumbnail processors. If ``None``, will use the default
+    #: processors defined in settings.
     thumbnail_processors = None
 
     def __init__(self, file=None, name=None, source_storage=None,
