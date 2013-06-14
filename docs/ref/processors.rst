@@ -59,7 +59,7 @@ options used to generate the thumbnail are passed to processors, not just the
 ones defined.
 
 Whether a processor actually modifies the image or not, they must always return
-an image. 
+an image.
 
 Use the processor
 -----------------
@@ -73,3 +73,12 @@ module::
     THUMBNAIL_PROCESSORS = easy_thumbnails_defaults.THUMBNAIL_PROCESSORS + (
         'wb_project.thumbnail_processors.whizzbang_processor',
     )
+
+    # For Django 1.5 or greater do the following in order to avoid the error,
+    # "ImproperlyConfigured: The SECRET_KEY setting must not be empty."
+    def get_easy_thumbnail_processors():
+        from easy_thumbnails.conf import Settings as easy_thumbnails_defaults
+        return easy_thumbnails_defaults.THUMBNAIL_PROCESSORS + (
+            'wb_project.thumbnail_processors.whizzbang_processor',
+        )
+    THUMBNAIL_PROCESSORS = get_easy_thumbnail_processors
