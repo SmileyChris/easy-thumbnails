@@ -104,8 +104,12 @@ def generate_all_aliases(fieldfile, include_global):
         # Because each thumbnail has a modified time that's different from the
         # source file's modified time, update all thumbnails so they have the
         # same modified time as the source so when the thumbnails are first
-        # used they aren't regenerated again.
-        Thumbnail.objects.filter(source_id=thumbnailer.source.pk).update(modified=thumbnailer.source.modified)
+        # used they aren't regenerated again. Unless you're using the local
+        # file system, because the local file system doesn't doesn't store
+        # thumbnail information in the DB.
+
+        if thumbnailer.source is not None:
+            Thumbnail.objects.filter(source_id=thumbnailer.source.pk).update(modified=thumbnailer.source.modified)
 
 
 class FakeField(object):
