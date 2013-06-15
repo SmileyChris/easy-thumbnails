@@ -12,6 +12,7 @@ from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.models import Thumbnail
+from easy_thumbnails.storage import ThumbnailFileSystemStorage
 
 
 def get_thumbnailer(obj, relative_name=None):
@@ -78,10 +79,14 @@ def save_thumbnail(thumbnail_file, storage):
     Save a thumbnailed file, returning the saved relative file name.
     """
     filename = thumbnail_file.name
-    try:
-        storage.delete(filename)
-    except:
-        pass
+
+    # Don't waste time deleting a file if using remote storage like S3
+    is_local_storage = isinstance(storage, ThumbnailFileSystemStorage)
+    if is_local_storage is True:
+        try:
+            storage.delete(filename)
+        except:
+            pass
 
     return storage.save(filename, thumbnail_file)
 
