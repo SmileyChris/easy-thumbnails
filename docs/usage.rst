@@ -22,7 +22,7 @@ more recently than the existing thumbnail, a new thumbnail is generated (and
 saved).
 
 Thumbnail aliases can be defined in the
-:ref:`THUMBNAIL_ALIASES <setting-thumbnail_aliases>` setting, providing
+:attr:`~easy_thumbnails.conf.Settings.THUMBNAIL_ALIASES` setting, providing
 predefined thumbnail options. This also allows for generation of thumbnails
 when the source image is uploaded.
 

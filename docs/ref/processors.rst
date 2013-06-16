@@ -7,7 +7,7 @@ a series of image processors. Each processor may alter the image, often
 dependent on the options it receives.
 
 This makes the system very flexible, as the processors an image passes through
-can be defined in :ref:`THUMBNAIL_PROCESSORS <setting-thumbnail_processors>`
+can be defined in :attr:`~easy_thumbnails.conf.Settings.THUMBNAIL_PROCESSORS`
 and even overridden by an individual :class:`easy_thumbnails.files.Thumbnailer`
 (via the :attr:`~easy_thumbnails.files.Thumbnailer.thumbnail_processors`
 attribute).
@@ -29,7 +29,7 @@ You can replace or leave out any default processor as suits your needs.
 Following is an explanation of how to create and activate a custom processor.
 
 When defining the
-:ref:`THUMBNAIL_PROCESSORS setting <setting-thumbnail_processors>`, remember
+:attr:`~easy_thumbnails.conf.Settings.THUMBNAIL_PROCESSORS` setting, remember
 that this is the order through which the processors are run. The image received
 by a processor is the output of the previous processor.
 
@@ -66,7 +66,7 @@ Use the processor
 -----------------
 
 Next, add the processor to
-:ref:`THUMBNAIL_PROCESSORS <setting-thumbnail_processors>` in your settings
+:attr:`~easy_thumbnails.conf.Settings.THUMBNAIL_PROCESSORS` in your settings
 module::
 
     from easy_thumbnails.conf import Settings as easy_thumbnails_defaults
