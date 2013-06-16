@@ -1,6 +1,16 @@
 Changes
 =======
 
+current
+---
+
+* Some more Django 1.5 fixes.
+
+* Fix an issue with ``Thumbnail.url`` not working correctly.
+
+* Add the ability to generate retina quality thumbnails in addition to the
+  standard ones (off by default).
+
 1.2
 ---
 
