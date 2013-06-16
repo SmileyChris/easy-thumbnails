@@ -120,5 +120,6 @@ class Settings(AppSettings):
 
     THUMBNAIL_DEFAULT_OPTIONS = None
 
+    THUMBNAIL_HIGH_RESOLUTION = False  # enables thumbnails for retina displays
 
 settings = Settings()

@@ -270,13 +270,17 @@ class Thumbnailer(File):
         return engine.generate_source_image(self, thumbnail_options,
                                             self.source_generators)
 
-    def generate_thumbnail(self, thumbnail_options):
+    def generate_thumbnail(self, thumbnail_options, high_resolution=False):
         """
         Return an unsaved ``ThumbnailFile`` containing a thumbnail image.
 
         The thumbnail image is generated using the ``thumbnail_options``
         dictionary.
         """
+        if high_resolution:
+            orig_size = thumbnail_options['size']  # remember original size
+            thumbnail_options = thumbnail_options.copy()
+            thumbnail_options['size'] = (orig_size[0] * 2, orig_size[1] * 2)
         image = self.generate_source_image(thumbnail_options)
         if image is None:
             raise exceptions.InvalidImageFormatError(
@@ -286,9 +290,13 @@ class Thumbnailer(File):
                                                self.thumbnail_processors)
         quality = thumbnail_options.get('quality', self.thumbnail_quality)
 
+        if high_resolution:
+            thumbnail_options['size'] = orig_size  # restore original size
+
         filename = self.get_thumbnail_name(
             thumbnail_options,
-            transparent=utils.is_transparent(thumbnail_image))
+            transparent=utils.is_transparent(thumbnail_image),
+            high_resolution=high_resolution)
 
         img = engine.save_image(
             thumbnail_image, filename=filename, quality=quality)
@@ -302,7 +310,8 @@ class Thumbnailer(File):
 
         return thumbnail
 
-    def get_thumbnail_name(self, thumbnail_options, transparent=False):
+    def get_thumbnail_name(self, thumbnail_options, transparent=False,
+                           high_resolution=False):
         """
         Return a thumbnail filename for the given ``thumbnail_options``
         dictionary and ``source_name`` (which defaults to the File's ``name``
@@ -345,6 +354,8 @@ class Thumbnailer(File):
                 filename_parts.append(extension)
         else:
             filename_parts += [all_opts, extension]
+        if high_resolution:
+            filename_parts[-2] += '@2x'
         filename = '.'.join(filename_parts)
 
         return os.path.join(basedir, path, subdir, filename)
@@ -397,6 +408,10 @@ class Thumbnailer(File):
                         transparent_name or opaque_name)
             self.get_thumbnail_cache(filename, create=True, update=True)
 
+            if settings.THUMBNAIL_HIGH_RESOLUTION:
+                thumbnail_2x = self.generate_thumbnail(thumbnail_options,
+                                                       high_resolution=True)
+                save_thumbnail(thumbnail_2x, self.thumbnail_storage)
         return thumbnail
 
     def thumbnail_exists(self, thumbnail_name):
@@ -413,6 +428,12 @@ class Thumbnailer(File):
         # Try to use the local file modification times first.
         source_modtime = self.get_source_modtime()
         thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
+        if settings.THUMBNAIL_HIGH_RESOLUTION:
+            filename_parts = os.path.splitext(thumbnail_name)
+            thumbnail_name_2x = '%s@2x%s' % filename_parts
+            thumbnail_modtime = min(
+                thumbnail_modtime,
+                self.get_thumbnail_modtime(thumbnail_name_2x))
         # The thumbnail modification time will be 0 if there was an OSError,
         # in which case it will still be used (but always return False).
         if source_modtime and thumbnail_modtime is not None:
@@ -422,7 +443,12 @@ class Thumbnailer(File):
         if not source:
             return False
         thumbnail = self.get_thumbnail_cache(thumbnail_name)
-        return thumbnail and source.modified <= thumbnail.modified
+        thumbnail_modtime = thumbnail.modified
+        if thumbnail and settings.THUMBNAIL_HIGH_RESOLUTION:
+            thumbnail = self.get_thumbnail_cache(thumbnail_name_2x)
+            if thumbnail:
+                thumbnail_modtime = min(thumbnail_modtime, thumbnail.modified)
+        return thumbnail and source.modified <= thumbnail_modtime
 
     def get_source_cache(self, create=False, update=False):
         if self.remote_source:

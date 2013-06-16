@@ -4,4 +4,5 @@ build
 docs/_build
 .tox/
 *.egg
+*.pyc
 reports/*
