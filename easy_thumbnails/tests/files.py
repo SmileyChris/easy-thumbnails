@@ -121,17 +121,13 @@ class FilesTest(test.BaseTest):
         self.assertEqual(path.splitext(thumb.name)[1], '.jpg')
 
     def test_high_resolution(self):
-        thumbnail_high_resolution = getattr(settings, 'THUMBNAIL_HIGH_RESOLUTION', False)
-        try:
-            setattr(settings, 'THUMBNAIL_HIGH_RESOLUTION', True)
-            self.ext_thumbnailer.thumbnail_extension = 'jpg'
-            thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
-            hires_thumb_file = path.join(path.dirname(thumb.path), path.splitext(thumb.name)[0] + '@2x.jpg')
-            self.assertTrue(path.isfile(hires_thumb_file))
-            thumb = Image.open(hires_thumb_file)
-            self.assertEqual(thumb.size, (200, 150))
-        finally:
-            settings.THUMBNAIL_HIGH_RESOLUTION = thumbnail_high_resolution
+        self.ext_thumbnailer.thumbnail_high_resolution = True
+        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        base, ext = path.splitext(thumb.path)
+        hires_thumb_file = ''.join([base + '@2x', ext])
+        self.assertTrue(path.isfile(hires_thumb_file))
+        thumb = Image.open(hires_thumb_file)
+        self.assertEqual(thumb.size, (200, 150))
 
     def test_USE_TZ(self):
         settings.USE_TZ = True

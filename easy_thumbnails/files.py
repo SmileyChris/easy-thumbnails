@@ -250,7 +250,7 @@ class Thumbnailer(File):
         for default in (
                 'basedir', 'subdir', 'prefix', 'quality', 'extension',
                 'preserve_extensions', 'transparency_extension',
-                'check_cache_miss'):
+                'check_cache_miss', 'high_resolution'):
             attr_name = 'thumbnail_%s' % default
             if getattr(self, attr_name, None) is None:
                 value = getattr(settings, attr_name.upper())
@@ -408,7 +408,7 @@ class Thumbnailer(File):
                         transparent_name or opaque_name)
             self.get_thumbnail_cache(filename, create=True, update=True)
 
-            if settings.THUMBNAIL_HIGH_RESOLUTION:
+            if self.thumbnail_high_resolution:
                 thumbnail_2x = self.generate_thumbnail(thumbnail_options,
                                                        high_resolution=True)
                 save_thumbnail(thumbnail_2x, self.thumbnail_storage)
@@ -428,7 +428,7 @@ class Thumbnailer(File):
         # Try to use the local file modification times first.
         source_modtime = self.get_source_modtime()
         thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
-        if settings.THUMBNAIL_HIGH_RESOLUTION:
+        if self.thumbnail_high_resolution:
             filename_parts = os.path.splitext(thumbnail_name)
             thumbnail_name_2x = '%s@2x%s' % filename_parts
             thumbnail_modtime = min(
@@ -444,7 +444,7 @@ class Thumbnailer(File):
             return False
         thumbnail = self.get_thumbnail_cache(thumbnail_name)
         thumbnail_modtime = thumbnail.modified
-        if thumbnail and settings.THUMBNAIL_HIGH_RESOLUTION:
+        if thumbnail and self.thumbnail_high_resolution:
             thumbnail = self.get_thumbnail_cache(thumbnail_name_2x)
             if thumbnail:
                 thumbnail_modtime = min(thumbnail_modtime, thumbnail.modified)
