@@ -237,6 +237,12 @@ class Settings(AppSettings):
         THUMBNAIL_DEFAULT_OPTIONS = {'bw': True}
     """
 
-    THUMBNAIL_HIGH_RESOLUTION = False  # enables thumbnails for retina displays
+    THUMBNAIL_HIGH_RESOLUTION = False
+    """
+    Enables thumbnails for retina displays.
+
+    Creates a "@2x" version of the thumbnails that can be used by a javascript
+    layer to display higher quality thumbnails for high DPI displays.
+    """
 
 settings = Settings()
