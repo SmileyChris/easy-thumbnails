@@ -15,3 +15,8 @@ install:
 
 script:
   - django-admin.py test easy_thumbnails --settings=easy_thumbnails.test_settings
+
+matrix:
+  exclude:
+    - env: PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.5
+      python: "3.3"
