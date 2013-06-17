@@ -1,7 +1,6 @@
 from django.db.models.fields.files import FileField
 
 from easy_thumbnails import signals
-from easy_thumbnails.alias import aliases
 
 
 def find_uncommitted_filefields(sender, instance, **kwargs):
@@ -11,7 +10,7 @@ def find_uncommitted_filefields(sender, instance, **kwargs):
     :func:`signal_committed_filefields` post_save handler.
     """
     uncommitted = instance._uncommitted_filefields = []
-    
+
     fields = sender._meta.fields
     if kwargs.get('update_fields', None):
         update_fields = set(kwargs['update_fields'])
