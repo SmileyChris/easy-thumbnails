@@ -1,5 +1,6 @@
 import re
 import six
+import sys
 
 from django.template import (
     Library, Node, VariableDoesNotExist, TemplateSyntaxError)
@@ -93,7 +94,8 @@ class ThumbnailNode(Node):
 
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
-        except Exception as e:
+        except Exception:
+            e = sys.exc_info()[1]   # Python 2.5 compatable "as e"
             if raise_errors:
                 raise TemplateSyntaxError(
                     u"Couldn't get the thumbnail %s: %s" % (source, e))
