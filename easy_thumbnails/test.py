@@ -1,9 +1,9 @@
 import shutil
 import tempfile
 try:
-    from cStringIO import StringIO
+    from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from StringIO import StringIO
+    from six import BytesIO
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
@@ -112,10 +112,10 @@ class BaseTest(TestCase):
         """
         Generate a test image, returning the filename that it was saved as.
 
-        If ``storage`` is ``None``, the StringIO containing the image data
+        If ``storage`` is ``None``, the BytesIO containing the image data
         will be passed instead.
         """
-        data = StringIO()
+        data = BytesIO()
         Image.new(image_mode, size).save(data, image_format)
         data.seek(0)
         if not storage:

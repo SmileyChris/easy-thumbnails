@@ -1,3 +1,5 @@
+import six
+
 from easy_thumbnails.conf import settings
 
 
@@ -110,7 +112,7 @@ class Aliases(object):
         The assumption is that if it is not ``None`` and not a string, it is
         a Django ``FieldFile`` object.
         """
-        if not target or isinstance(target, basestring):
+        if not target or isinstance(target, six.string_types):
             return target
         model = target.instance.__class__
         return '%s.%s.%s' % (

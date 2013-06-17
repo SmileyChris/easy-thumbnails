@@ -1,8 +1,8 @@
 import os
 try:
-    from cStringIO import StringIO
+    from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from StringIO import StringIO
+    from six import BytesIO
 
 try:
     from PIL import Image
@@ -42,7 +42,7 @@ def save_image(image, destination=None, filename=None, **options):
     Save a PIL image.
     """
     if destination is None:
-        destination = StringIO()
+        destination = BytesIO()
     filename = filename or ''
     format = Image.EXTENSION.get(os.path.splitext(filename)[1], 'JPEG')
     if format == 'JPEG':

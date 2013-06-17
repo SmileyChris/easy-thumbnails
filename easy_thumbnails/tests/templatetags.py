@@ -45,14 +45,15 @@ class Base(test.BaseTest):
                          transparent=False):
         if source_filename is None:
             source_filename = self.filename
-        self.assert_(isinstance(options, dict))
+        self.assertTrue(isinstance(options, dict))
         # Verify that the thumbnail file exists
         thumbnailer = get_thumbnailer(self.storage, source_filename)
         expected_filename = thumbnailer.get_thumbnail_name(
             options, transparent=transparent)
 
-        self.assert_(self.storage.exists(expected_filename),
-                     'Thumbnail file %r not found' % expected_filename)
+        self.assertTrue(
+            self.storage.exists(expected_filename),
+            'Thumbnail file %r not found' % expected_filename)
 
         # Verify the thumbnail has the expected dimensions
         image = Image.open(self.storage.open(expected_filename))

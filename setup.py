@@ -35,6 +35,10 @@ setup(
         'easy_thumbnails.tests',
     ],
     package_data={'easy_thumbnails': ['docs/*', 'docs/ref/*.rst']},
+    install_requires=[
+        'pillow',
+        'six',
+    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',

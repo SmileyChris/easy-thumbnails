@@ -1,4 +1,5 @@
 import re
+import six
 
 from django.template import (
     Library, Node, VariableDoesNotExist, TemplateSyntaxError)
@@ -61,7 +62,7 @@ class ThumbnailNode(Node):
         # Resolve the thumbnail option values.
         try:
             opts = {}
-            for key, value in self.opts.iteritems():
+            for key, value in six.iteritems(self.opts):
                 if hasattr(value, 'resolve'):
                     value = value.resolve(context)
                 opts[str(key)] = value
@@ -72,7 +73,7 @@ class ThumbnailNode(Node):
         # Size variable can be either a tuple/list of two integers or a
         # valid string.
         size = opts['size']
-        if isinstance(size, basestring):
+        if isinstance(size, six.string_types):
             m = RE_SIZE.match(size)
             if m:
                 opts['size'] = (int(m.group(1)), int(m.group(2)))
@@ -92,7 +93,7 @@ class ThumbnailNode(Node):
 
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
-        except Exception, e:
+        except Exception as e:
             if raise_errors:
                 raise TemplateSyntaxError(
                     u"Couldn't get the thumbnail %s: %s" % (source, e))

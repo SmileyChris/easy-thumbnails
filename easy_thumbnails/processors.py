@@ -1,4 +1,5 @@
 import re
+import six
 
 try:
     from PIL import Image, ImageChops, ImageFilter
@@ -169,7 +170,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
                    min(source_x, int(target_x) + halfdiff_x),
                    min(source_y, int(target_y) + halfdiff_y)]
             # See if an edge cropping argument was provided.
-            edge_crop = (isinstance(crop, basestring) and
+            edge_crop = (isinstance(crop, six.string_types) and
                          re.match(r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop))
             if edge_crop and filter(None, edge_crop.groups()):
                 x_right, x_crop, y_bottom, y_crop = edge_crop.groups()

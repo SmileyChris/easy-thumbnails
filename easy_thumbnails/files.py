@@ -1,8 +1,10 @@
+import os
+import six
+
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import (
     get_storage_class, default_storage, Storage)
 from django.db.models.fields.files import ImageFieldFile, FieldFile
-import os
 
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
@@ -51,7 +53,7 @@ def get_thumbnailer(obj, relative_name=None):
 
     source_storage = None
 
-    if isinstance(obj, basestring):
+    if isinstance(obj, six.string_types):
         relative_name = obj
         obj = None
 
@@ -336,10 +338,8 @@ class Thumbnailer(File):
         quality = thumbnail_options.pop('quality', self.thumbnail_quality)
         initial_opts = ['%sx%s' % size, 'q%s' % quality]
 
-        opts = thumbnail_options.items()
-        opts.sort()   # Sort the options so the file name is consistent.
         opts = ['%s' % (v is not True and '%s-%s' % (k, v) or k)
-                for k, v in opts if v]
+                for k, v in sorted(thumbnail_options.items()) if v]
 
         all_opts = '_'.join(initial_opts + opts)
 

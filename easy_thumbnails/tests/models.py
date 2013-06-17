@@ -32,7 +32,7 @@ class FileManagerTest(test.BaseTest):
             create=True,
             source=self.source)
 
-        self.assertEquals(img.name, self.filename)
+        self.assertEqual(img.name, self.filename)
 
     def test_get_file(self):
         """Fetch an existing thumb from database"""
@@ -47,7 +47,7 @@ class FileManagerTest(test.BaseTest):
             create=False)
 
         self.assertTrue(fetched)
-        self.assertEquals(created, fetched)
+        self.assertEqual(created, fetched)
 
     def test_get_file_check_cache(self):
         """Fetch a thumb that is in the storage but not in the database"""

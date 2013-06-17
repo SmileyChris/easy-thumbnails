@@ -1,6 +1,7 @@
 import inspect
 import math
 import datetime
+import six
 
 from django.utils.functional import LazyObject
 
@@ -97,10 +98,10 @@ def get_storage_hash(storage):
         if storage._wrapped is None:
             storage._setup()
         storage = storage._wrapped
-    if not isinstance(storage, basestring):
+    if not isinstance(storage, six.string_types):
         storage_cls = storage.__class__
         storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
-    return md5_constructor(storage).hexdigest()
+    return md5_constructor(storage.encode('utf8')).hexdigest()
 
 
 def is_transparent(image):

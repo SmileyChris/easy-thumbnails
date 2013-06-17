@@ -1,7 +1,7 @@
 try:
-    from cStringIO import StringIO
+    from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from StringIO import StringIO
+    from six import BytesIO
 
 try:
     from PIL import Image
@@ -21,13 +21,13 @@ def pil_image(source, exif_orientation=True, **options):
         before passing the data along the processing pipeline.
 
     """
-    # Use a StringIO wrapper because if the source is an incomplete file like
+    # Use a BytesIO wrapper because if the source is an incomplete file like
     # object, PIL may have problems with it. For example, some image types
     # require tell and seek methods that are not present on all storage
     # File objects.
     if not source:
         return
-    source = StringIO(source.read())
+    source = BytesIO(source.read())
     try:
         image = Image.open(source)
         # Fully load the image now to catch any problems with the image

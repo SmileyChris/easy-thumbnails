@@ -1,7 +1,10 @@
+import base64
+import six
+
 try:
-    from cStringIO import StringIO
+    from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from StringIO import StringIO
+    from six import BytesIO
 
 try:
     from PIL import Image, ImageChops
@@ -35,7 +38,7 @@ def near_identical(im1, im2):
 
 
 def image_from_b64(data):
-    return Image.open(StringIO(data.decode('base64')))
+    return Image.open(BytesIO(base64.b64decode(data)))
 
 
 class PilImageTest(test.BaseTest):
@@ -45,14 +48,14 @@ class PilImageTest(test.BaseTest):
         Non-images are passed silently.
         """
         self.assertEqual(
-            source_generators.pil_image(StringIO('not an image')), None)
+            source_generators.pil_image(BytesIO(six.b('not an image'))), None)
 
     def test_nearly_image(self):
         """
         Broken images are passed silently.
         """
         data = self.create_image(None, None)
-        trunc_data = StringIO()
+        trunc_data = BytesIO()
         trunc_data.write(data.read()[:-10])
         trunc_data.seek(0)
         self.assertEqual(source_generators.pil_image(data), None)
@@ -62,12 +65,12 @@ class PilImageTest(test.BaseTest):
         Images with EXIF orientation data are reoriented.
         """
         reference = image_from_b64(EXIF_REFERENCE)
-        for exif_orientation, data in EXIF_ORIENTATION.iteritems():
+        for exif_orientation, data in six.iteritems(EXIF_ORIENTATION):
             im = image_from_b64(data)
             self.assertEqual(exif_orientation, im._getexif().get(0x0112))
             self.assertFalse(near_identical(reference, im))
 
-            im = source_generators.pil_image(StringIO(data.decode('base64')))
+            im = source_generators.pil_image(BytesIO(base64.b64decode(data)))
             self.assertTrue(
                 near_identical(reference, im),
                 'EXIF orientation %s did not match reference image' %
@@ -84,7 +87,7 @@ class PilImageTest(test.BaseTest):
         self.assertFalse(near_identical(reference, im))
 
         im = source_generators.pil_image(
-            StringIO(data.decode('base64')), exif_orientation=False)
+            BytesIO(base64.b64decode(data)), exif_orientation=False)
         self.assertFalse(
             near_identical(reference, im),
             'Image should not have been modified')
