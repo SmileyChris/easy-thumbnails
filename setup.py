@@ -3,12 +3,6 @@ from distutils.core import setup
 import easy_thumbnails
 
 
-requirements = [
-    'pillow',
-    'six',
-]
-
-
 def read_files(*filenames):
     """
     Output the contents of one or more files to a single concatenated string.
@@ -41,8 +35,10 @@ setup(
         'easy_thumbnails.tests',
     ],
     package_data={'easy_thumbnails': ['docs/*', 'docs/ref/*.rst']},
-    install_requires=requirements,
-    tests_require=requirements,
+    install_requires=[
+        'pillow',
+        'six',
+    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',

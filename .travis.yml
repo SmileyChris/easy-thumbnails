@@ -10,6 +10,7 @@ env:
 
 install:
   - pip install --use-mirrors "Django<$DJANGO_VERSION"
+  - pip install .
 
 script:
   - django-admin.py test easy_thumbnails --settings=easy_thumbnails.test_settings
