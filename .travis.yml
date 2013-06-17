@@ -3,6 +3,7 @@ language: python
 python:
   - "2.6"
   - "2.7"
+  - "3.3"
 
 env:
   - PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.5
@@ -10,7 +11,7 @@ env:
 
 install:
   - pip install --use-mirrors "Django<$DJANGO_VERSION"
-  - pip install .
+  - pip install --use-mirrors .
 
 script:
   - django-admin.py test easy_thumbnails --settings=easy_thumbnails.test_settings
