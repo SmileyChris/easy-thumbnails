@@ -78,11 +78,10 @@ def save_thumbnail(thumbnail_file, storage):
     Save a thumbnailed file, returning the saved relative file name.
     """
     filename = thumbnail_file.name
-    if storage.exists(filename):
-        try:
-            storage.delete(filename)
-        except:
-            pass
+    try:
+        storage.delete(filename)
+    except Exception:
+        pass
     return storage.save(filename, thumbnail_file)
 
 
