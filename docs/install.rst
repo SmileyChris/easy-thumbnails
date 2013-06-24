@@ -3,7 +3,7 @@ Installation
 ============
 
 Before installing easy-thumbnails, you'll obviously need to have copy of Django
-installed. For the |version| release, Django 1.1 is required.
+installed. For the |version| release, Django 1.4 and up is supported.
 
 By default, all of the image manipulation is handled by the
 `Python Imaging Library`__ (a.k.a. PIL), so you'll probably want that

@@ -2,7 +2,7 @@
 Easy Thumbnails
 ===============
 
-A powerful, yet easy to implement thumbnailing application for Django.
+A powerful, yet easy to implement thumbnailing application for Django 1.4+
 
 Below is a quick summary of usage. For more comprehensive information, view the
 `full documentation`__ online or the peruse the project's ``docs`` directory.
