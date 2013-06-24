@@ -125,7 +125,7 @@ class ThumbnailTagTest(Base):
         self.assertEqual(self.render_template(src), '')
         # ...and THUMBNAIL_DEBUG = True
         settings.THUMBNAIL_DEBUG = True
-        self.assertRaises(TemplateSyntaxError, self.render_template, src)
+        self.assertRaises(ValueError, self.render_template, src)
         # Invalid size as a string:
         src = '{% thumbnail source invalid_strsize %}'
         # ...with THUMBNAIL_DEBUG = False
