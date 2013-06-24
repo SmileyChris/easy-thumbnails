@@ -83,6 +83,13 @@ class FakeRemoteStorage(TemporaryStorage):
         finally:
             self.remote_mode = True
 
+    def delete(self, *args, **kwargs):
+        self.remote_mode = False
+        try:
+            return super(FakeRemoteStorage, self).delete(*args, **kwargs)
+        finally:
+            self.remote_mode = True
+
 
 class BaseTest(TestCase):
     """

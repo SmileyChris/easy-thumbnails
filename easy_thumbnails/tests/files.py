@@ -103,6 +103,24 @@ class FilesTest(test.BaseTest):
             utils.is_transparent(thumb),
             "%s should be transparent." % thumb_file.name)
 
+    def test_missing_thumb(self):
+        opts = {'size': (100, 100)}
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        thumb_cache = self.thumbnailer.get_thumbnail_cache(
+            thumbnail_name=thumb.name)
+        thumb_cache.delete()
+        thumb.storage.delete(thumb.name)
+        self.thumbnailer.get_thumbnail(opts)
+
+    def test_missing_remote_thumb(self):
+        opts = {'size': (100, 100)}
+        thumb = self.remote_thumbnailer.get_thumbnail(opts)
+        thumb_cache = self.remote_thumbnailer.get_thumbnail_cache(
+            thumbnail_name=thumb.name)
+        thumb_cache.delete()
+        thumb.storage.delete(thumb.name)
+        self.remote_thumbnailer.get_thumbnail(opts)
+
     def test_extensions(self):
         self.ext_thumbnailer.thumbnail_extension = 'png'
         thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})

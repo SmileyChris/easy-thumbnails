@@ -457,12 +457,15 @@ class Thumbnailer(File):
         if not source:
             return False
         thumbnail = self.get_thumbnail_cache(thumbnail_name)
+        if not thumbnail:
+            return False
         thumbnail_modtime = thumbnail.modified
-        if thumbnail and self.thumbnail_high_resolution:
-            thumbnail = self.get_thumbnail_cache(thumbnail_name_2x)
-            if thumbnail:
-                thumbnail_modtime = min(thumbnail_modtime, thumbnail.modified)
-        return thumbnail and source.modified <= thumbnail_modtime
+        if self.thumbnail_high_resolution:
+            thumbnail2x = self.get_thumbnail_cache(thumbnail_name_2x)
+            if not thumbnail2x:
+                return False
+            thumbnail_modtime = min(thumbnail_modtime, thumbnail2x.modified)
+        return source.modified <= thumbnail_modtime
 
     def get_source_cache(self, create=False, update=False):
         if self.remote_source:
