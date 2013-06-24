@@ -133,6 +133,21 @@ class ThumbnailFile(ImageFieldFile):
             self.file = file
         self.thumbnail_options = thumbnail_options
 
+    def save(self, *args, **kwargs):
+        # Can't save a ``ThumbnailFile`` directly.
+        raise NotImplementedError()
+
+    def delete(self, *args, **kwargs):
+        # Can't delete a ``ThumbnailFile`` directly, it doesn't have a
+        # reference to the source image, so it can't update the cache. If you
+        # really need to do this, do it with ``self.storage.delete`` directly.
+        raise NotImplementedError()
+
+    # Be consistant with standard behaviour, even though these methods don't
+    # actually alter data any more.
+    save.alters_data = True
+    delete.alters_data = True
+
     def _get_image(self):
         """
         Get a PIL Image instance of this file.
