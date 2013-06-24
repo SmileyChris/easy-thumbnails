@@ -2,6 +2,11 @@
 Easy Thumbnails
 ===============
 
+.. image:: https://secure.travis-ci.org/SmileyChris/easy-thumbnails.png?branch=master
+    :alt: Build Status
+    :target: http://travis-ci.org/SmileyChris/easy-thumbnails
+
+
 A powerful, yet easy to implement thumbnailing application for Django 1.4+
 
 Below is a quick summary of usage. For more comprehensive information, view the
