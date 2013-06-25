@@ -11,14 +11,15 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import os
+import sys
 from django.conf import settings
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 settings.configure(SECRET_KEY='easy')
-sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import easy_thumbnails
 
@@ -177,8 +178,8 @@ htmlhelp_basename = 'easy-thumbnailsdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'easy-thumbnails.tex', u'easy-thumbnails Documentation',
-   u'Chris Beaven', 'manual'),
+    ('index', 'easy-thumbnails.tex', u'easy-thumbnails Documentation',
+     u'Chris Beaven', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
