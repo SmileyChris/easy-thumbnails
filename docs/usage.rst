@@ -4,7 +4,9 @@ Usage
 
 The common way easy-thumbnails is used is via the ``{% thumbnail %}`` template
 tag or ``thumbnail_url`` filter, which generates
-images from a model with an ``ImageField``.
+images from a model with an ``ImageField``. However the tag can also be used
+with static imagess not tied into a specific model. Simply pass in the relative
+path inside quotes where one would call the ``ImageField``.
 
 Custom database fields are also available for simpler access.
 
