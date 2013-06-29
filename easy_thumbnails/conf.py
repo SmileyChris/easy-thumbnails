@@ -248,7 +248,8 @@ class Settings(AppSettings):
     THUMBNAIL_NAME_PROCESSOR = 'easy_thumbnails.files.default_name_processor'
     """
     Defines the path to a function which generates the suffix of a thumbnail
-    filename from the options passed to a Thumbnailer.
+    filename from the options passed to a Thumbnailer. The function takes one
+    argument, which is the list of options passed.
     """
     
 settings = Settings()
