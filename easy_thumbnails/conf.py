@@ -244,5 +244,11 @@ class Settings(AppSettings):
     Creates a "@2x" version of the thumbnails that can be used by a javascript
     layer to display higher quality thumbnails for high DPI displays.
     """
-
+    
+    THUMBNAIL_NAME_PROCESSOR = 'easy_thumbnails.files.default_name_processor'
+    """
+    Defines the path to a function which generates the suffix of a thumbnail
+    filename from the options passed to a Thumbnailer.
+    """
+    
 settings = Settings()
