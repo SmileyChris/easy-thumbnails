@@ -6,8 +6,8 @@ python:
   - "3.3"
 
 env:
-  - PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.5
-  - PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.6
+  - DJANGO_VERSION=1.5
+  - DJANGO_VERSION=1.6
 
 install:
   - pip install --use-mirrors "Django<$DJANGO_VERSION"
@@ -18,5 +18,5 @@ script:
 
 matrix:
   exclude:
-    - env: PYTHONPATH=$PYTHONPATH:$PWD DJANGO_VERSION=1.5
+    - env: DJANGO_VERSION=1.5
       python: "3.3"
