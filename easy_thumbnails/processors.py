@@ -68,7 +68,7 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
         if not replace_alpha:
             return im
         base = Image.new('RGBA', im.size, replace_alpha)
-        base.paste(im)
+        base.paste(im, mask=im)
         im = base
 
     return im.convert('RGB')

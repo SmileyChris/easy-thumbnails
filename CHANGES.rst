@@ -11,6 +11,8 @@ current
 * Add the ability to generate retina quality thumbnails in addition to the
   standard ones (off by default).
 
+* Make ``replace_alpha`` actually work correctly.
+
 1.2
 ---
 

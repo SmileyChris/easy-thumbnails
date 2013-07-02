@@ -148,12 +148,16 @@ class ColorspaceTest(TestCase):
 
     def test_replace_alpha(self):
         image = Image.new('RGBA', (800, 600))
-        processed = processors.colorspace(image, replace_alpha='#fff')
+        self.assertEqual(image.load()[0, 0], (0, 0, 0, 0))
+        processed = processors.colorspace(image, replace_alpha='#fefdfc')
         self.assertEqual(processed.mode, 'RGB')
+        self.assertEqual(processed.load()[0, 0], (254, 253, 252))
 
         image = Image.new('LA', (800, 600))
-        processed = processors.colorspace(image, replace_alpha='#fff')
+        self.assertEqual(image.load()[0, 0], (0, 0))
+        processed = processors.colorspace(image, replace_alpha='#fefdfc')
         self.assertEqual(processed.mode, 'RGB')
+        self.assertEqual(processed.load()[0, 0], (254, 253, 252))
 
     def test_bw(self):
         image = Image.new('RGB', (800, 600))
