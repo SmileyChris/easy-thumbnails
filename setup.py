@@ -36,6 +36,7 @@ setup(
     ],
     package_data={'easy_thumbnails': ['docs/*', 'docs/ref/*.rst']},
     install_requires=[
+        'django>=1.4',
         'pillow',
         'six',
     ],
