@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup, find_packages
 import easy_thumbnails
 
 
@@ -26,15 +26,8 @@ setup(
     author='Chris Beaven',
     author_email='smileychris@gmail.com',
     platforms=['any'],
-    packages=[
-        'easy_thumbnails',
-        'easy_thumbnails.management',
-        'easy_thumbnails.management.commands',
-        'easy_thumbnails.migrations',
-        'easy_thumbnails.templatetags',
-        'easy_thumbnails.tests',
-    ],
-    package_data={'easy_thumbnails': ['docs/*', 'docs/ref/*.rst']},
+    packages=find_packages(),
+    include_package_data=True,
     install_requires=[
         'django>=1.4',
         'pillow',
