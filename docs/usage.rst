@@ -191,7 +191,9 @@ use::
 -----------------------
 
 If you want to create a thumbnail *without* providing an alias, use this tag to
-generate the thumbnail by specifying all of the required options.
+generate the thumbnail by specifying all of the required options (or *with* an
+alias name, to override/supplement the default alias options with dynamic
+content).
 
 .. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnail
 
