@@ -504,6 +504,8 @@ class Thumbnailer(File):
             return 0
         except NotImplementedError:
             return None
+        except UnicodeEncodeError:
+            return None
 
     def get_thumbnail_modtime(self, thumbnail_name):
         try:
@@ -512,6 +514,8 @@ class Thumbnailer(File):
         except OSError:
             return 0
         except NotImplementedError:
+            return None
+        except UnicodeEncodeError:
             return None
 
     def open(self, mode=None):
