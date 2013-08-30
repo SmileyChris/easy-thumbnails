@@ -1,5 +1,6 @@
 import os
 import six
+from subprocess import call
 
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import (
@@ -8,6 +9,7 @@ from django.db.models.fields.files import ImageFieldFile, FieldFile
 
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
+from django.core.files.temp import NamedTemporaryFile
 
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
@@ -82,6 +84,24 @@ def save_thumbnail(thumbnail_file, storage):
         storage.delete(filename)
     except Exception:
         pass
+    extension = os.path.splitext(filename)[1][1:].lower()
+    if extension == 'png' and settings.THUMBNAIL_POSTPROCESS_PNG:
+        postprocess_command = settings.THUMBNAIL_POSTPROCESS_PNG
+    elif extension == 'gif' and settings.THUMBNAIL_POSTPROCESS_GIF:
+        postprocess_command = settings.THUMBNAIL_POSTPROCESS_GIF
+    elif extension in ('jpg', 'jpeg',) and settings.THUMBNAIL_POSTPROCESS_GIF:
+        postprocess_command = settings.THUMBNAIL_POSTPROCESS_JPEG
+    else:
+        postprocess_command = None
+    if postprocess_command:
+        with NamedTemporaryFile() as temp_file:
+            temp_file.write(thumbnail_file.read())
+            temp_file.flush()
+            postprocess_command %= dict(filename=temp_file.name)
+            if call(postprocess_command, shell=True) != 0:
+                raise RuntimeError('Failed to execute postprocess command: ', postprocess_command)
+            with open(temp_file.name, 'rb') as f:
+                thumbnail_file.file = ContentFile(f.read())
     return storage.save(filename, thumbnail_file)
 
 

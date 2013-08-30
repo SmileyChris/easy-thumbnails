@@ -245,4 +245,31 @@ class Settings(AppSettings):
     layer to display higher quality thumbnails for high DPI displays.
     """
 
+    THUMBNAIL_POSTPROCESS_PNG = None
+    """
+    Postprocess thumbnails of type PNG after transformation but before storage.
+
+    Applies an external filter program, which can be used to reduce the payload of the generated
+    thumbnailed image file.
+    Example: THUMBNAIL_POSTPROCESS_PNG = '/usr/bin/optipng %(filename)s'
+    """
+
+    THUMBNAIL_POSTPROCESS_GIF = None
+    """
+    Postprocess thumbnails of type GIF after transformation but before storage.
+
+    Applies an external filter program, which can be used to reduce the payload of the generated
+    thumbnailed image file.
+    Example: THUMBNAIL_POSTPROCESS_GIF = '/usr/bin/optipng -silent %(filename)s'
+    """
+
+    THUMBNAIL_POSTPROCESS_JPEG = None
+    """
+    Postprocess thumbnails of type JPEG after transformation but before storage.
+
+    Applies an external filter program, which can be used to reduce the payload of the generated
+    thumbnailed image file.
+    Example: THUMBNAIL_POSTPROCESS_JPEG = '/usr/bin/jpegoptim --quiet %(filename)s'
+    """
+
 settings = Settings()
