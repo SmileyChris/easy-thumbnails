@@ -1,16 +1,13 @@
 Changes
 =======
 
-next
+current
 ---
 
 * Added configuration directives THUMBNAIL_POSTPROCESS_PNG, THUMBNAIL_POSTPROCESS_GIF and
   THUMBNAIL_POSTPROCESS_JPEG. They can optionally be used to specify a filtering executable, such
   as 'optipng' or 'jpegoptim', which are available for reducing the payload of images. Using these
   optional filters can dramatically increase the loading time of webpages.
-
-current
----
 
 * Some more Django 1.5 fixes.
 
