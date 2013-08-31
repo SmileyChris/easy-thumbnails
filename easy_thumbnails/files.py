@@ -89,7 +89,7 @@ def save_thumbnail(thumbnail_file, storage):
         postprocess_command = settings.THUMBNAIL_POSTPROCESS_PNG
     elif extension == 'gif' and settings.THUMBNAIL_POSTPROCESS_GIF:
         postprocess_command = settings.THUMBNAIL_POSTPROCESS_GIF
-    elif extension in ('jpg', 'jpeg',) and settings.THUMBNAIL_POSTPROCESS_GIF:
+    elif extension in ('jpg', 'jpeg',) and settings.THUMBNAIL_POSTPROCESS_JPEG:
         postprocess_command = settings.THUMBNAIL_POSTPROCESS_JPEG
     else:
         postprocess_command = None
