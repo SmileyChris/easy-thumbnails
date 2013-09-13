@@ -7,6 +7,7 @@ from django.template import (
 from django.utils.html import escape
 
 from easy_thumbnails import utils
+from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.files import get_thumbnailer
 
@@ -38,9 +39,9 @@ def split_args(args):
 
 
 class ThumbnailNode(Node):
-    def __init__(self, source_var, opts, context_name=None):
+    def __init__(self, source_var, opts, context_name=None, alias=None):
         self.source_var = source_var
-        self.opts = opts
+        self.opts = dict(alias or {}, **opts) if alias else opts
         self.context_name = context_name
 
     def render(self, context):
@@ -124,6 +125,8 @@ def thumbnail(parser, token):
 
     *size* can either be:
 
+    * the name of an alias
+
     * the size in the format ``[width]x[height]`` (for example,
       ``{% thumbnail person.photo 100x50 %}``) or
 
@@ -134,6 +137,9 @@ def thumbnail(parser, token):
     *options* are a space separated list of options which are used when
     processing the image to a thumbnail such as ``sharpen``, ``crop`` and
     ``quality=90``.
+
+    If *size* is specified as an alias name, *options* are used to override
+    and/or supplement the options defined in that alias.
 
     The thumbnail tag can also place a
     :class:`~easy_thumbnails.files.ThumbnailFile` object in the context,
@@ -179,13 +185,18 @@ def thumbnail(parser, token):
     # The first argument is the source file.
     source_var = parser.compile_filter(args[1])
 
-    # The second argument is the requested size. If it's the static "10x10"
-    # format, wrap it in quotes so that it is compiled correctly.
-    size = args[2]
-    match = RE_SIZE.match(size)
-    if match:
-        size = '"%s"' % size
-    opts['size'] = parser.compile_filter(size)
+    # The second argument is the requested size (or alias).
+    # Check alias first so that RE_SIZE matching alias names are OK:
+    alias = aliases.get(parser.compile_filter(args[2]).var)
+    # TODO: allow variables for alias names?
+    if alias is None:
+        # If it's the static "10x10" format, wrap it in quotes so that it is
+        # compiled correctly.
+        size = args[2]
+        match = RE_SIZE.match(size)
+        if match:
+            size = '"%s"' % size
+        opts['size'] = parser.compile_filter(size)
 
     # All further arguments are options.
     args_list = split_args(args[3:]).items()
@@ -197,7 +208,8 @@ def thumbnail(parser, token):
         else:
             raise TemplateSyntaxError("'%s' tag received a bad argument: "
                                       "'%s'" % (tag, arg))
-    return ThumbnailNode(source_var, opts=opts, context_name=context_name)
+    return ThumbnailNode(
+        source_var, alias=alias, opts=opts, context_name=context_name)
 
 
 def thumbnailer(obj):
