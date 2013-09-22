@@ -31,6 +31,7 @@ class Base(test.BaseTest):
         source_image.thumbnail_storage = self.storage
         context = Context({
             'source': source_image,
+            'storage': self.storage,
             'filename': self.filename,
             'invalid_filename': 'not%s' % self.filename,
             'size': (90, 100),
@@ -227,6 +228,17 @@ class ThumbnailerFilterTest(ThumbnailerBase):
     def test_get(self):
         src = (
             '{% with t=filename|thumbnailer %}'
+            '{{ t.small.url }}{% endwith %}'
+        )
+        output = self.render_template(src)
+        expected = self.verify_thumbnail(
+            (20, 20), settings.THUMBNAIL_ALIASES['']['small'])
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, expected_url)
+
+    def test_relative_name(self):
+        src = (
+            '{% with t=storage|thumbnailer:filename %}'
             '{{ t.small.url }}{% endwith %}'
         )
         output = self.render_template(src)

@@ -200,7 +200,7 @@ def thumbnail(parser, token):
     return ThumbnailNode(source_var, opts=opts, context_name=context_name)
 
 
-def thumbnailer(obj):
+def thumbnailer(obj, relative_name=None):
     """
     Creates a thumbnailer from an object (usually a ``FileField``).
 
@@ -215,8 +215,12 @@ def thumbnailer(obj):
             <img href="{% static 'template/fallback.png' %}" alt="" />
         {% endif %}
         {% endwith %}
+
+    If you know what you're doing, you can also pass the relative name::
+
+        {% with photo=storage|thumbnailer:'some/file.jpg' %}...
     """
-    return get_thumbnailer(obj)
+    return get_thumbnailer(obj, relative_name=relative_name)
 
 
 def thumbnailer_passive(obj):
