@@ -15,6 +15,13 @@ class FilesTest(test.BaseTest):
         self.storage = test.TemporaryStorage()
         self.remote_storage = test.FakeRemoteStorage()
 
+        # add a mock image optimizing post processor
+        settings.THUMBNAIL_POSTPROCESS = {
+            'png': 'easy_thumbnails/tests/mockoptim.py {filename}',
+            'gif': 'easy_thumbnails/tests/mockoptim.py {filename}',
+            'jpg': 'easy_thumbnails/tests/mockoptim.py {filename}',
+        }
+
         # Save a test image in both storages.
         filename = self.create_image(self.storage, 'test.jpg')
         self.thumbnailer = files.get_thumbnailer(self.storage, filename)
