@@ -57,7 +57,6 @@ class Aliases(object):
             options = self._get(target_part, alias)
             if options:
                 return options
-        return self._get('', alias)
 
     def all(self, target=None, include_global=True):
         """
