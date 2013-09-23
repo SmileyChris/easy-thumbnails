@@ -1,6 +1,5 @@
 import re
 import six
-import sys
 
 from django.template import (
     Library, Node, VariableDoesNotExist, TemplateSyntaxError)
@@ -39,9 +38,9 @@ def split_args(args):
 
 
 class ThumbnailNode(Node):
-    def __init__(self, source_var, opts, context_name=None, alias=None):
+    def __init__(self, source_var, opts, context_name=None):
         self.source_var = source_var
-        self.opts = dict(alias or {}, **opts) if alias else opts
+        self.opts = opts
         self.context_name = context_name
 
     def render(self, context):
@@ -80,9 +79,16 @@ class ThumbnailNode(Node):
             if m:
                 opts['size'] = (int(m.group(1)), int(m.group(2)))
             else:
-                if raise_errors:
-                    raise TemplateSyntaxError("%r is not a valid size." % size)
-                return self.bail_out(context)
+                # Size variable may alternatively be referencing an alias.
+                alias = aliases.get(size, target=source)
+                if alias:
+                    del opts['size']
+                    opts = dict(alias, **opts)
+                else:
+                    if raise_errors:
+                        raise TemplateSyntaxError(
+                            "%r is not a valid size." % size)
+                    return self.bail_out(context)
         # Ensure the quality is an integer.
         if 'quality' in opts:
             try:
@@ -185,18 +191,13 @@ def thumbnail(parser, token):
     # The first argument is the source file.
     source_var = parser.compile_filter(args[1])
 
-    # The second argument is the requested size (or alias).
-    # Check alias first so that RE_SIZE matching alias names are OK:
-    alias = aliases.get(parser.compile_filter(args[2]).var)
-    # TODO: allow variables for alias names?
-    if alias is None:
-        # If it's the static "10x10" format, wrap it in quotes so that it is
-        # compiled correctly.
-        size = args[2]
-        match = RE_SIZE.match(size)
-        if match:
-            size = '"%s"' % size
-        opts['size'] = parser.compile_filter(size)
+    # The second argument is the requested size. If it's the static "10x10"
+    # format, wrap it in quotes so that it is compiled correctly.
+    size = args[2]
+    match = RE_SIZE.match(size)
+    if match:
+        size = '"%s"' % size
+    opts['size'] = parser.compile_filter(size)
 
     # All further arguments are options.
     args_list = split_args(args[3:]).items()
@@ -208,8 +209,7 @@ def thumbnail(parser, token):
         else:
             raise TemplateSyntaxError("'%s' tag received a bad argument: "
                                       "'%s'" % (tag, arg))
-    return ThumbnailNode(
-        source_var, alias=alias, opts=opts, context_name=context_name)
+    return ThumbnailNode(source_var, opts=opts, context_name=context_name)
 
 
 def thumbnailer(obj, relative_name=None):

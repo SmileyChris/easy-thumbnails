@@ -114,6 +114,8 @@ class Aliases(object):
         """
         if not target or isinstance(target, six.string_types):
             return target
+        if not hasattr(target, 'instance'):
+            return None
         model = target.instance.__class__
         return '%s.%s.%s' % (
             model._meta.app_label,
