@@ -1,6 +1,6 @@
 from os import path
 
-from easy_thumbnails import files, utils, signals, test
+from easy_thumbnails import files, utils, signals, test, exceptions
 from easy_thumbnails.conf import settings
 try:
     from PIL import Image
@@ -112,6 +112,14 @@ class FilesTest(test.BaseTest):
         thumb.storage.delete(thumb.name)
         self.thumbnailer.get_thumbnail(opts)
 
+    def test_missing_thumb_from_storage(self):
+        opts = {'size': (100, 100)}
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        thumb.storage.delete(thumb.name)
+        new_thumb = self.thumbnailer.get_thumbnail(opts)
+        self.assertEqual(thumb.name, new_thumb.name)
+        self.assertTrue(thumb.storage.exists(new_thumb.name))
+
     def test_missing_remote_thumb(self):
         opts = {'size': (100, 100)}
         thumb = self.remote_thumbnailer.get_thumbnail(opts)
@@ -120,6 +128,13 @@ class FilesTest(test.BaseTest):
         thumb_cache.delete()
         thumb.storage.delete(thumb.name)
         self.remote_thumbnailer.get_thumbnail(opts)
+
+    def test_missing_source(self):
+        opts = {'size': (100, 100)}
+        self.storage.delete(self.thumbnailer.name)
+        self.assertRaises(
+            exceptions.InvalidImageFormatError,
+            self.thumbnailer.get_thumbnail, opts)
 
     def test_extensions(self):
         self.ext_thumbnailer.thumbnail_extension = 'png'
