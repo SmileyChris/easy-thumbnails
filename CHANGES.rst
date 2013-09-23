@@ -1,7 +1,22 @@
 Changes
 =======
 
-current
+1.4
+---
+
+* Considerable speed up for remote storages by reducing queries.
+  Brent O'Connor spent a lot of time debugging this, so thank you epicserve!
+
+* Allow the ``{% thumbnail %}`` tag to also accept aliases. Thanks Simon Meers!
+
+* Make ``replace_alpha`` actually work correctly.
+
+* Fixes exception being raised when image exists in cache but is doesn't
+  actually exist in the storage.
+
+* Fixes Python 2.5 compatibility.
+
+1.3
 ---
 
 * Some more Django 1.5 fixes.
@@ -10,8 +25,6 @@ current
 
 * Add the ability to generate retina quality thumbnails in addition to the
   standard ones (off by default).
-
-* Make ``replace_alpha`` actually work correctly.
 
 1.2
 ---

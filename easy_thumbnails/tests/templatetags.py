@@ -327,4 +327,3 @@ class ThumbnailTagAliasTest(ThumbnailerBase):
             bw=True,
             upscale=True,
         )
-
