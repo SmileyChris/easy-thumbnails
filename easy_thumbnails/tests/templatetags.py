@@ -295,3 +295,36 @@ class ThumbnailerPassiveFilterTest(ThumbnailerBase):
         )
         output = self.render_template(src)
         self.assertEqual(output, '')
+
+
+class ThumbnailTagAliasTest(ThumbnailerBase):
+    def assertCorrectOutput(self, src, alias_name, **overrides):
+        options = settings.THUMBNAIL_ALIASES[''][alias_name]
+        options.update(overrides)
+        output = self.render_template(src)
+        expected = self.verify_thumbnail(options['size'], options)
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, expected_url)
+
+    def test_invalid_alias_name(self):
+        self.assertEqual(
+            self.render_template('{% thumbnail filename "notanalias" %}'),
+            ''
+        )
+
+    def test_correct_alias(self):
+        self.assertCorrectOutput('{% thumbnail filename "small" %}', 'small')
+
+    def test_alias_overrides(self):
+        self.assertCorrectOutput(
+            '{% thumbnail filename "small" upscale %}',
+            'small',
+            upscale=True,
+        )
+        self.assertCorrectOutput(
+            '{% thumbnail filename "small" upscale bw %}',
+            'small',
+            bw=True,
+            upscale=True,
+        )
+
