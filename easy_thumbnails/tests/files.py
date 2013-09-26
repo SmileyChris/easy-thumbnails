@@ -180,6 +180,15 @@ class FilesTest(test.BaseTest):
         thumb = self.thumbnailer.get_thumbnail(opts)
         self.assertEqual((thumb.width, thumb.height), (50, 50))
 
+    def test_dimensions_of_cached_image(self):
+        opts = {'size': (50, 50)}
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        self.assertEqual((thumb.width, thumb.height), (50, 38))
+        # Now the thumb has been created, check that retrieving this still
+        # gives access to the dimensions.
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        self.assertEqual((thumb.width, thumb.height), (50, 38))
+
     def test_thumbnail_created_signal(self):
 
         def signal_handler(sender, **kwargs):
