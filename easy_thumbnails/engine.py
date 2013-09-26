@@ -71,6 +71,8 @@ def generate_source_image(source_file, processor_options, generators=None):
     passed to the generators.
     """
     processor_options = _use_default_options(processor_options)
+    # Keep record of whether the source file was originally closed. Not all
+    # file-like objects provide this attribute, so just fall back to False.
     was_closed = getattr(source_file, 'closed', False)
     if generators is None:
         generators = [
@@ -79,14 +81,16 @@ def generate_source_image(source_file, processor_options, generators=None):
     try:
         for generator in generators:
             source = source_file
+            # First try to open the file.
             try:
                 source.open()
             except Exception:
+                # If that failed, maybe the file-like object doesn't support
+                # reopening so just try seeking back to the start of the file.
                 try:
                     source.seek(0)
                 except Exception:
                     source = None
-                    was_closed = False
             image = generator(source, **processor_options)
             if image:
                 return image
