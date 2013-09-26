@@ -427,6 +427,7 @@ class Thumbnailer(File):
                 thumbnail_2x = self.generate_thumbnail(thumbnail_options,
                                                        high_resolution=True)
                 save_thumbnail(thumbnail_2x)
+                signals.thumbnail_created.send(sender=thumbnail_2x)
         return thumbnail
 
     def thumbnail_exists(self, thumbnail_name):
