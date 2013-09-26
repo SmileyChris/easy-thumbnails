@@ -73,11 +73,12 @@ def get_thumbnailer(obj, relative_name=None):
         remote_source=obj is not None)
 
 
-def save_thumbnail(thumbnail_file, storage):
+def save_thumbnail(thumbnail_file):
     """
     Save a thumbnailed file, returning the saved relative file name.
     """
     filename = thumbnail_file.name
+    storage = thumbnail_file.storage
     try:
         storage.delete(filename)
     except Exception:
@@ -414,7 +415,7 @@ class Thumbnailer(File):
 
         thumbnail = self.generate_thumbnail(thumbnail_options)
         if save:
-            save_thumbnail(thumbnail, self.thumbnail_storage)
+            save_thumbnail(thumbnail)
             signals.thumbnail_created.send(sender=thumbnail)
             # Ensure the right thumbnail name is used based on the transparency
             # of the image.
@@ -425,7 +426,7 @@ class Thumbnailer(File):
             if self.thumbnail_high_resolution:
                 thumbnail_2x = self.generate_thumbnail(thumbnail_options,
                                                        high_resolution=True)
-                save_thumbnail(thumbnail_2x, self.thumbnail_storage)
+                save_thumbnail(thumbnail_2x)
         return thumbnail
 
     def thumbnail_exists(self, thumbnail_name):
