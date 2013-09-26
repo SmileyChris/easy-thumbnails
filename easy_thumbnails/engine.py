@@ -95,5 +95,10 @@ def generate_source_image(source_file, processor_options, generators=None):
             if image:
                 return image
     finally:
+        # Attempt to close the file if it was closed originally (but fail
+        # silently).
         if was_closed:
-            source_file.close()
+            try:
+                source_file.close()
+            except Exception:
+                pass
