@@ -71,19 +71,22 @@ def generate_source_image(source_file, processor_options, generators=None):
     passed to the generators.
     """
     processor_options = _use_default_options(processor_options)
-    was_closed = source_file.closed
+    was_closed = getattr(source_file, 'closed', False)
     if generators is None:
         generators = [
             utils.dynamic_import(name)
             for name in settings.THUMBNAIL_SOURCE_GENERATORS]
     try:
-        source = source_file
-        try:
-            source.open()
-        except Exception:
-            source = None
-            was_closed = False
         for generator in generators:
+            source = source_file
+            try:
+                source.open()
+            except Exception:
+                try:
+                    source.seek(0)
+                except Exception:
+                    source = None
+                    was_closed = False
             image = generator(source, **processor_options)
             if image:
                 return image
