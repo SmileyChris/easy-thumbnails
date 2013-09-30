@@ -1,7 +1,11 @@
 import inspect
 import math
 import datetime
-import six
+
+try:
+    import six
+except ImportError:
+    from django.utils import six
 
 from django.utils.functional import LazyObject
 
