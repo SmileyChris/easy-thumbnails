@@ -48,12 +48,13 @@ def save_image(image, destination=None, filename=None, **options):
     if format == 'JPEG':
         options.setdefault('quality', 85)
         try:
-            image.save(destination, format=format, optimize=1, **options)
+            image.save(destination, format=format, optimize=1, subsampling=0, **options)
         except IOError:
             # Try again, without optimization (PIL can't optimize an image
             # larger than ImageFile.MAXBLOCK, which is 64k by default)
-            pass
-    image.save(destination, format=format, **options)
+            image.save(destination, format=format, subsampling=0, **options)
+    else:
+        image.save(destination, format=format, **options)
     if hasattr(destination, 'seek'):
         destination.seek(0)
     return destination
