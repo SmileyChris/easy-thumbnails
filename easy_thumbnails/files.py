@@ -474,7 +474,7 @@ class Thumbnailer(File):
             if self._source_cache or not create:
                 return self._source_cache
         modtime = self.get_source_modtime()
-        update_modified = modtime and utils.fromtimestamp(modtime)
+        update_modified = modtime and utils.make_time_zone_aware(modtime)
         if update:
             update_modified = update_modified or utils.now()
         self._source_cache = models.Source.objects.get_file(
@@ -487,7 +487,7 @@ class Thumbnailer(File):
         if self.remote_source:
             return None
         modtime = self.get_thumbnail_modtime(thumbnail_name)
-        update_modified = modtime and utils.fromtimestamp(modtime)
+        update_modified = modtime and utils.make_time_zone_aware(modtime)
         if update:
             update_modified = update_modified or utils.now()
         source = self.get_source_cache(create=True)
@@ -497,22 +497,10 @@ class Thumbnailer(File):
             check_cache_miss=self.thumbnail_check_cache_miss)
 
     def get_source_modtime(self):
-        try:
-            path = self.source_storage.path(self.name)
-            return os.path.getmtime(path)
-        except OSError:
-            return 0
-        except NotImplementedError:
-            return None
+        return utils.get_modified_time(self.source_storage, self.name)
 
     def get_thumbnail_modtime(self, thumbnail_name):
-        try:
-            path = self.thumbnail_storage.path(thumbnail_name)
-            return os.path.getmtime(path)
-        except OSError:
-            return 0
-        except NotImplementedError:
-            return None
+        return utils.get_modified_time(self.thumbnail_storage, thumbnail_name)
 
     def open(self, mode=None):
         if self.closed:

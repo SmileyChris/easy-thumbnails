@@ -1,6 +1,7 @@
 import inspect
 import math
 import datetime
+import os
 import six
 
 from django.utils.functional import LazyObject
@@ -19,8 +20,7 @@ try:
     from django.utils import timezone
     now = timezone.now
 
-    def fromtimestamp(timestamp):
-        dt = datetime.datetime.fromtimestamp(timestamp)
+    def make_time_zone_aware(dt):
         if getattr(settings, 'USE_TZ', False):
             default_timezone = timezone.get_default_timezone()
             return timezone.make_aware(dt, default_timezone)
@@ -28,7 +28,7 @@ try:
 
 except ImportError:
     now = datetime.datetime.now
-    fromtimestamp = datetime.datetime.fromtimestamp
+    make_time_zone_aware = lambda dt: dt
 
 from easy_thumbnails.conf import settings
 
@@ -141,3 +141,20 @@ def exif_orientation(im):
         elif orientation == 8:
             im = im.rotate(90)
     return im
+
+
+def get_modified_time(storage, name):
+    """
+    Get modified time from storage if the storage implements modified_time.
+    Fall back to using os.path (assumes a FS-based storage) for backwards-compatibility
+    """
+    try:
+        try:
+            return storage.modified_time(name)
+        except AttributeError: # older storage interface didn't have "modified_time"
+            path = storage.path(name)
+            return datetime.datetime.fromtimestamp(os.path.getmtime(path))
+    except OSError:
+        return 0
+    except NotImplementedError:
+        return None
