@@ -8,6 +8,7 @@ from django.db.models.fields.files import ImageFieldFile, FieldFile
 
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
+from django.utils import timezone
 
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
@@ -473,10 +474,9 @@ class Thumbnailer(File):
         if hasattr(self, '_source_cache') and not update:
             if self._source_cache or not create:
                 return self._source_cache
-        modtime = self.get_source_modtime()
-        update_modified = modtime and utils.make_time_zone_aware(modtime)
+        update_modified = self.get_source_modtime()
         if update:
-            update_modified = update_modified or utils.now()
+            update_modified = update_modified or timezone.now()
         self._source_cache = models.Source.objects.get_file(
             create=create, update_modified=update_modified,
             storage=self.source_storage, name=self.name,
@@ -486,10 +486,9 @@ class Thumbnailer(File):
     def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
         if self.remote_source:
             return None
-        modtime = self.get_thumbnail_modtime(thumbnail_name)
-        update_modified = modtime and utils.make_time_zone_aware(modtime)
+        update_modified = self.get_thumbnail_modtime(thumbnail_name)
         if update:
-            update_modified = update_modified or utils.now()
+            update_modified = update_modified or timezone.now()
         source = self.get_source_cache(create=True)
         return models.Thumbnail.objects.get_file(
             create=create, update_modified=update_modified,

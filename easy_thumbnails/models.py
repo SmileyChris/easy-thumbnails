@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from easy_thumbnails import utils, signal_handlers
 
@@ -37,7 +38,7 @@ class FileManager(models.Manager):
 class File(models.Model):
     storage_hash = models.CharField(max_length=40, db_index=True)
     name = models.CharField(max_length=255, db_index=True)
-    modified = models.DateTimeField(default=utils.now)
+    modified = models.DateTimeField(default=timezone.now)
 
     objects = FileManager()
 

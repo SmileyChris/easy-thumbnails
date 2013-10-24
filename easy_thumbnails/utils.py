@@ -1,10 +1,9 @@
 import inspect
 import math
-import datetime
-import os
 import six
 
 from django.utils.functional import LazyObject
+from django.utils import timezone
 
 try:
     from hashlib import md5 as md5_constructor
@@ -15,20 +14,6 @@ try:
     from PIL import Image
 except ImportError:
     import Image
-
-try:
-    from django.utils import timezone
-    now = timezone.now
-
-    def make_time_zone_aware(dt):
-        if getattr(settings, 'USE_TZ', False):
-            default_timezone = timezone.get_default_timezone()
-            return timezone.make_aware(dt, default_timezone)
-        return dt
-
-except ImportError:
-    now = datetime.datetime.now
-    make_time_zone_aware = lambda dt: dt
 
 from easy_thumbnails.conf import settings
 
@@ -145,16 +130,17 @@ def exif_orientation(im):
 
 def get_modified_time(storage, name):
     """
-    Get modified time from storage if the storage implements modified_time.
-    Fall back to using os.path (assumes a FS-based storage) for backwards-compatibility
+    Get modified time from storage, ensuring the result is a timezone-aware
+    datetime.
     """
     try:
-        try:
-            return storage.modified_time(name)
-        except AttributeError: # older storage interface didn't have "modified_time"
-            path = storage.path(name)
-            return datetime.datetime.fromtimestamp(os.path.getmtime(path))
+        modified_time = storage.modified_time(name)
     except OSError:
         return 0
     except NotImplementedError:
         return None
+    if modified_time and timezone.is_naive(modified_time):
+        if getattr(settings, 'USE_TZ', False):
+            default_timezone = timezone.get_default_timezone()
+            return timezone.make_aware(modified_time, default_timezone)
+    return modified_time
