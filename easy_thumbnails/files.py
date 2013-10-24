@@ -74,18 +74,6 @@ def get_thumbnailer(obj, relative_name=None):
         remote_source=obj is not None)
 
 
-def save_thumbnail(thumbnail_file, storage):
-    """
-    Save a thumbnailed file, returning the saved relative file name.
-    """
-    filename = thumbnail_file.name
-    try:
-        storage.delete(filename)
-    except Exception:
-        pass
-    return storage.save(filename, thumbnail_file)
-
-
 def generate_all_aliases(fieldfile, include_global):
     """
     Generate all of a file's aliases.
@@ -375,6 +363,27 @@ class Thumbnailer(File):
 
         return os.path.join(basedir, path, subdir, filename)
 
+    def get_existing_thumbnail(self, thumbnail_options, high_resolution=False):
+        """
+        Return a ``ThumbnailFile`` containing an existing thumbnail for a set
+        of thumbnail options, or ``None`` if not found.
+        """
+        names = [
+            self.get_thumbnail_name(
+                thumbnail_options, transparent=False,
+                high_resolution=high_resolution)]
+        transparent_name = self.get_thumbnail_name(
+            thumbnail_options, transparent=True,
+            high_resolution=high_resolution)
+        if transparent_name not in names:
+            names.append(transparent_name)
+
+        for filename in names:
+            if self.thumbnail_exists(filename):
+                return ThumbnailFile(
+                    name=filename, storage=self.thumbnail_storage,
+                    thumbnail_options=thumbnail_options)
+
     def get_thumbnail(self, thumbnail_options, save=True, generate=None):
         """
         Return a ``ThumbnailFile`` containing a thumbnail.
@@ -392,42 +401,51 @@ class Thumbnailer(File):
         dictionary. If the ``save`` argument is ``True`` (default), the
         generated thumbnail will be saved too.
         """
-        opaque_name = self.get_thumbnail_name(thumbnail_options,
-                                              transparent=False)
-        transparent_name = self.get_thumbnail_name(thumbnail_options,
-                                                   transparent=True)
-        if opaque_name == transparent_name:
-            names = (opaque_name,)
-        else:
-            names = (opaque_name, transparent_name)
-        for filename in names:
-            if self.thumbnail_exists(filename):
-                return ThumbnailFile(
-                    name=filename, storage=self.thumbnail_storage,
-                    thumbnail_options=thumbnail_options)
-
         if generate is None:
             generate = self.generate
-        if not generate:
-            signals.thumbnail_missed.send(
-                sender=self, options=thumbnail_options)
-            return
 
-        thumbnail = self.generate_thumbnail(thumbnail_options)
-        if save:
-            save_thumbnail(thumbnail, self.thumbnail_storage)
-            signals.thumbnail_created.send(sender=thumbnail)
-            # Ensure the right thumbnail name is used based on the transparency
-            # of the image.
-            filename = (utils.is_transparent(thumbnail.image) and
-                        transparent_name or opaque_name)
-            self.get_thumbnail_cache(filename, create=True, update=True)
+        thumbnail = self.get_existing_thumbnail(thumbnail_options)
+        if not thumbnail:
+            if generate:
+                thumbnail = self.generate_thumbnail(thumbnail_options)
+                if save:
+                    self.save_thumbnail(thumbnail)
+            else:
+                signals.thumbnail_missed.send(
+                    sender=self, options=thumbnail_options,
+                    high_resolution=False)
 
-            if self.thumbnail_high_resolution:
-                thumbnail_2x = self.generate_thumbnail(thumbnail_options,
-                                                       high_resolution=True)
-                save_thumbnail(thumbnail_2x, self.thumbnail_storage)
+        if self.thumbnail_high_resolution:
+            thumbnail.high_resolution = self.get_existing_thumbnail(
+                thumbnail_options, high_resolution=True)
+            if not thumbnail.high_resolution:
+                if generate:
+                    thumbnail.high_resolution = self.generate_thumbnail(
+                        thumbnail_options, high_resolution=True)
+                    if save:
+                        self.save_thumbnail(thumbnail.high_resolution)
+                else:
+                    signals.thumbnail_missed.send(
+                        sender=self, options=thumbnail_options,
+                        high_resolution=False)
+
         return thumbnail
+
+    def save_thumbnail(self, thumbnail):
+        """
+        Save a thumbnail to the thumbnail_storage.
+
+        Also triggers the ``thumbnail_created`` signal and caches the
+        thumbnail values for future lookups.
+        """
+        filename = thumbnail.name
+        try:
+            self.thumbnail_storage.delete(filename)
+        except Exception:
+            pass
+        self.thumbnail_storage.save(filename, thumbnail)
+        signals.thumbnail_created.send(sender=thumbnail)
+        self.get_thumbnail_cache(thumbnail.name, create=True, update=True)
 
     def thumbnail_exists(self, thumbnail_name):
         """
@@ -460,21 +478,6 @@ class Thumbnailer(File):
             if not thumbnail:
                 return False
             thumbnail_modtime = thumbnail.modified
-
-        if self.thumbnail_high_resolution:
-            filename_parts = os.path.splitext(thumbnail_name)
-            thumbnail_name_2x = '%s@2x%s' % filename_parts
-            if local_thumbnails:
-                thumbnail2x_modtime = self.get_thumbnail_modtime(
-                    thumbnail_name_2x)
-                if not thumbnail2x_modtime:
-                    return False
-            else:
-                thumbnail2x = self.get_thumbnail_cache(thumbnail_name_2x)
-                if not thumbnail2x:
-                    return False
-                thumbnail2x_modtime = thumbnail2x.modified
-            thumbnail_modtime = min(thumbnail_modtime, thumbnail2x_modtime)
 
         if not thumbnail_modtime:
             return False
