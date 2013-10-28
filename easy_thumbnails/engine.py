@@ -37,7 +37,7 @@ def process_image(source, processor_options, processors=None):
     return image
 
 
-def save_image(image, destination=None, filename=None, **options):
+def save_image(image, destination=None, filename=None, thumbnail_options={}, **options):
     """
     Save a PIL image.
     """
@@ -47,12 +47,26 @@ def save_image(image, destination=None, filename=None, **options):
     format = Image.EXTENSION.get(os.path.splitext(filename)[1], 'JPEG')
     if format == 'JPEG':
         options.setdefault('quality', 85)
-        try:
-            image.save(destination, format=format, optimize=1, **options)
-        except IOError:
-            # Try again, without optimization (PIL can't optimize an image
-            # larger than ImageFile.MAXBLOCK, which is 64k by default)
-            pass
+        if thumbnail_options.get('progressive', False):
+            block_size = image.size[0] * image.size[1]
+            if block_size >= 1024 * 10:
+                try:
+                    image.save(destination, format=format, optimize=1, progressive=1, **options)
+                except IOError:
+                    # Try again, without optimization (PIL can't optimize an image
+                    # larger than ImageFile.MAXBLOCK, which is 64k by default)
+                    try:
+                        from PIL import ImageFile
+                    except ImportError:
+                        import ImageFile
+                    ImageFile.MAXBLOCK = block_size
+                    image.save(destination, format=format, optimize=1, progressive=1, **options)
+        else:
+            try:
+                image.save(destination, format=format, optimize=1, **options)
+            except IOError:
+                pass
+
     image.save(destination, format=format, **options)
     if hasattr(destination, 'seek'):
         destination.seek(0)
