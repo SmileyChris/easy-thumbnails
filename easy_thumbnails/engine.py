@@ -47,12 +47,14 @@ def save_image(image, destination=None, filename=None, **options):
     format = Image.EXTENSION.get(os.path.splitext(filename)[1], 'JPEG')
     if format == 'JPEG':
         options.setdefault('quality', 85)
+        if not settings.THUMBNAIL_JPEG_SUBSAMPLING:
+            options.setdefault('subsampling', 0)
         try:
-            image.save(destination, format=format, optimize=1, subsampling=0, **options)
+            image.save(destination, format=format, optimize=1, **options)
         except IOError:
             # Try again, without optimization (PIL can't optimize an image
             # larger than ImageFile.MAXBLOCK, which is 64k by default)
-            image.save(destination, format=format, subsampling=0, **options)
+            image.save(destination, format=format, **options)
     else:
         image.save(destination, format=format, **options)
     if hasattr(destination, 'seek'):

@@ -244,5 +244,14 @@ class Settings(AppSettings):
     Creates a "@2x" version of the thumbnails that can be used by a javascript
     layer to display higher quality thumbnails for high DPI displays.
     """
+    
+    THUMBNAIL_JPEG_SUBSAMPLING = True
+    """
+    Enables subsampling for JPEG images.
+
+    Set this to False if you want to disable subsampling in JPEG images.
+    This will improve the output quality but will lead to an increased file 
+    size.
+    """
 
 settings = Settings()
