@@ -304,7 +304,8 @@ class Thumbnailer(File):
             high_resolution=high_resolution)
 
         img = engine.save_image(
-            thumbnail_image, filename=filename, quality=quality)
+            thumbnail_image, filename=filename, quality=quality,
+            thumbnail_options=thumbnail_options)
         data = img.read()
 
         thumbnail = ThumbnailFile(
