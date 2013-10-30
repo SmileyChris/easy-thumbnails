@@ -1,14 +1,11 @@
 # encoding: utf-8
 import datetime
+import hashlib
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 from django.core.files.storage import default_storage
 import pickle
-try:
-    from hashlib import md5 as md5_constructor
-except ImportError:
-    from django.utils.hashcompat import md5_constructor
 
 
 class Migration(DataMigration):
@@ -21,7 +18,7 @@ class Migration(DataMigration):
         """
         Return a hex string hash for a storage object (or string containing a
         pickle of a storage object).
-        
+
         """
         try:
             # Make sure that pickle is getting a string, since it can choke
@@ -34,7 +31,7 @@ class Migration(DataMigration):
             storage_obj = default_storage
         storage_cls = storage_obj.__class__
         name = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
-        return md5_constructor(name).hexdigest()
+        return hashlib.md5(name).hexdigest()
 
     def forwards(self, orm):
         "Write your forwards methods here."
@@ -44,7 +41,7 @@ class Migration(DataMigration):
                                         storage_hash=storage_hash)
             orm.Thumbnail.objects.filter(storage=storage).update(
                                         storage_hash=storage_hash)
-            
+
     def backwards(self, orm):
         "Write your backwards methods here."
 

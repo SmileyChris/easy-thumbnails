@@ -1,20 +1,17 @@
 # encoding: utf-8
 import datetime
+import hashlib
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
 from django.core.files.storage import default_storage
 import pickle
-try:
-    from hashlib import md5 as md5_constructor
-except ImportError:
-    from django.utils.hashcompat import md5_constructor
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Deleting model 'Storage'
         db.delete_table('easy_thumbnails_storage')
 
@@ -32,7 +29,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Removing index on 'Thumbnail', fields ['storage_hash']
         db.delete_index('easy_thumbnails_thumbnail', ['storage_hash'])
 
@@ -52,7 +49,7 @@ class Migration(SchemaMigration):
         # at least it lets us reverse migrate.
         storage = orm.Storage()
         storage.pickle = pickle.dumps(default_storage)
-        storage.hash = md5_constructor(storage.pickle).hexdigest()
+        storage.hash = hashlib.md5(storage.pickle).hexdigest()
         storage.save()
 
         # Adding field 'Source.storage'
