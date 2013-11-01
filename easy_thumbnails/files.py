@@ -293,8 +293,7 @@ class Thumbnailer(File):
 
         thumbnail_image = engine.process_image(image, thumbnail_options,
                                                self.thumbnail_processors)
-        quality = thumbnail_options.get('quality', self.thumbnail_quality)
-
+        thumbnail_options.setdefault('quality', self.thumbnail_quality)
         if high_resolution:
             thumbnail_options['size'] = orig_size  # restore original size
 
@@ -304,8 +303,7 @@ class Thumbnailer(File):
             high_resolution=high_resolution)
 
         img = engine.save_image(
-            thumbnail_image, filename=filename, quality=quality,
-            thumbnail_options=thumbnail_options)
+            thumbnail_image, filename=filename, **thumbnail_options)
         data = img.read()
 
         thumbnail = ThumbnailFile(
