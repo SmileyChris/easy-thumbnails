@@ -342,7 +342,7 @@ class Thumbnailer(File):
         initial_opts = ['%sx%s' % size, 'q%s' % quality]
 
         opts = ['%s' % (v is not True and '%s-%s' % (k, v) or k)
-                for k, v in sorted(thumbnail_options.items()) if v]
+                for k, v in sorted(thumbnail_options.items()) if v and not k.startswith('_')]
 
         all_opts = '_'.join(initial_opts + opts)
 
