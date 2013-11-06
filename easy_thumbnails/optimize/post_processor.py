@@ -11,10 +11,11 @@ logger = logging.getLogger('easy_thumbnails.optimize')
 
 def optimize_thumbnail(thumbnail):
     '''Optimize thumbnail images by removing unnecessary data'''
-    if not isinstance(settings.THUMBNAIL_OPTIMIZE_COMMAND, dict):
-        return
-    optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND.get(determinetype(thumbnail.path))
-    if not optimize_command:
+    try:
+        optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[determinetype(thumbnail.path)]
+        if not optimize_command:
+            return
+    except (TypeError, KeyError, NotImplementedError):
         return
     storage = thumbnail.storage
     try:
