@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.dispatch import receiver
 from post_processor import optimize_thumbnail
 

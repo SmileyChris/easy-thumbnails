@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 from subprocess import check_output, STDOUT
 from imghdr import what as determinetype
