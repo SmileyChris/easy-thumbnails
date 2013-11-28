@@ -6,6 +6,13 @@ This project has been forked from easy-thumbnails v1.4 and has been optimized fo
 It needs packages like redis, django-redis to work correctly. And it has NOT been tested for local storages.
 
 
+Invalidation:
+
+This fork caches the modified time and existence of the thumbnail for 30 days. So situations like save or delete,
+you may need to handle signals to invalidate cache.
+
+There is a ready function called invalidate_easy_cache for invalidation under utils for that reason.
+
 ===============
 Easy Thumbnails
 ===============
