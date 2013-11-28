@@ -1,3 +1,11 @@
+==============
+Important Note
+==============
+
+This project has been forked from easy-thumbnails v1.4 and has been optimized based on my necessities for remote storages.
+It needs packages like redis, django-redis to work correctly. And it has NOT been tested for local storages.
+
+
 ===============
 Easy Thumbnails
 ===============
