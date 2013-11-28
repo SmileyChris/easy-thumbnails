@@ -20,7 +20,10 @@ try:
     now = timezone.now
 
     def fromtimestamp(timestamp):
-        dt = datetime.datetime.fromtimestamp(timestamp)
+        if isinstance(timestamp, datetime.datetime):
+            dt = timestamp
+        else:
+            dt = datetime.datetime.fromtimestamp(timestamp)
         if getattr(settings, 'USE_TZ', False):
             default_timezone = timezone.get_default_timezone()
             return timezone.make_aware(dt, default_timezone)
