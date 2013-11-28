@@ -504,13 +504,13 @@ class Thumbnailer(File):
         return 'easy:thumbnail:' + thumbnail_name + ':exists', \
                'easy:thumbnail:' + thumbnail_name + ':modtime'
 
-    def fetch_value(key):
+    def fetch_value(self, key):
         return cache.get(key)
 
-    def cache_value(key, value, timeout=settings.DEFAULT_CACHE_TIMEOUT):
+    def cache_value(self, key, value, timeout=settings.DEFAULT_CACHE_TIMEOUT):
         return cache.set(key, value, timeout)
 
-    def has_key(key):
+    def has_key(self, key):
         return cache.has_key(key)
 
     def get_source_modtime(self):
