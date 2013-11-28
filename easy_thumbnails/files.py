@@ -415,6 +415,14 @@ class Thumbnailer(File):
         thumbnail = self.generate_thumbnail(thumbnail_options)
         if save:
             save_thumbnail(thumbnail, self.thumbnail_storage)
+            # BEGIN: cache thumbnail modified time and exists
+            exists_key, mod_key = self.get_thumbnail_keys(thumbnail.name)
+            exists = self.thumbnail_storage.exists(thumbnail.name)
+            modified_time = self.thumbnail_storage.modified_time(
+                thumbnail.name)
+            self.cache_value(mod_key, modified_time)
+            self.cache_value(exists_key, exists)
+            # END:
             signals.thumbnail_created.send(sender=thumbnail)
             # Ensure the right thumbnail name is used based on the transparency
             # of the image.
@@ -426,6 +434,15 @@ class Thumbnailer(File):
                 thumbnail_2x = self.generate_thumbnail(thumbnail_options,
                                                        high_resolution=True)
                 save_thumbnail(thumbnail_2x, self.thumbnail_storage)
+                # BEGIN: cache thumbnail modified time and exists
+                exists_key, mod_key = self.get_thumbnail_keys(
+                    thumbnail_2x.name)
+                exists = self.thumbnail_storage.exists(thumbnail_2x.name)
+                modified_time = self.thumbnail_storage.modified_time(
+                    thumbnail_2x.name)
+                self.cache_value(mod_key, modified_time)
+                self.cache_value(exists_key, exists)
+                # END:
         return thumbnail
 
     def thumbnail_exists(self, thumbnail_name):
@@ -507,15 +524,15 @@ class Thumbnailer(File):
     def fetch_value(self, key):
         return cache.get(key)
 
-    def cache_value(self, key, value, timeout=settings.DEFAULT_CACHE_TIMEOUT):
+    def cache_value(self, key, value, timeout=60 * 60 * 24 * 30):
         return cache.set(key, value, timeout)
 
     def has_key(self, key):
-        return cache.has_key(key)
+        return cache.has_key(key)  # noqa
 
     def get_source_modtime(self):
         exists_key, mod_key = self.get_source_keys()
-        in_cache = self.has_key(exists_key)
+        in_cache = self.has_key(exists_key)  # noqa
         if in_cache:
             exists = self.fetch_value(exists_key)
         else:
@@ -536,7 +553,7 @@ class Thumbnailer(File):
 
     def get_thumbnail_modtime(self, thumbnail_name):
         exists_key, mod_key = self.get_thumbnail_keys(thumbnail_name)
-        in_cache = cache.has_key(exists_key)
+        in_cache = cache.has_key(exists_key)  # noqa
         if in_cache:
             exists = self.fetch_value(exists_key)
         else:
@@ -551,7 +568,8 @@ class Thumbnailer(File):
             fetched_value = self.fetch_value(mod_key)
             if fetched_value:
                 return fetched_value
-            modified_time = self.thumbnail_storage.modified_time(thumbnail_name)
+            modified_time = self.thumbnail_storage.modified_time(
+                thumbnail_name)
             self.cache_value(mod_key, modified_time)
             return modified_time
 

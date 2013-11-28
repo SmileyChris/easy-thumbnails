@@ -3,6 +3,7 @@ import math
 import datetime
 import six
 
+from django.core.cache import cache
 from django.utils.functional import LazyObject
 
 try:
@@ -144,3 +145,12 @@ def exif_orientation(im):
         elif orientation == 8:
             im = im.rotate(90)
     return im
+
+
+def invalidate_easy_cache(source_image):
+    keys = []
+    if source_image and isinstance(source_image, six.string_types):
+        exists_key = 'easy:*' + source_image + '*:exists'
+        mod_key = 'easy:*' + source_image + '*:modtime'
+        keys = cache.keys(exists_key) + cache.keys(mod_key)
+    cache.delete_many(keys)
