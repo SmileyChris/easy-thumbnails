@@ -220,7 +220,7 @@ def thumbnailer(obj, relative_name=None):
 
         {% with photo=person.photo|thumbnailer %}
         {% if photo %}
-            <a src="{{ photo.large.url }}">
+            <a href="{{ photo.large.url }}">
                 {{ photo.square.tag }}
             </a>
         {% else %}
