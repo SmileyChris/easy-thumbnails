@@ -224,7 +224,7 @@ def thumbnailer(obj, relative_name=None):
                 {{ photo.square.tag }}
             </a>
         {% else %}
-            <img href="{% static 'template/fallback.png' %}" alt="" />
+            <img src="{% static 'template/fallback.png' %}" alt="" />
         {% endif %}
         {% endwith %}
 
@@ -270,7 +270,7 @@ def thumbnail_url(source, alias):
 
     Example usage::
 
-        <img href="{{ person.photo|thumbnail_url:'small' }}" alt="">
+        <img src="{{ person.photo|thumbnail_url:'small' }}" alt="">
     """
     try:
         thumb = get_thumbnailer(source)[alias]
