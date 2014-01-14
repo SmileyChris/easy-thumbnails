@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.admin',
     'easy_thumbnails',
+    'easy_thumbnails.optimize',
     'easy_thumbnails.tests',
 ]
 
@@ -27,3 +28,26 @@ INSTALLED_APPS = [
 USE_TZ = True
 
 SECRET_KEY = 'easy'
+
+# add a mock image optimizing post processor
+THUMBNAIL_OPTIMIZE_COMMAND = {
+    'png': 'easy_thumbnails/tests/mockoptim.py {filename}',
+    'gif': 'easy_thumbnails/tests/mockoptim.py {filename}',
+    'jpg': 'easy_thumbnails/tests/mockoptim.py {filename}',
+}
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+        },
+    },
+    'loggers': {
+        'easy_thumbnails.optimize': {
+            'handlers': ['console'],
+            'level': 'WARN',
+        },
+    }
+}
