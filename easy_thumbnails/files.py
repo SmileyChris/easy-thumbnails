@@ -444,8 +444,8 @@ class Thumbnailer(File):
         except Exception:
             pass
         self.thumbnail_storage.save(filename, thumbnail)
-        signals.thumbnail_created.send(sender=thumbnail)
         self.get_thumbnail_cache(thumbnail.name, create=True, update=True)
+        signals.thumbnail_created.send(sender=thumbnail)
 
     def thumbnail_exists(self, thumbnail_name):
         """
