@@ -14,25 +14,26 @@ class FileManager(models.Manager):
             if update_modified:
                 defaults = kwargs.setdefault('defaults', {})
                 defaults['modified'] = update_modified
-            object, created = self.get_or_create(**kwargs)
+            obj, created = self.get_or_create(**kwargs)
         else:
             created = False
             kwargs.pop('defaults', None)
             try:
-                object = self.get(**kwargs)
+                obj = self.get(**kwargs)
             except self.model.DoesNotExist:
 
                 if check_cache_miss and storage.exists(name):
                     # File already in storage, update cache
-                    object = self.create(**kwargs)
+                    obj = self.create(**kwargs)
                     created = True
                 else:
                     return
 
-        if update_modified and object and not created:
-            if object.modified != update_modified:
-                self.filter(pk=object.pk).update(modified=update_modified)
-        return object
+        if update_modified and not created:
+            if obj.modified != update_modified:
+                self.filter(pk=obj.pk).update(modified=update_modified)
+
+        return obj
 
 
 class File(models.Model):
