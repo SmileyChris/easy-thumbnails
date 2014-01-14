@@ -460,7 +460,8 @@ class Thumbnailer(File):
             return False
 
         if utils.is_storage_local(self.source_storage):
-            source_modtime = self.get_source_modtime()
+            source_modtime = utils.get_modified_time(
+                self.source_storage, self.name)
         else:
             source = self.get_source_cache()
             if not source:
@@ -472,7 +473,8 @@ class Thumbnailer(File):
 
         local_thumbnails = utils.is_storage_local(self.thumbnail_storage)
         if local_thumbnails:
-            thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
+            thumbnail_modtime = utils.get_modified_time(
+                self.thumbnail_storage, thumbnail_name)
         else:
             thumbnail = self.get_thumbnail_cache(thumbnail_name)
             if not thumbnail:
@@ -490,9 +492,7 @@ class Thumbnailer(File):
         if hasattr(self, '_source_cache') and not update:
             if self._source_cache or not create:
                 return self._source_cache
-        update_modified = self.get_source_modtime()
-        if update:
-            update_modified = update_modified or timezone.now()
+        update_modified = (update or create) and timezone.now()
         self._source_cache = models.Source.objects.get_file(
             create=create, update_modified=update_modified,
             storage=self.source_storage, name=self.name,
@@ -502,20 +502,12 @@ class Thumbnailer(File):
     def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
         if self.remote_source:
             return None
-        update_modified = self.get_thumbnail_modtime(thumbnail_name)
-        if update:
-            update_modified = update_modified or timezone.now()
         source = self.get_source_cache(create=True)
+        update_modified = (update or create) and timezone.now()
         return models.Thumbnail.objects.get_file(
             create=create, update_modified=update_modified,
             storage=self.thumbnail_storage, source=source, name=thumbnail_name,
             check_cache_miss=self.thumbnail_check_cache_miss)
-
-    def get_source_modtime(self):
-        return utils.get_modified_time(self.source_storage, self.name)
-
-    def get_thumbnail_modtime(self, thumbnail_name):
-        return utils.get_modified_time(self.thumbnail_storage, thumbnail_name)
 
     def open(self, mode=None):
         if self.closed:
