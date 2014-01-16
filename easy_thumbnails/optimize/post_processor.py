@@ -26,9 +26,9 @@ def optimize_thumbnail(thumbnail):
             optimize_command = optimize_command.format(filename=temp_file.name)
             output = check_output(optimize_command, stderr=STDOUT, shell=True)
             if output:
-                logger.warn('%s returned %s' % (optimize_command, output))
+                logger.warn('{0} returned {1}'.format(optimize_command, output))
             else:
-                logger.info('%s returned nothing' % optimize_command)
+                logger.info('{0} returned nothing'.format(optimize_command))
             with open(temp_file.name, 'rb') as f:
                 thumbnail.file = ContentFile(f.read())
                 storage.delete(thumbnail.path)
