@@ -1,5 +1,6 @@
+import logging
+from testfixtures import LogCapture
 from os import path
-
 from easy_thumbnails import files, utils, signals, test, exceptions
 from easy_thumbnails.conf import settings
 try:
@@ -161,6 +162,28 @@ class FilesTest(test.BaseTest):
         self.assertTrue(path.isfile(hires_thumb_file))
         thumb = Image.open(hires_thumb_file)
         self.assertEqual(thumb.size, (200, 150))
+
+    def test_postprocessor(self):
+        """use a mock image optimizing post processor doing nothing"""
+        with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={'png': 'easy_thumbnails/tests/mockoptim.py {filename}'}):
+            with LogCapture() as logcap:
+                self.ext_thumbnailer.thumbnail_extension = 'png'
+                self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
+                actual = tuple(logcap.actual())[0]
+                self.assertEqual(actual[0], 'easy_thumbnails.optimize')
+                self.assertEqual(actual[1], 'INFO')
+                self.assertRegexpMatches(actual[2], '^easy_thumbnails/tests/mockoptim.py [^ ]+ returned nothing$')
+
+    def test_postprocessor_fail(self):
+        """use a mock image optimizing post processor doing nothing"""
+        with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={'png': 'easy_thumbnails/tests/mockoptim_fail.py {filename}'}):
+            with LogCapture() as logcap:
+                self.ext_thumbnailer.thumbnail_extension = 'png'
+                self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
+                actual = tuple(logcap.actual())[0]
+                self.assertEqual(actual[0], 'easy_thumbnails.optimize')
+                self.assertEqual(actual[1], 'ERROR')
+                self.assertRegexpMatches(actual[2], '^Command\ .+returned non-zero exit status 9$')
 
     def test_USE_TZ(self):
         settings.USE_TZ = True
