@@ -1,6 +1,17 @@
 Changes
 =======
 
+HEAD
+----
+
+* Better support for multiple source generators.
+
+* Update method used to check for modification dates of source and thumbnail
+  images. Thanks Ben Roberts.
+
+* Better thumbnail_high_resolution handling.
+
+
 1.4
 ---
 

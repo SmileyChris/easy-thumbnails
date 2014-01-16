@@ -8,6 +8,7 @@ from django.db.models.fields.files import ImageFieldFile, FieldFile
 
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
+from django.utils import timezone
 
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
@@ -71,19 +72,6 @@ def get_thumbnailer(obj, relative_name=None):
     return Thumbnailer(
         file=obj, name=relative_name, source_storage=source_storage,
         remote_source=obj is not None)
-
-
-def save_thumbnail(thumbnail_file):
-    """
-    Save a thumbnailed file, returning the saved relative file name.
-    """
-    filename = thumbnail_file.name
-    storage = thumbnail_file.storage
-    try:
-        storage.delete(filename)
-    except Exception:
-        pass
-    return storage.save(filename, thumbnail_file)
 
 
 def generate_all_aliases(fieldfile, include_global):
@@ -375,6 +363,27 @@ class Thumbnailer(File):
 
         return os.path.join(basedir, path, subdir, filename)
 
+    def get_existing_thumbnail(self, thumbnail_options, high_resolution=False):
+        """
+        Return a ``ThumbnailFile`` containing an existing thumbnail for a set
+        of thumbnail options, or ``None`` if not found.
+        """
+        names = [
+            self.get_thumbnail_name(
+                thumbnail_options, transparent=False,
+                high_resolution=high_resolution)]
+        transparent_name = self.get_thumbnail_name(
+            thumbnail_options, transparent=True,
+            high_resolution=high_resolution)
+        if transparent_name not in names:
+            names.append(transparent_name)
+
+        for filename in names:
+            if self.thumbnail_exists(filename):
+                return ThumbnailFile(
+                    name=filename, storage=self.thumbnail_storage,
+                    thumbnail_options=thumbnail_options)
+
     def get_thumbnail(self, thumbnail_options, save=True, generate=None):
         """
         Return a ``ThumbnailFile`` containing a thumbnail.
@@ -392,83 +401,90 @@ class Thumbnailer(File):
         dictionary. If the ``save`` argument is ``True`` (default), the
         generated thumbnail will be saved too.
         """
-        opaque_name = self.get_thumbnail_name(thumbnail_options,
-                                              transparent=False)
-        transparent_name = self.get_thumbnail_name(thumbnail_options,
-                                                   transparent=True)
-        if opaque_name == transparent_name:
-            names = (opaque_name,)
-        else:
-            names = (opaque_name, transparent_name)
-        for filename in names:
-            if self.thumbnail_exists(filename):
-                return ThumbnailFile(
-                    name=filename, storage=self.thumbnail_storage,
-                    thumbnail_options=thumbnail_options)
-
         if generate is None:
             generate = self.generate
-        if not generate:
-            signals.thumbnail_missed.send(
-                sender=self, options=thumbnail_options)
-            return
 
-        thumbnail = self.generate_thumbnail(thumbnail_options)
-        if save:
-            save_thumbnail(thumbnail)
-            signals.thumbnail_created.send(sender=thumbnail)
-            # Ensure the right thumbnail name is used based on the transparency
-            # of the image.
-            filename = (utils.is_transparent(thumbnail.image) and
-                        transparent_name or opaque_name)
-            self.get_thumbnail_cache(filename, create=True, update=True)
+        thumbnail = self.get_existing_thumbnail(thumbnail_options)
+        if not thumbnail:
+            if generate:
+                thumbnail = self.generate_thumbnail(thumbnail_options)
+                if save:
+                    self.save_thumbnail(thumbnail)
+            else:
+                signals.thumbnail_missed.send(
+                    sender=self, options=thumbnail_options,
+                    high_resolution=False)
 
-            if self.thumbnail_high_resolution:
-                thumbnail_2x = self.generate_thumbnail(thumbnail_options,
-                                                       high_resolution=True)
-                save_thumbnail(thumbnail_2x)
-                self.get_thumbnail_cache(thumbnail_2x.name, create=True, update=True)
-                signals.thumbnail_created.send(sender=thumbnail_2x)
+        if self.thumbnail_high_resolution:
+            thumbnail.high_resolution = self.get_existing_thumbnail(
+                thumbnail_options, high_resolution=True)
+            if not thumbnail.high_resolution:
+                if generate:
+                    thumbnail.high_resolution = self.generate_thumbnail(
+                        thumbnail_options, high_resolution=True)
+                    if save:
+                        self.save_thumbnail(thumbnail.high_resolution)
+                else:
+                    signals.thumbnail_missed.send(
+                        sender=self, options=thumbnail_options,
+                        high_resolution=False)
+
         return thumbnail
+
+    def save_thumbnail(self, thumbnail):
+        """
+        Save a thumbnail to the thumbnail_storage.
+
+        Also triggers the ``thumbnail_created`` signal and caches the
+        thumbnail values for future lookups.
+        """
+        filename = thumbnail.name
+        try:
+            self.thumbnail_storage.delete(filename)
+        except Exception:
+            pass
+        self.thumbnail_storage.save(filename, thumbnail)
+        self.get_thumbnail_cache(thumbnail.name, create=True, update=True)
+        signals.thumbnail_created.send(sender=thumbnail)
 
     def thumbnail_exists(self, thumbnail_name):
         """
         Calculate whether the thumbnail already exists and that the source is
         not newer than the thumbnail.
 
-        If both the source and thumbnail file storages are local, their
-        file modification times are used. Otherwise the database cached
-        modification times are used.
+        If the source and thumbnail file storages are local, their file
+        modification times are used. Otherwise the database cached modification
+        times are used.
         """
         if self.remote_source:
             return False
-        # Try to use the local file modification times first.
-        source_modtime = self.get_source_modtime()
-        thumbnail_modtime = self.get_thumbnail_modtime(thumbnail_name)
-        if self.thumbnail_high_resolution:
-            filename_parts = os.path.splitext(thumbnail_name)
-            thumbnail_name_2x = '%s@2x%s' % filename_parts
-            thumbnail_modtime = min(
-                thumbnail_modtime,
-                self.get_thumbnail_modtime(thumbnail_name_2x))
-        # The thumbnail modification time will be 0 if there was an OSError,
-        # in which case it will still be used (but always return False).
-        if source_modtime and thumbnail_modtime is not None:
-            return thumbnail_modtime and source_modtime <= thumbnail_modtime
-        # Fall back to using the database cached modification times.
-        source = self.get_source_cache()
-        if not source:
-            return False
-        thumbnail = self.get_thumbnail_cache(thumbnail_name)
-        if not thumbnail:
-            return False
-        thumbnail_modtime = thumbnail.modified
-        if self.thumbnail_high_resolution:
-            thumbnail2x = self.get_thumbnail_cache(thumbnail_name_2x)
-            if not thumbnail2x:
+
+        if utils.is_storage_local(self.source_storage):
+            source_modtime = utils.get_modified_time(
+                self.source_storage, self.name)
+        else:
+            source = self.get_source_cache()
+            if not source:
                 return False
-            thumbnail_modtime = min(thumbnail_modtime, thumbnail2x.modified)
-        return source.modified <= thumbnail_modtime
+            source_modtime = source.modified
+
+        if not source_modtime:
+            return False
+
+        local_thumbnails = utils.is_storage_local(self.thumbnail_storage)
+        if local_thumbnails:
+            thumbnail_modtime = utils.get_modified_time(
+                self.thumbnail_storage, thumbnail_name)
+        else:
+            thumbnail = self.get_thumbnail_cache(thumbnail_name)
+            if not thumbnail:
+                return False
+            thumbnail_modtime = thumbnail.modified
+
+        if not thumbnail_modtime:
+            return False
+
+        return source_modtime <= thumbnail_modtime
 
     def get_source_cache(self, create=False, update=False):
         if self.remote_source:
@@ -476,10 +492,7 @@ class Thumbnailer(File):
         if hasattr(self, '_source_cache') and not update:
             if self._source_cache or not create:
                 return self._source_cache
-        modtime = self.get_source_modtime()
-        update_modified = modtime and utils.fromtimestamp(modtime)
-        if update:
-            update_modified = update_modified or utils.now()
+        update_modified = (update or create) and timezone.now()
         self._source_cache = models.Source.objects.get_file(
             create=create, update_modified=update_modified,
             storage=self.source_storage, name=self.name,
@@ -489,33 +502,12 @@ class Thumbnailer(File):
     def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
         if self.remote_source:
             return None
-        modtime = self.get_thumbnail_modtime(thumbnail_name)
-        update_modified = modtime and utils.fromtimestamp(modtime)
-        if update:
-            update_modified = update_modified or utils.now()
         source = self.get_source_cache(create=True)
+        update_modified = (update or create) and timezone.now()
         return models.Thumbnail.objects.get_file(
             create=create, update_modified=update_modified,
             storage=self.thumbnail_storage, source=source, name=thumbnail_name,
             check_cache_miss=self.thumbnail_check_cache_miss)
-
-    def get_source_modtime(self):
-        try:
-            path = self.source_storage.path(self.name)
-            return os.path.getmtime(path)
-        except OSError:
-            return 0
-        except NotImplementedError:
-            return None
-
-    def get_thumbnail_modtime(self, thumbnail_name):
-        try:
-            path = self.thumbnail_storage.path(thumbnail_name)
-            return os.path.getmtime(path)
-        except OSError:
-            return 0
-        except NotImplementedError:
-            return None
 
     def open(self, mode=None):
         if self.closed:

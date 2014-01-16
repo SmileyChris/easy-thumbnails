@@ -1,34 +1,17 @@
+import datetime
+import hashlib
 import inspect
 import math
-import datetime
 import six
 
 from django.utils.functional import LazyObject
+from django.utils import timezone
 
-try:
-    from hashlib import md5 as md5_constructor
-except ImportError:
-    from django.utils.hashcompat import md5_constructor
 
 try:
     from PIL import Image
 except ImportError:
     import Image
-
-try:
-    from django.utils import timezone
-    now = timezone.now
-
-    def fromtimestamp(timestamp):
-        dt = datetime.datetime.fromtimestamp(timestamp)
-        if getattr(settings, 'USE_TZ', False):
-            default_timezone = timezone.get_default_timezone()
-            return timezone.make_aware(dt, default_timezone)
-        return dt
-
-except ImportError:
-    now = datetime.datetime.now
-    fromtimestamp = datetime.datetime.fromtimestamp
 
 from easy_thumbnails.conf import settings
 
@@ -101,7 +84,7 @@ def get_storage_hash(storage):
     if not isinstance(storage, six.string_types):
         storage_cls = storage.__class__
         storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
-    return md5_constructor(storage.encode('utf8')).hexdigest()
+    return hashlib.md5(storage.encode('utf8')).hexdigest()
 
 
 def is_transparent(image):
@@ -141,3 +124,21 @@ def exif_orientation(im):
         elif orientation == 8:
             im = im.rotate(90)
     return im
+
+
+def get_modified_time(storage, name):
+    """
+    Get modified time from storage, ensuring the result is a timezone-aware
+    datetime.
+    """
+    try:
+        modified_time = storage.modified_time(name)
+    except OSError:
+        return 0
+    except NotImplementedError:
+        return None
+    if modified_time and timezone.is_naive(modified_time):
+        if getattr(settings, 'USE_TZ', False):
+            default_timezone = timezone.get_default_timezone()
+            return timezone.make_aware(modified_time, default_timezone)
+    return modified_time
