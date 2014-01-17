@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.dispatch import receiver
-from post_processor import optimize_thumbnail
+from easy_thumbnails.optimize.post_processor import optimize_thumbnail
 
 try:
     from easy_thumbnails.signals import thumbnail_created

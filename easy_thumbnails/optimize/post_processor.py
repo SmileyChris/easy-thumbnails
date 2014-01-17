@@ -4,7 +4,7 @@ import subprocess
 from imghdr import what as determinetype
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
-from conf import settings
+from easy_thumbnails.optimize.conf import settings
 
 
 try:
