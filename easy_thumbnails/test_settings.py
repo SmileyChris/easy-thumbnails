@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.admin',
     'easy_thumbnails',
+    'easy_thumbnails.optimize',
     'easy_thumbnails.tests',
 ]
 
