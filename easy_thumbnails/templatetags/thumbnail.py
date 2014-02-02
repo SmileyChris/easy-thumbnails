@@ -279,7 +279,7 @@ def thumbnail_url(source, alias):
     return thumb.url
 
 
-def thumbnail_file(source, alias):
+def thumbnail_image(source, alias):
     """
     Return the thumbnail for a source file using an aliased set of thumbnail
     options. This allow access to all properties of ``ThumbnailFile`` object
@@ -289,7 +289,7 @@ def thumbnail_file(source, alias):
 
     Example usage::
 
-        {% with thumbnail=person.photo|thumbnail_file:'small' %}
+        {% with thumbnail=person.photo|thumbnail_image:'small' %}
             <a href="{{ thumbnail.url }}" title="">
                 <img href="{{ thumbnail.url }}" width="{{ thumbnail.width }}" height="{{ thumbnail.height }}" alt=""/>
             </a>
@@ -306,4 +306,4 @@ register.tag(thumbnail)
 register.filter(thumbnailer)
 register.filter(thumbnailer_passive)
 register.filter(thumbnail_url)
-register.filter(thumbnail_file)
+register.filter(thumbnail_image)
