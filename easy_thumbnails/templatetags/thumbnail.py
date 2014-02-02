@@ -302,8 +302,8 @@ def thumbnail_file(source, alias):
         return ''
     return thumb
 
-register.filter_function(thumbnail_file)
 register.tag(thumbnail)
 register.filter(thumbnailer)
 register.filter(thumbnailer_passive)
 register.filter(thumbnail_url)
+register.filter(thumbnail_file)
