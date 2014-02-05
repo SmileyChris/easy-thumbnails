@@ -101,6 +101,9 @@ class Settings(AppSettings):
         'easy_thumbnails.storage.ThumbnailFileSystemStorage')
     """
     The default Django storage for thumbnails.
+    If this option not set thumbnails will be saved in the file system.
+    By default easy_thumbnails read source image from DEFAULT_STORAGE 
+    and save the generated thumbnail in THUMBNAIL_DEFAULT_STORAGE
     """
     THUMBNAIL_MEDIA_ROOT = ''
     """
