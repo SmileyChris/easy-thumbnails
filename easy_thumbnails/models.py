@@ -62,5 +62,13 @@ class Thumbnail(File):
         unique_together = (('storage_hash', 'name', 'source'),)
 
 
+class ThumbnailDimensions(models.Model):
+    thumbnail = models.ForeignKey(Thumbnail, related_name="dimensions")
+    width = models.PositiveIntegerField(null=True)
+    height = models.PositiveIntegerField(null=True)
+
+    def __unicode__(self):
+        return "%sx%s" % (self.width, self.height)
+
 models.signals.pre_save.connect(signal_handlers.find_uncommitted_filefields)
 models.signals.post_save.connect(signal_handlers.signal_committed_filefields)
