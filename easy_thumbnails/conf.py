@@ -245,4 +245,14 @@ class Settings(AppSettings):
     layer to display higher quality thumbnails for high DPI displays.
     """
 
+    THUMBNAIL_CACHE_DIMENSIONS = False
+    """
+    Save thumbnail dimensions to the database.
+
+    When using remote storage backends it can be a slow process to get image
+    dimensions for a thumbnailed file. This option will store them in
+    the database to be recalled quickly when required. Note: the old method
+    still works as a fall back.
+    """
+
 settings = Settings()

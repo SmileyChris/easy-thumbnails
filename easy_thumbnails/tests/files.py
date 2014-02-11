@@ -1,6 +1,6 @@
 from os import path
 
-from easy_thumbnails import files, utils, signals, test, exceptions
+from easy_thumbnails import files, utils, signals, test, exceptions, models
 from easy_thumbnails.conf import settings
 try:
     from PIL import Image
@@ -188,6 +188,21 @@ class FilesTest(test.BaseTest):
         # gives access to the dimensions.
         thumb = self.thumbnailer.get_thumbnail(opts)
         self.assertEqual((thumb.width, thumb.height), (50, 38))
+
+    def test_cached_dimensions_of_cached_image(self):
+        settings.THUMBNAIL_CACHE_DIMENSIONS = True
+        opts = {'size': (50, 50)}
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        self.assertEqual((thumb.width, thumb.height), (50, 38))
+        # Now the thumb has been created, check that
+        # dimesions are in the database.
+        dimensions = models.ThumbnailDimensions.objects.all()[0]
+        # and make sure they match when fetched again.
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        self.assertEqual(
+            (thumb.width, thumb.height),
+            (dimensions.width, dimensions.height))
+        settings.THUMBNAIL_CACHE_DIMENSIONS = False
 
     def test_thumbnail_created_signal(self):
 
