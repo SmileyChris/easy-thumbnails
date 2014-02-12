@@ -197,6 +197,25 @@ class FilesTest(test.BaseTest):
         # Now the thumb has been created, check that
         # dimesions are in the database.
         dimensions = models.ThumbnailDimensions.objects.all()[0]
+        self.assertEqual(
+            (thumb.width, thumb.height),
+            (dimensions.width, dimensions.height))
+        settings.THUMBNAIL_CACHE_DIMENSIONS = False
+
+    def test_add_dimension_cache(self):
+        settings.THUMBNAIL_CACHE_DIMENSIONS = True
+        opts = {'size': (50, 50)}
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        self.assertEqual((thumb.width, thumb.height), (50, 38))
+        # delete the created dimensions
+        models.ThumbnailDimensions.objects.all()[0].delete()
+        # now access the thumbnail again
+        thumb = self.thumbnailer.get_thumbnail(opts)
+        self.assertRaises(
+            IndexError,
+            lambda: models.ThumbnailDimensions.objects.all()[0])
+        thumb.height
+        dimensions = models.ThumbnailDimensions.objects.all()[0]
         # and make sure they match when fetched again.
         thumb = self.thumbnailer.get_thumbnail(opts)
         self.assertEqual(

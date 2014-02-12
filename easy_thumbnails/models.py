@@ -63,7 +63,7 @@ class Thumbnail(File):
 
 
 class ThumbnailDimensions(models.Model):
-    thumbnail = models.OneToOneField(Thumbnail)
+    thumbnail = models.OneToOneField(Thumbnail, related_name="dimensions")
     width = models.PositiveIntegerField(null=True)
     height = models.PositiveIntegerField(null=True)
 

@@ -101,18 +101,35 @@ def database_get_image_dimensions(file, close=False):
     in the db.
     """
     storage_hash = utils.get_storage_hash(file.easy_thumbnails_field.storage)
+    dimensions = None
     if settings.THUMBNAIL_CACHE_DIMENSIONS:
         try:
+            # get the thumbnail first
             thumbnail_cache = models.Thumbnail.objects.get(
-                storage_hash=storage_hash, name=file.easy_thumbnails_field.name
+                storage_hash=storage_hash, name=file.name
             )
         except models.Thumbnail.DoesNotExist:
-            pass
+            # if we don't have a thumbnail yet we can't save dimensions
+            # this won't happen with normal usage
+            dimensions = get_image_dimensions(file, close=close)
         else:
-            width = thumbnail_cache.dimensions.width
-            height = thumbnail_cache.dimensions.height
-            return (width, height)
-    return get_image_dimensions(file, close=close)
+            try:
+                dimensions_cache = thumbnail_cache.dimensions
+                dimensions = dimensions_cache.width, dimensions_cache.height
+            except models.ThumbnailDimensions.DoesNotExist:
+                # dimension caching is on, but we have no cached dimenions
+                # let's back populate them for this cached thumbnail
+                dimensions = get_image_dimensions(file, close=close)
+                if dimensions:
+                    models.ThumbnailDimensions.objects.create(
+                        thumbnail=thumbnail_cache,
+                        width=dimensions[0],
+                        height=dimensions[1]
+                    )
+            return dimensions
+    if not dimensions:
+        dimensions = get_image_dimensions(file, close=close)
+    return dimensions
 
 
 class FakeField(object):
@@ -140,6 +157,7 @@ class ThumbnailFile(ImageFieldFile):
     def __init__(self, name, file=None, storage=None, thumbnail_options=None,
                  *args, **kwargs):
         fake_field = FakeField(storage=storage)
+        self._has_db_cached_dimensions = False
         super(ThumbnailFile, self).__init__(
             FakeInstance(), fake_field, name, *args, **kwargs)
         self.easy_thumbnails_field = self.field
@@ -244,11 +262,13 @@ class ThumbnailFile(ImageFieldFile):
             return super(ThumbnailFile, self).open(mode, *args, **kwargs)
 
     def _get_image_dimensions(self):
-        if not hasattr(self, '_dimensions_cache'):
+        if not self._has_db_cached_dimensions\
+                or not hasattr(self, '_dimensions_cache'):
             close = self.closed
             self.open()
             self._dimensions_cache = database_get_image_dimensions(
                 self, close=close)
+            self._has_db_cached_dimensions = True
         return self._dimensions_cache
 
 
@@ -478,22 +498,9 @@ class Thumbnailer(File):
         except Exception:
             pass
         self.thumbnail_storage.save(filename, thumbnail)
-        thumbnail_cache = self.get_thumbnail_cache(
+        self.get_thumbnail_cache(
             thumbnail.name, create=True, update=True)
-        if settings.THUMBNAIL_CACHE_DIMENSIONS:
-            try:
-                dimensions = models.ThumbnailDimensions.objects.get(
-                    thumbnail=thumbnail_cache
-                )
-                dimensions.width = thumbnail.width
-                dimensions.height = thumbnail.height
-                dimensions.save()
-            except models.ThumbnailDimensions.DoesNotExist:
-                dimensions = models.ThumbnailDimensions.objects.create(
-                    thumbnail=thumbnail_cache,
-                    width=thumbnail.width,
-                    height=thumbnail.height
-                )
+        thumbnail.height  # To trigger db cache if required.
         signals.thumbnail_created.send(sender=thumbnail)
 
     def thumbnail_exists(self, thumbnail_name):
