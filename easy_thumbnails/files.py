@@ -153,7 +153,6 @@ class ThumbnailFile(ImageFieldFile):
         self._has_db_cached_dimensions = False
         super(ThumbnailFile, self).__init__(
             FakeInstance(), fake_field, name, *args, **kwargs)
-        # self.easy_thumbnails_field = self.field
         del self.field
         if file:
             self.file = file
