@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 from easy_thumbnails import utils, signal_handlers
+from easy_thumbnails.conf import settings
 
 
 class FileManager(models.Manager):
@@ -19,7 +20,8 @@ class FileManager(models.Manager):
             created = False
             kwargs.pop('defaults', None)
             try:
-                obj = self.get(**kwargs)
+                manager = self._get_thumbnail_manager()
+                obj = manager.get(**kwargs)
             except self.model.DoesNotExist:
 
                 if check_cache_miss and storage.exists(name):
@@ -34,6 +36,11 @@ class FileManager(models.Manager):
                 self.filter(pk=obj.pk).update(modified=update_modified)
 
         return obj
+
+    def _get_thumbnail_manager(self):
+        if settings.THUMBNAIL_CACHE_DIMENSIONS:
+            return self.select_related("dimensions")
+        return self
 
 
 class File(models.Model):

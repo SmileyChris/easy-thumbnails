@@ -91,7 +91,7 @@ def generate_all_aliases(fieldfile, include_global):
             thumbnailer.get_thumbnail(options)
 
 
-def database_get_image_dimensions(file, close=False):
+def database_get_image_dimensions(file, close=False, dimensions=None):
     """
     Returns the (width, height) of an image, given ThumbnailFile.  Set
     'close' to True to close the file at the end if it is initially in an open
@@ -100,35 +100,28 @@ def database_get_image_dimensions(file, close=False):
     Will attempt to get the dimensions from the file itself if they aren't
     in the db.
     """
-    storage_hash = utils.get_storage_hash(file.easy_thumbnails_field.storage)
-    dimensions = None
+    storage_hash = utils.get_storage_hash(file.storage)
+    dimensions_cache = None
     if settings.THUMBNAIL_CACHE_DIMENSIONS:
         try:
-            # get the thumbnail first
-            thumbnail_cache = models.Thumbnail.objects.get(
-                storage_hash=storage_hash, name=file.name
-            )
-        except models.Thumbnail.DoesNotExist:
-            # if we don't have a thumbnail yet we can't save dimensions
-            # this won't happen with normal usage
-            dimensions = get_image_dimensions(file, close=close)
-        else:
-            try:
-                dimensions_cache = thumbnail_cache.dimensions
-                dimensions = dimensions_cache.width, dimensions_cache.height
-            except models.ThumbnailDimensions.DoesNotExist:
-                # dimension caching is on, but we have no cached dimenions
-                # let's back populate them for this cached thumbnail
-                dimensions = get_image_dimensions(file, close=close)
-                if dimensions:
-                    models.ThumbnailDimensions.objects.create(
-                        thumbnail=thumbnail_cache,
-                        width=dimensions[0],
-                        height=dimensions[1]
-                    )
-            return dimensions
+            dimensions_cache = models.ThumbnailDimensions.objects.get(
+                thumbnail__storage_hash=storage_hash,
+                thumbnail__name=file.name)
+            dimensions = dimensions_cache.width, dimensions_cache.height
+        except models.ThumbnailDimensions.DoesNotExist:
+            dimensions_cache = None
     if not dimensions:
         dimensions = get_image_dimensions(file, close=close)
+    if settings.THUMBNAIL_CACHE_DIMENSIONS and not dimensions_cache:
+        try:
+            thumbnail = models.Thumbnail.objects.get(
+                storage_hash=storage_hash, name=file.name)
+        except models.Thumbnail.DoesNotExist:
+            pass
+        else:
+            dimensions_cache = models.ThumbnailDimensions(thumbnail=thumbnail)
+            dimensions_cache.width, dimensions_cache.height = dimensions
+            dimensions_cache.save()
     return dimensions
 
 
@@ -160,7 +153,7 @@ class ThumbnailFile(ImageFieldFile):
         self._has_db_cached_dimensions = False
         super(ThumbnailFile, self).__init__(
             FakeInstance(), fake_field, name, *args, **kwargs)
-        self.easy_thumbnails_field = self.field
+        # self.easy_thumbnails_field = self.field
         del self.field
         if file:
             self.file = file
@@ -201,7 +194,8 @@ class ThumbnailFile(ImageFieldFile):
         """
         if image:
             self._image_cache = image
-            self._dimensions_cache = image.size
+            if not settings.THUMBNAIL_CACHE_DIMENSIONS:
+                self._dimensions_cache = image.size
         else:
             if hasattr(self, '_image_cache'):
                 del self._cached_image
@@ -262,13 +256,11 @@ class ThumbnailFile(ImageFieldFile):
             return super(ThumbnailFile, self).open(mode, *args, **kwargs)
 
     def _get_image_dimensions(self):
-        if not self._has_db_cached_dimensions\
-                or not hasattr(self, '_dimensions_cache'):
+        if not hasattr(self, '_dimensions_cache'):
             close = self.closed
             self.open()
             self._dimensions_cache = database_get_image_dimensions(
                 self, close=close)
-            self._has_db_cached_dimensions = True
         return self._dimensions_cache
 
 
