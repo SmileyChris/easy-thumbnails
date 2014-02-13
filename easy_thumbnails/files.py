@@ -5,6 +5,7 @@ from django.core.files.base import File, ContentFile
 from django.core.files.storage import (
     get_storage_class, default_storage, Storage)
 from django.db.models.fields.files import ImageFieldFile, FieldFile
+from django.core.files.images import get_image_dimensions
 
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
@@ -90,6 +91,40 @@ def generate_all_aliases(fieldfile, include_global):
             thumbnailer.get_thumbnail(options)
 
 
+def database_get_image_dimensions(file, close=False, dimensions=None):
+    """
+    Returns the (width, height) of an image, given ThumbnailFile.  Set
+    'close' to True to close the file at the end if it is initially in an open
+    state.
+
+    Will attempt to get the dimensions from the file itself if they aren't
+    in the db.
+    """
+    storage_hash = utils.get_storage_hash(file.storage)
+    dimensions = None
+    dimensions_cache = None
+    try:
+        thumbnail = models.Thumbnail.objects.select_related('dimensions').get(
+            storage_hash=storage_hash, name=file.name)
+    except models.Thumbnail.DoesNotExist:
+        thumbnail = None
+    else:
+        try:
+            dimensions_cache = thumbnail.dimensions
+            if dimensions_cache:
+                dimensions = dimensions_cache.width, dimensions_cache.height
+        except models.ThumbnailDimensions.DoesNotExist:
+            dimensions_cache = None
+    if not dimensions:
+        dimensions = get_image_dimensions(file, close=close)
+    if settings.THUMBNAIL_CACHE_DIMENSIONS \
+            and thumbnail and not dimensions_cache:
+        dimensions_cache = models.ThumbnailDimensions(thumbnail=thumbnail)
+        dimensions_cache.width, dimensions_cache.height = dimensions
+        dimensions_cache.save()
+    return dimensions
+
+
 class FakeField(object):
     name = 'fake'
 
@@ -115,6 +150,7 @@ class ThumbnailFile(ImageFieldFile):
     def __init__(self, name, file=None, storage=None, thumbnail_options=None,
                  *args, **kwargs):
         fake_field = FakeField(storage=storage)
+        self._has_db_cached_dimensions = False
         super(ThumbnailFile, self).__init__(
             FakeInstance(), fake_field, name, *args, **kwargs)
         del self.field
@@ -157,7 +193,8 @@ class ThumbnailFile(ImageFieldFile):
         """
         if image:
             self._image_cache = image
-            self._dimensions_cache = image.size
+            if not settings.THUMBNAIL_CACHE_DIMENSIONS:
+                self._dimensions_cache = image.size
         else:
             if hasattr(self, '_image_cache'):
                 del self._cached_image
@@ -216,6 +253,14 @@ class ThumbnailFile(ImageFieldFile):
             self.file = self.storage.open(self.name, mode)
         else:
             return super(ThumbnailFile, self).open(mode, *args, **kwargs)
+
+    def _get_image_dimensions(self):
+        if not hasattr(self, '_dimensions_cache'):
+            close = self.closed
+            self.open()
+            self._dimensions_cache = database_get_image_dimensions(
+                self, close=close)
+        return self._dimensions_cache
 
 
 class Thumbnailer(File):
@@ -436,7 +481,7 @@ class Thumbnailer(File):
         Save a thumbnail to the thumbnail_storage.
 
         Also triggers the ``thumbnail_created`` signal and caches the
-        thumbnail values for future lookups.
+        thumbnail values and dimensions for future lookups.
         """
         filename = thumbnail.name
         try:
@@ -444,7 +489,9 @@ class Thumbnailer(File):
         except Exception:
             pass
         self.thumbnail_storage.save(filename, thumbnail)
-        self.get_thumbnail_cache(thumbnail.name, create=True, update=True)
+        self.get_thumbnail_cache(
+            thumbnail.name, create=True, update=True)
+        thumbnail.height  # To trigger db cache if required.
         signals.thumbnail_created.send(sender=thumbnail)
 
     def thumbnail_exists(self, thumbnail_name):
