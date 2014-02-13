@@ -111,7 +111,8 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
     else:
         try:
             dimensions_cache = thumbnail.dimensions
-            dimensions = dimensions_cache.width, dimensions_cache.height
+            if dimensions_cache:
+                dimensions = dimensions_cache.width, dimensions_cache.height
         except models.ThumbnailDimensions.DoesNotExist:
             dimensions_cache = None
     if not dimensions:
