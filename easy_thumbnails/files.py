@@ -101,27 +101,26 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
     in the db.
     """
     storage_hash = utils.get_storage_hash(file.storage)
+    dimensions = None
     dimensions_cache = None
-    if settings.THUMBNAIL_CACHE_DIMENSIONS:
+    try:
+        thumbnail = models.Thumbnail.objects.select_related('dimensions').get(
+            storage_hash=storage_hash, name=file.name)
+    except models.Thumbnail.DoesNotExist:
+        thumbnail = None
+    else:
         try:
-            dimensions_cache = models.ThumbnailDimensions.objects.get(
-                thumbnail__storage_hash=storage_hash,
-                thumbnail__name=file.name)
+            dimensions_cache = thumbnail.dimensions
             dimensions = dimensions_cache.width, dimensions_cache.height
         except models.ThumbnailDimensions.DoesNotExist:
             dimensions_cache = None
     if not dimensions:
         dimensions = get_image_dimensions(file, close=close)
-    if settings.THUMBNAIL_CACHE_DIMENSIONS and not dimensions_cache:
-        try:
-            thumbnail = models.Thumbnail.objects.get(
-                storage_hash=storage_hash, name=file.name)
-        except models.Thumbnail.DoesNotExist:
-            pass
-        else:
-            dimensions_cache = models.ThumbnailDimensions(thumbnail=thumbnail)
-            dimensions_cache.width, dimensions_cache.height = dimensions
-            dimensions_cache.save()
+    if settings.THUMBNAIL_CACHE_DIMENSIONS \
+            and thumbnail and not dimensions_cache:
+        dimensions_cache = models.ThumbnailDimensions(thumbnail=thumbnail)
+        dimensions_cache.width, dimensions_cache.height = dimensions
+        dimensions_cache.save()
     return dimensions
 
 
