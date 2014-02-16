@@ -255,7 +255,7 @@ class Thumbnailer(File):
         for default in (
                 'basedir', 'subdir', 'prefix', 'quality', 'extension',
                 'preserve_extensions', 'transparency_extension',
-                'check_cache_miss', 'high_resolution'):
+                'check_cache_miss', 'high_resolution', 'highres_infix'):
             attr_name = 'thumbnail_%s' % default
             if getattr(self, attr_name, None) is None:
                 value = getattr(settings, attr_name.upper())
@@ -358,7 +358,7 @@ class Thumbnailer(File):
         else:
             filename_parts += [all_opts, extension]
         if high_resolution:
-            filename_parts[-2] += '@2x'
+            filename_parts[-2] += self.thumbnail_highres_infix
         filename = '.'.join(filename_parts)
 
         return os.path.join(basedir, path, subdir, filename)

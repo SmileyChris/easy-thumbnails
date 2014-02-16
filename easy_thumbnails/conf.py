@@ -241,8 +241,19 @@ class Settings(AppSettings):
     """
     Enables thumbnails for retina displays.
 
-    Creates a "@2x" version of the thumbnails that can be used by a javascript
-    layer to display higher quality thumbnails for high DPI displays.
+    Creates a version of the thumbnails in high resolution that can be used by
+    a javascript layer to display higher quality thumbnails for high DPI displays.
+    """
+
+    THUMBNAIL_HIGHRES_INFIX = '@2x'
+    """
+    Sets the infix used to distinguish thumbnail images for retina displays.
+
+    Thumbnails generated for retina displays are distinguished from the standard
+    resolution counterparts, by adding an infix to the filename just before the
+    dot followed by the extension.
+    Apple Inc., formerly suggested to use ``@2x`` as infix, but later changed
+    their mind and now suggests to use ``_2x``, since this is more portable.
     """
 
 settings = Settings()
