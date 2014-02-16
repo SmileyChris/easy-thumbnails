@@ -11,6 +11,8 @@ HEAD
 
 * Better thumbnail_high_resolution handling.
 
+* Added configuration option to specify the infix used for high resolution image
+  handling.
 
 1.4
 ---
