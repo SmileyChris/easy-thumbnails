@@ -14,6 +14,10 @@ HEAD
 * Added configuration option to specify the infix used for high resolution image
   handling.
 
+* Optional postprocessor for image optimization. Thanks Jacob Rief!
+
+* More remote storages optimization
+
 1.4
 ---
 
