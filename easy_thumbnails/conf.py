@@ -256,4 +256,14 @@ class Settings(AppSettings):
     their mind and now suggests to use ``_2x``, since this is more portable.
     """
 
+    THUMBNAIL_CACHE_DIMENSIONS = False
+    """
+    Save thumbnail dimensions to the database.
+
+    When using remote storage backends it can be a slow process to get image
+    dimensions for a thumbnailed file. This option will store them in
+    the database to be recalled quickly when required. Note: the old method
+    still works as a fall back.
+    """
+
 settings = Settings()
