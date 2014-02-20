@@ -4,9 +4,10 @@ Get a git project's authors (ordered by most contributions).
 """
 
 import re
-import six
 import subprocess
 from operator import itemgetter
+
+from django.utils import six
 
 re_line = re.compile(six.b(r'(\d+)\s+(\d+)\s+[^<]+$'))
 re_author = re.compile(six.b(r'.+<(.+)>$'))

@@ -1,5 +1,5 @@
 import re
-import six
+from django.utils import six
 
 try:
     from PIL import Image, ImageChops, ImageFilter

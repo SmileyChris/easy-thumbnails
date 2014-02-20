@@ -1,5 +1,5 @@
 import os
-import six
+from django.utils import six
 
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import (

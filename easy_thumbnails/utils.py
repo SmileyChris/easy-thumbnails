@@ -2,7 +2,7 @@ import datetime
 import hashlib
 import inspect
 import math
-import six
+from django.utils import six
 
 from django.utils.functional import LazyObject
 from django.utils import timezone

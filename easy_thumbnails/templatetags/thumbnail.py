@@ -1,5 +1,5 @@
 import re
-import six
+from django.utils import six
 
 from django.template import (
     Library, Node, VariableDoesNotExist, TemplateSyntaxError)
