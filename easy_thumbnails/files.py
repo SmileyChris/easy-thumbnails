@@ -111,14 +111,12 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
     else:
         try:
             dimensions_cache = thumbnail.dimensions
-            if dimensions_cache:
-                dimensions = dimensions_cache.width, dimensions_cache.height
         except models.ThumbnailDimensions.DoesNotExist:
             dimensions_cache = None
-    if not dimensions:
-        dimensions = get_image_dimensions(file, close=close)
-    if settings.THUMBNAIL_CACHE_DIMENSIONS \
-            and thumbnail and not dimensions_cache:
+        if dimensions_cache:
+            return dimensions_cache.width, dimensions_cache.height
+    dimensions = get_image_dimensions(file, close=close)
+    if settings.THUMBNAIL_CACHE_DIMENSIONS and thumbnail:
         dimensions_cache = models.ThumbnailDimensions(thumbnail=thumbnail)
         dimensions_cache.width, dimensions_cache.height = dimensions
         dimensions_cache.save()
@@ -150,7 +148,6 @@ class ThumbnailFile(ImageFieldFile):
     def __init__(self, name, file=None, storage=None, thumbnail_options=None,
                  *args, **kwargs):
         fake_field = FakeField(storage=storage)
-        self._has_db_cached_dimensions = False
         super(ThumbnailFile, self).__init__(
             FakeInstance(), fake_field, name, *args, **kwargs)
         del self.field
@@ -193,8 +190,7 @@ class ThumbnailFile(ImageFieldFile):
         """
         if image:
             self._image_cache = image
-            if not settings.THUMBNAIL_CACHE_DIMENSIONS:
-                self._dimensions_cache = image.size
+            self._dimensions_cache = image.size
         else:
             if hasattr(self, '_image_cache'):
                 del self._cached_image
@@ -489,9 +485,22 @@ class Thumbnailer(File):
         except Exception:
             pass
         self.thumbnail_storage.save(filename, thumbnail)
-        self.get_thumbnail_cache(
+
+        thumb_cache = self.get_thumbnail_cache(
             thumbnail.name, create=True, update=True)
-        thumbnail.height  # To trigger db cache if required.
+
+        # Cache thumbnail dimensions.
+        if settings.THUMBNAIL_CACHE_DIMENSIONS:
+            dimensions_cache, created = (
+                models.ThumbnailDimensions.objects.get_or_create(
+                    thumbnail=thumb_cache,
+                    defaults={'width': thumbnail.width,
+                              'height': thumbnail.height}))
+            if not created:
+                dimensions_cache.width = thumbnail.width
+                dimensions_cache.height = thumbnail.height
+                dimensions_cache.save()
+
         signals.thumbnail_created.send(sender=thumbnail)
 
     def thumbnail_exists(self, thumbnail_name):
