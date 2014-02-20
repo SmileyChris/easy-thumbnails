@@ -50,6 +50,12 @@ class FilesTest(test.BaseTest):
         self.remote_storage.delete_temporary_storage()
         super(FilesTest, self).tearDown()
 
+    def assertRegex(self, *args, **kwargs):
+        func = getattr(super(FilesTest, self), 'assertRegex', None)
+        if func is None:
+            func = self.assertRegexpMatches
+        return func(*args, **kwargs)
+
     def test_tag(self):
         local = self.thumbnailer.get_thumbnail({'size': (100, 100)})
         remote = self.remote_thumbnailer.get_thumbnail({'size': (100, 100)})
@@ -165,25 +171,31 @@ class FilesTest(test.BaseTest):
 
     def test_postprocessor(self):
         """use a mock image optimizing post processor doing nothing"""
-        with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={'png': 'easy_thumbnails/tests/mockoptim.py {filename}'}):
+        with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={
+                'png': 'easy_thumbnails/tests/mockoptim.py {filename}'}):
             with LogCapture() as logcap:
                 self.ext_thumbnailer.thumbnail_extension = 'png'
                 self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
                 actual = tuple(logcap.actual())[0]
                 self.assertEqual(actual[0], 'easy_thumbnails.optimize')
                 self.assertEqual(actual[1], 'INFO')
-                self.assertRegexpMatches(actual[2], '^easy_thumbnails/tests/mockoptim.py [^ ]+ returned nothing$')
+                self.assertRegex(
+                    actual[2],
+                    '^easy_thumbnails/tests/mockoptim.py [^ ]+ returned '
+                    'nothing$')
 
     def test_postprocessor_fail(self):
         """use a mock image optimizing post processor doing nothing"""
-        with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={'png': 'easy_thumbnails/tests/mockoptim_fail.py {filename}'}):
+        with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={
+                'png': 'easy_thumbnails/tests/mockoptim_fail.py {filename}'}):
             with LogCapture() as logcap:
                 self.ext_thumbnailer.thumbnail_extension = 'png'
                 self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
                 actual = tuple(logcap.actual())[0]
                 self.assertEqual(actual[0], 'easy_thumbnails.optimize')
                 self.assertEqual(actual[1], 'ERROR')
-                self.assertRegexpMatches(actual[2], r'^Command\ .+returned non-zero exit status 1$')
+                self.assertRegex(
+                    actual[2], r'^Command\ .+returned non-zero exit status 1$')
 
     def test_USE_TZ(self):
         settings.USE_TZ = True
