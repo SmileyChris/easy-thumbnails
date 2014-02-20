@@ -182,31 +182,30 @@ class FilesTest(test.BaseTest):
 
     def test_postprocessor(self):
         """use a mock image optimizing post processor doing nothing"""
-        with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={
-                'png': 'easy_thumbnails/tests/mockoptim.py {filename}'}):
-            with LogCapture() as logcap:
-                self.ext_thumbnailer.thumbnail_extension = 'png'
-                self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
-                actual = tuple(logcap.actual())[0]
-                self.assertEqual(actual[0], 'easy_thumbnails.optimize')
-                self.assertEqual(actual[1], 'INFO')
-                self.assertRegex(
-                    actual[2],
-                    '^easy_thumbnails/tests/mockoptim.py [^ ]+ returned '
-                    'nothing$')
+        settings.THUMBNAIL_OPTIMIZE_COMMAND = {
+            'png': 'easy_thumbnails/tests/mockoptim.py {filename}'}
+        with LogCapture() as logcap:
+            self.ext_thumbnailer.thumbnail_extension = 'png'
+            self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
+            actual = tuple(logcap.actual())[0]
+            self.assertEqual(actual[0], 'easy_thumbnails.optimize')
+            self.assertEqual(actual[1], 'INFO')
+            self.assertRegex(
+                actual[2],
+                '^easy_thumbnails/tests/mockoptim.py [^ ]+ returned nothing$')
 
     def test_postprocessor_fail(self):
         """use a mock image optimizing post processor doing nothing"""
-        with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={
-                'png': 'easy_thumbnails/tests/mockoptim_fail.py {filename}'}):
-            with LogCapture() as logcap:
-                self.ext_thumbnailer.thumbnail_extension = 'png'
-                self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
-                actual = tuple(logcap.actual())[0]
-                self.assertEqual(actual[0], 'easy_thumbnails.optimize')
-                self.assertEqual(actual[1], 'ERROR')
-                self.assertRegex(
-                    actual[2], r'^Command\ .+returned non-zero exit status 1$')
+        settings.THUMBNAIL_OPTIMIZE_COMMAND = {
+            'png': 'easy_thumbnails/tests/mockoptim_fail.py {filename}'}
+        with LogCapture() as logcap:
+            self.ext_thumbnailer.thumbnail_extension = 'png'
+            self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
+            actual = tuple(logcap.actual())[0]
+            self.assertEqual(actual[0], 'easy_thumbnails.optimize')
+            self.assertEqual(actual[1], 'ERROR')
+            self.assertRegex(
+                actual[2], r'^Command\ .+returned non-zero exit status 1$')
 
     def test_USE_TZ(self):
         settings.USE_TZ = True
