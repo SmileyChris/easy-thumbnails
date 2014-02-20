@@ -169,6 +169,16 @@ class FilesTest(test.BaseTest):
         thumb = Image.open(hires_thumb_file)
         self.assertEqual(thumb.size, (200, 150))
 
+    def test_highres_infix(self):
+        self.ext_thumbnailer.thumbnail_high_resolution = True
+        self.ext_thumbnailer.thumbnail_highres_infix = '_2x'
+        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        base, ext = path.splitext(thumb.path)
+        hires_thumb_file = ''.join([base + '_2x', ext])
+        self.assertTrue(path.isfile(hires_thumb_file))
+        thumb = Image.open(hires_thumb_file)
+        self.assertEqual(thumb.size, (200, 150))
+
     def test_postprocessor(self):
         """use a mock image optimizing post processor doing nothing"""
         with self.settings(THUMBNAIL_OPTIMIZE_COMMAND={
