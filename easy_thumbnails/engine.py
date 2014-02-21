@@ -13,6 +13,17 @@ from easy_thumbnails import utils
 from easy_thumbnails.conf import settings
 
 
+class NoSourceGenerator(Exception):
+    """
+    Exception that is raised if no source generator can process the source
+    file.
+    """
+
+    def __unicode__(self):
+        return "Tried {0} source generators with no success".format(
+            len(self.args))
+
+
 def _use_default_options(options):
     if not settings.THUMBNAIL_DEFAULT_OPTIONS:
         return options
@@ -59,7 +70,8 @@ def save_image(image, destination=None, filename=None, **options):
     return destination
 
 
-def generate_source_image(source_file, processor_options, generators=None):
+def generate_source_image(source_file, processor_options, generators=None,
+                          fail_silently=True):
     """
     Processes a source ``File`` through a series of source generators, stopping
     once a generator returns an image.
@@ -78,6 +90,7 @@ def generate_source_image(source_file, processor_options, generators=None):
         generators = [
             utils.dynamic_import(name)
             for name in settings.THUMBNAIL_SOURCE_GENERATORS]
+    exceptions = []
     try:
         for generator in generators:
             source = source_file
@@ -91,7 +104,14 @@ def generate_source_image(source_file, processor_options, generators=None):
                     source.seek(0)
                 except Exception:
                     source = None
-            image = generator(source, **processor_options)
+            try:
+                image = generator(source, **processor_options)
+            except Exception as e:
+                if not fail_silently:
+                    if len(generators) == 1:
+                        raise
+                    exceptions.append(e)
+                image = None
             if image:
                 return image
     finally:
@@ -102,3 +122,5 @@ def generate_source_image(source_file, processor_options, generators=None):
                 source_file.close()
             except Exception:
                 pass
+    if exceptions and not fail_silently:
+        raise NoSourceGenerator(*exceptions)

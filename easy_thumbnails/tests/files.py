@@ -1,7 +1,13 @@
-import logging
+try:
+    from cStringIO import cStringIO as BytesIO
+except ImportError:
+    from django.utils.six import BytesIO
 from os import path
 
-from easy_thumbnails import files, utils, signals, test, exceptions, models
+from django.test import TestCase
+from django.utils import six
+from easy_thumbnails import (
+    files, utils, signals, test, exceptions, models, engine)
 from easy_thumbnails.conf import settings
 try:
     from PIL import Image
@@ -371,3 +377,45 @@ class FilesTest(test.BaseTest):
             self.assertEqual(self.thumbnailer.missed_signal, options)
         finally:
             signals.thumbnail_created.disconnect(signal_handler)
+
+
+class FakeSourceGenerator(object):
+
+    def __init__(self, fail=False):
+        self.fail = fail
+
+    def __call__(self, source, **kwargs):
+        if self.fail:
+            raise ValueError("Fake source generator failed")
+        return source
+
+
+class EngineTest(TestCase):
+
+    def setUp(self):
+        self.source = BytesIO(six.b('file-contents'))
+
+    def test_single_fail(self):
+        source_generators = [FakeSourceGenerator(fail=True)]
+        self.assertRaises(ValueError, engine.generate_source_image,
+            self.source, {}, source_generators, fail_silently=False)
+
+    def test_single_silent_fail(self):
+        source_generators = [FakeSourceGenerator(fail=True)]
+        image = engine.generate_source_image(
+            self.source, {}, source_generators)
+        self.assertEqual(image, None)
+
+    def test_multiple_fail(self):
+        source_generators = [
+            FakeSourceGenerator(fail=True), FakeSourceGenerator(fail=True)]
+        self.assertRaises(engine.NoSourceGenerator,
+            engine.generate_source_image,
+            self.source, {}, source_generators, fail_silently=False)
+
+    def test_multiple_silent_fail(self):
+        source_generators = [
+            FakeSourceGenerator(fail=True), FakeSourceGenerator(fail=True)]
+        image = engine.generate_source_image(
+            self.source, {}, source_generators)
+        self.assertEqual(image, None)

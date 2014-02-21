@@ -45,20 +45,21 @@ class PilImageTest(test.BaseTest):
 
     def test_not_image(self):
         """
-        Non-images are passed silently.
+        Non-images raise an exception.
         """
-        self.assertEqual(
-            source_generators.pil_image(BytesIO(six.b('not an image'))), None)
+        self.assertRaises(
+            IOError,
+            source_generators.pil_image, BytesIO(six.b('not an image')))
 
     def test_nearly_image(self):
         """
-        Broken images are passed silently.
+        Broken images raise an exception.
         """
         data = self.create_image(None, None)
         trunc_data = BytesIO()
         trunc_data.write(data.read()[:-10])
         trunc_data.seek(0)
-        self.assertEqual(source_generators.pil_image(data), None)
+        self.assertRaises(IOError, source_generators.pil_image, data)
 
     def test_exif_orientation(self):
         """

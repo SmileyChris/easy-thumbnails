@@ -327,13 +327,10 @@ class Thumbnailer(File):
         options = aliases.get(alias, target=self.alias_target)
         if not options:
             raise KeyError(alias)
-        return self.get_thumbnail(options)
+        return self.get_thumbnail(options, silent_template_exception=True)
 
-    def generate_source_image(self, thumbnail_options):
-        return engine.generate_source_image(self, thumbnail_options,
-                                            self.source_generators)
-
-    def generate_thumbnail(self, thumbnail_options, high_resolution=False):
+    def generate_thumbnail(self, thumbnail_options, high_resolution=False,
+                           silent_template_exception=False):
         """
         Return an unsaved ``ThumbnailFile`` containing a thumbnail image.
 
@@ -344,7 +341,9 @@ class Thumbnailer(File):
             orig_size = thumbnail_options['size']  # remember original size
             thumbnail_options = thumbnail_options.copy()
             thumbnail_options['size'] = (orig_size[0] * 2, orig_size[1] * 2)
-        image = self.generate_source_image(thumbnail_options)
+        image = engine.generate_source_image(
+            self, thumbnail_options, self.source_generators,
+            fail_silently=silent_template_exception)
         if image is None:
             raise exceptions.InvalidImageFormatError(
                 "The source file does not appear to be an image")
@@ -453,7 +452,8 @@ class Thumbnailer(File):
                     thumbnail_file.set_image_dimensions(exists)
                 return thumbnail_file
 
-    def get_thumbnail(self, thumbnail_options, save=True, generate=None):
+    def get_thumbnail(self, thumbnail_options, save=True, generate=None,
+                      silent_template_exception=False):
         """
         Return a ``ThumbnailFile`` containing a thumbnail.
 
@@ -476,7 +476,9 @@ class Thumbnailer(File):
         thumbnail = self.get_existing_thumbnail(thumbnail_options)
         if not thumbnail:
             if generate:
-                thumbnail = self.generate_thumbnail(thumbnail_options)
+                thumbnail = self.generate_thumbnail(
+                    thumbnail_options,
+                    silent_template_exception=silent_template_exception)
                 if save:
                     self.save_thumbnail(thumbnail)
             else:
@@ -494,7 +496,8 @@ class Thumbnailer(File):
             if not thumbnail.high_resolution:
                 if generate:
                     thumbnail.high_resolution = self.generate_thumbnail(
-                        thumbnail_options, high_resolution=True)
+                        thumbnail_options, high_resolution=True,
+                        silent_template_exception=silent_template_exception)
                     if save:
                         self.save_thumbnail(thumbnail.high_resolution)
                 else:

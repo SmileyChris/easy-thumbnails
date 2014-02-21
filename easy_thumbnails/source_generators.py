@@ -28,13 +28,11 @@ def pil_image(source, exif_orientation=True, **options):
     if not source:
         return
     source = BytesIO(source.read())
-    try:
-        image = Image.open(source)
-        # Fully load the image now to catch any problems with the image
-        # contents.
-        image.load()
-    except Exception:
-        return
+
+    image = Image.open(source)
+    # Fully load the image now to catch any problems with the image
+    # contents.
+    image.load()
 
     if exif_orientation:
         image = utils.exif_orientation(image)

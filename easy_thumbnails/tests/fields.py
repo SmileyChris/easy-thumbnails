@@ -4,6 +4,7 @@ from django.core.files.base import ContentFile
 from django.db import models
 
 from easy_thumbnails import test
+from easy_thumbnails.conf import settings
 from easy_thumbnails.fields import ThumbnailerField, ThumbnailerImageField
 from easy_thumbnails.exceptions import InvalidImageFormatError
 
@@ -33,12 +34,20 @@ class ThumbnailerFieldTest(test.BaseTest):
         thumb = instance.avatar.generate_thumbnail({'size': (300, 300)})
         self.assertEqual((thumb.width, thumb.height), (300, 225))
 
-    def test_generate_thumbnail_type_error(self):
+    def test_generate_thumbnail_bad_image(self):
         text_file = ContentFile("Lorem ipsum dolor sit amet. Not an image.")
         self.storage.save('avatars/invalid.jpg', text_file)
         instance = TestModel(avatar='avatars/invalid.jpg')
         generate = lambda: instance.avatar.generate_thumbnail(
             {'size': (300, 300)})
+        self.assertRaises(IOError, generate)
+
+    def test_generate_thumbnail_alias_bad_image(self):
+        settings.THUMBNAIL_ALIASES = {'': {'small': {'size': (100, 100)}}}
+        text_file = ContentFile("Lorem ipsum dolor sit amet. Not an image.")
+        self.storage.save('avatars/invalid.jpg', text_file)
+        instance = TestModel(avatar='avatars/invalid.jpg')
+        generate = lambda: instance.avatar['small']
         self.assertRaises(InvalidImageFormatError, generate)
 
     def test_delete(self):
