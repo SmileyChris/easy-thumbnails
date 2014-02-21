@@ -265,5 +265,14 @@ class Settings(AppSettings):
     the database to be recalled quickly when required. Note: the old method
     still works as a fall back.
     """
+    
+    THUMBNAIL_JPEG_SUBSAMPLING = True
+    """
+    Enables subsampling for JPEG images.
+
+    Set this to False if you want to disable subsampling in JPEG images.
+    This will improve the output quality but will lead to an increased file 
+    size.
+    """
 
 settings = Settings()
