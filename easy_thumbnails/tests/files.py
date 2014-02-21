@@ -72,7 +72,15 @@ class FilesTest(test.BaseTest):
         self.assertEqual(
             remote.tag(use_size=False), '<img alt="" src="%s" />' % remote.url)
 
-        # Thumbnails on remote storage don't get dimensions...
+        # Even a remotely generated thumbnail has the dimensions cached if it
+        # was just created.
+        self.assertEqual(
+            remote.tag(),
+            '<img alt="" height="75" src="%s" width="100" />' % remote.url)
+
+        # Future requests to thumbnails on remote storage don't get
+        # dimensions...
+        remote = self.remote_thumbnailer.get_thumbnail({'size': (100, 100)})
         self.assertEqual(
             remote.tag(), '<img alt="" src="%s" />' % remote.url)
         # ...unless explicitly requested.
@@ -85,6 +93,16 @@ class FilesTest(test.BaseTest):
             local.tag(**{'rel': 'A&B', 'class': 'fish'}),
             '<img alt="" class="fish" height="75" rel="A&amp;B" '
             'src="%s" width="100" />' % local.url)
+
+    def test_tag_cached_dimensions(self):
+        settings.THUMBNAIL_CACHE_DIMENSIONS = True
+        self.remote_thumbnailer.get_thumbnail({'size': (100, 100)})
+
+        # Look up thumbnail again to ensure dimensions are a *really* cached.
+        remote = self.remote_thumbnailer.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(
+            remote.tag(),
+            '<img alt="" height="75" src="%s" width="100" />' % remote.url)
 
     def test_transparent_thumbnailing(self):
         thumb_file = self.thumbnailer.get_thumbnail(
