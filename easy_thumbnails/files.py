@@ -399,7 +399,7 @@ class Thumbnailer(File):
         quality = thumbnail_options.pop('quality', self.thumbnail_quality)
         initial_opts = ['%sx%s' % size, 'q%s' % quality]
         # Uppercase options don't alter the filename.
-        for option in thumbnail_options.keys():
+        for option in list(thumbnail_options):
             if option == option.upper():
                 del thumbnail_options[option]
 
