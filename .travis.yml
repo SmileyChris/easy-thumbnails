@@ -6,9 +6,9 @@ python:
   - "3.3"
 
 env:
-  - DJANGO_VERSION=1.5
-  - DJANGO_VERSION=1.6
-  - DJANGO_VERSION=1.7
+  - DJANGO_VERSION=1.5 TEST_LOCATION=easy_thumbnails
+  - DJANGO_VERSION=1.6 TEST_LOCATION=easy_thumbnails
+  - DJANGO_VERSION=1.7 TEST_LOCATION=easy_thumbnails.tests
 
 install:
   - pip install --use-mirrors "Django<$DJANGO_VERSION"
@@ -16,10 +16,9 @@ install:
   - pip install --use-mirrors .
 
 script:
-  - django-admin.py test easy_thumbnails --settings=easy_thumbnails.test_settings --traceback
+  - django-admin.py test $TEST_LOCATION --settings=easy_thumbnails.test_settings --traceback
 
 matrix:
   exclude:
-    - env: DJANGO_VERSION=1.5
+    - env: DJANGO_VERSION=1.5 TEST_LOCATION=easy_thumbnails
       python: "3.3"
-
