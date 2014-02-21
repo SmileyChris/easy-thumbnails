@@ -154,7 +154,13 @@ def thumbnail(parser, token):
 
         {% thumbnail [source] [size] [options] as [variable] %}
 
-    When ``as [variable]`` is used, the tag doesn't output anything.
+    When ``as [variable]`` is used, the tag doesn't output anything. Instead,
+    use the variable like a standard ``ImageFieldFile`` object::
+
+        {% thumbnail obj.picture 200x200 upscale as thumb %}
+        <img href="{{ thumb.url }}"
+             width="{{ thumb.width }}"
+             height="{{ thumb.height }}" />
 
     **Debugging**
 

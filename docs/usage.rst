@@ -3,15 +3,9 @@ Usage
 =====
 
 The common way easy-thumbnails is used is via the ``{% thumbnail %}`` template
-tag or ``thumbnail_url`` filter, which generates
-images from a model with an ``ImageField``. 
-
-The tag can also be used with any static image. Simply pass in the relative
-path instead of passing in the ``ImageField``.
-
-|  To access dimensions of the image temporarily store the thumbnail as follows:
-|  ``{% thumbnail object.picture 200x200 upscale as thumb %}``
-|  Then the thumbnail's fields can be accessed by any of the usual attributes, such as ``{{thumb.url}}`` or ``{{thumb.width}}``.
+tag or ``thumbnail_url`` filter, which generates images from a model with an
+``ImageField``. The tag can also be used with media images not tied to a
+specific model by passing in the relative path instead.
 
 Custom database fields are also available for simpler access.
 
