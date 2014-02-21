@@ -4,7 +4,7 @@ from django.utils import six
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from six import BytesIO
+    from django.utils.six import BytesIO
 
 try:
     from PIL import Image, ImageChops
