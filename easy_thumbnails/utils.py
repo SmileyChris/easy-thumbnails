@@ -52,7 +52,7 @@ def valid_processor_options(processors=None):
             dynamic_import(p) for p in
             settings.THUMBNAIL_PROCESSORS +
             settings.THUMBNAIL_SOURCE_GENERATORS]
-    valid_options = set(['size', 'quality'])
+    valid_options = set(['size', 'quality', 'progressive'])
     for processor in processors:
         args = inspect.getargspec(processor)[0]
         # Add all arguments apart from the first (the source image).
@@ -97,6 +97,17 @@ def is_transparent(image):
         return False
     return (image.mode in ('RGBA', 'LA') or
             (image.mode == 'P' and 'transparency' in image.info))
+
+
+def is_progressive(image):
+    """
+    Check to see if an image is progressive.
+    """
+    if not isinstance(image, Image.Image):
+        # Can only deal with PIL images, fall back to the assumption that that
+        # it's not transparent.
+        return False
+    return (('progressive' in image.info) or ('progression' in image.info))
 
 
 def exif_orientation(im):

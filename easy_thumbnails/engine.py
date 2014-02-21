@@ -45,14 +45,36 @@ def save_image(image, destination=None, filename=None, **options):
         destination = BytesIO()
     filename = filename or ''
     format = Image.EXTENSION.get(os.path.splitext(filename)[1], 'JPEG')
+    # PIL will enable progressive even `progressive=False` when `image.save()`,
+    # so just remove this key
+    progressive = options.setdefault('progressive', False)
+    options.pop('progressive', None)
     if format == 'JPEG':
         options.setdefault('quality', 85)
-        try:
-            image.save(destination, format=format, optimize=1, **options)
-        except IOError:
-            # Try again, without optimization (PIL can't optimize an image
-            # larger than ImageFile.MAXBLOCK, which is 64k by default)
-            pass
+        if progressive:
+            # when your JPEG image is under 10K, it's better to be saved as
+            # baseline JPEG
+            block_size = image.size[0] * image.size[1]
+            if block_size >= 1024 * 10:
+                try:
+                    image.save(destination, format=format, optimize=1,
+                               progressive=1, **options)
+                except IOError:
+                    # Try again, without optimization (PIL can't optimize an image
+                    # larger than ImageFile.MAXBLOCK, which is 64k by default)
+                    try:
+                        from PIL import ImageFile
+                    except ImportError:
+                        import ImageFile
+                    ImageFile.MAXBLOCK = block_size
+                    image.save(destination, format=format, optimize=1,
+                               progressive=1, **options)
+        else:
+            try:
+                image.save(destination, format=format, optimize=1, **options)
+            except IOError:
+                pass
+
     image.save(destination, format=format, **options)
     if hasattr(destination, 'seek'):
         destination.seek(0)

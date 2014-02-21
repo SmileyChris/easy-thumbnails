@@ -46,6 +46,15 @@ class FilesTest(test.BaseTest):
             self.storage, filename)
         self.transparent_greyscale_thumbnailer.thumbnail_storage = self.storage
 
+        # Generate test progressive images.
+        filename = self.create_image(
+            self.storage, 'progressive.jpg', image_mode='RGBA',
+            image_format='JPEG')
+        self.progressive_thumbnailer = files.get_thumbnailer(
+            self.storage, filename)
+        self.progressive_thumbnailer.thumbnail_storage = self.storage
+
+
     def tearDown(self):
         self.storage.delete_temporary_storage()
         self.remote_storage.delete_temporary_storage()
@@ -336,3 +345,28 @@ class FilesTest(test.BaseTest):
             self.assertEqual(self.thumbnailer.missed_signal, options)
         finally:
             signals.thumbnail_created.disconnect(signal_handler)
+
+    def test_progressive_thumbnailing(self):
+        thumb_file = self.thumbnailer.get_thumbnail(
+            {'size': (100, 100)})
+        thumb_file.seek(0)
+        thumb = Image.open(thumb_file)
+        self.assertFalse(
+            utils.is_progressive(thumb),
+            "%s shouldn't be progressive." % thumb_file.name)
+
+        thumb_file = self.progressive_thumbnailer.get_thumbnail(
+            {'size': (100, 100), 'progressive': True})
+        thumb_file.seek(0)
+        thumb = Image.open(thumb_file)
+        self.assertFalse(
+            utils.is_progressive(thumb),
+            "%s shouldn't be progressive. It's under 10k" % thumb_file.name)
+
+        thumb_file = self.progressive_thumbnailer.get_thumbnail(
+            {'size': (640, 480), 'progressive': True})
+        thumb_file.seek(0)
+        thumb = Image.open(thumb_file)
+        self.assertTrue(
+            utils.is_progressive(thumb),
+            "%s should be progressive." % thumb_file.name)
