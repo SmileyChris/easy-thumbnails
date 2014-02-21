@@ -258,6 +258,20 @@ class ThumbnailFile(ImageFieldFile):
                 self, close=close)
         return self._dimensions_cache
 
+    def set_image_dimensions(self, thumbnail):
+        """
+        Set image dimensions from the cached dimensions of a ``Thumbnail``
+        model instance.
+        """
+        try:
+            dimensions = getattr(thumbnail, 'dimensions', None)
+        except models.ThumbnailDimensions.DoesNotExist:
+            dimensions = None
+        if not dimensions:
+            return False
+        self._dimensions_cache = dimensions.size
+        return self._dimensions_cache
+
 
 class Thumbnailer(File):
     """
@@ -420,10 +434,17 @@ class Thumbnailer(File):
             names.append(transparent_name)
 
         for filename in names:
-            if self.thumbnail_exists(filename):
-                return ThumbnailFile(
+            exists = self.thumbnail_exists(filename)
+            if exists:
+                thumbnail_file = ThumbnailFile(
                     name=filename, storage=self.thumbnail_storage,
                     thumbnail_options=thumbnail_options)
+                if settings.THUMBNAIL_CACHE_DIMENSIONS:
+                    # If this wasn't local storage, exists will be a thumbnail
+                    # instance so we can store the image dimensions now to save
+                    # a future potential query.
+                    thumbnail_file.set_image_dimensions(exists)
+                return thumbnail_file
 
     def get_thumbnail(self, thumbnail_options, save=True, generate=None):
         """
@@ -531,16 +552,18 @@ class Thumbnailer(File):
         if local_thumbnails:
             thumbnail_modtime = utils.get_modified_time(
                 self.thumbnail_storage, thumbnail_name)
-        else:
-            thumbnail = self.get_thumbnail_cache(thumbnail_name)
-            if not thumbnail:
+            if not thumbnail_modtime:
                 return False
-            thumbnail_modtime = thumbnail.modified
+            return source_modtime <= thumbnail_modtime
 
-        if not thumbnail_modtime:
+        thumbnail = self.get_thumbnail_cache(thumbnail_name)
+        if not thumbnail:
             return False
+        thumbnail_modtime = thumbnail.modified
 
-        return source_modtime <= thumbnail_modtime
+        if thumbnail.modified and source_modtime <= thumbnail.modified:
+            return thumbnail
+        return False
 
     def get_source_cache(self, create=False, update=False):
         if self.remote_source:

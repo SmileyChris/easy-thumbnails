@@ -246,6 +246,16 @@ class FilesTest(test.BaseTest):
             (thumb.width, thumb.height),
             (dimensions.width, dimensions.height))
 
+    def test_remote_cached_dimensions_queries(self):
+        settings.THUMBNAIL_CACHE_DIMENSIONS = True
+        opts = {'size': (50, 50)}
+        thumb = self.remote_thumbnailer.get_thumbnail(opts)
+        thumb.height   # Trigger dimension caching.
+        # Get thumb again (which now has cached dimensions).
+        thumb = self.remote_thumbnailer.get_thumbnail(opts)
+        with self.assertNumQueries(0):
+            self.assertEqual(thumb.width, 50)
+
     def test_add_dimension_cache(self):
         settings.THUMBNAIL_CACHE_DIMENSIONS = True
         opts = {'size': (50, 50)}
