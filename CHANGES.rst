@@ -18,6 +18,8 @@ HEAD
 
 * More remote storages optimization
 
+* Thumbnail dimensions can now optionally be cached. Thanks David Novakovic.
+
 1.4
 ---
 
