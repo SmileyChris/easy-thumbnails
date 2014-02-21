@@ -9,10 +9,11 @@ HEAD
 * Update method used to check for modification dates of source and thumbnail
   images. Thanks Ben Roberts.
 
-* Better thumbnail_high_resolution handling.
+* Better thumbnail_high_resolution handling, including the ability to switch on
+  and off explicitly with a ``HIGH_RESOLUTION`` thumbnail option.
 
-* Added configuration option to specify the infix used for high resolution image
-  handling.
+* Added configuration option to specify the infix used for high resolution
+  image handling.
 
 * Optional postprocessor for image optimization. Thanks Jacob Rief!
 
