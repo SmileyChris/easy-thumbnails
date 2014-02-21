@@ -398,6 +398,10 @@ class Thumbnailer(File):
         size = tuple(thumbnail_options.pop('size'))
         quality = thumbnail_options.pop('quality', self.thumbnail_quality)
         initial_opts = ['%sx%s' % size, 'q%s' % quality]
+        # Uppercase options don't alter the filename.
+        for option in thumbnail_options.keys():
+            if option == option.upper():
+                del thumbnail_options[option]
 
         opts = ['%s' % (v is not True and '%s-%s' % (k, v) or k)
                 for k, v in sorted(thumbnail_options.items()) if v]
@@ -480,7 +484,11 @@ class Thumbnailer(File):
                     sender=self, options=thumbnail_options,
                     high_resolution=False)
 
-        if self.thumbnail_high_resolution:
+        if 'HIGH_RESOLUTION' in thumbnail_options:
+            generate_high_resolution = thumbnail_options.get('HIGH_RESOLUTION')
+        else:
+            generate_high_resolution = self.thumbnail_high_resolution
+        if generate_high_resolution:
             thumbnail.high_resolution = self.get_existing_thumbnail(
                 thumbnail_options, high_resolution=True)
             if not thumbnail.high_resolution:

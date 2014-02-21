@@ -188,6 +188,23 @@ class FilesTest(test.BaseTest):
         thumb = Image.open(hires_thumb_file)
         self.assertEqual(thumb.size, (200, 150))
 
+    def test_high_resolution_force_off(self):
+        self.ext_thumbnailer.thumbnail_high_resolution = True
+        thumb = self.ext_thumbnailer.get_thumbnail(
+            {'size': (100, 100), 'HIGH_RESOLUTION': False})
+        base, ext = path.splitext(thumb.path)
+        hires_thumb_file = ''.join([base + '@2x', ext])
+        self.assertFalse(path.exists(hires_thumb_file))
+
+    def test_high_resolution_force(self):
+        thumb = self.ext_thumbnailer.get_thumbnail(
+            {'size': (100, 100), 'HIGH_RESOLUTION': True})
+        base, ext = path.splitext(thumb.path)
+        hires_thumb_file = ''.join([base + '@2x', ext])
+        self.assertTrue(path.isfile(hires_thumb_file))
+        thumb = Image.open(hires_thumb_file)
+        self.assertEqual(thumb.size, (200, 150))
+
     def test_highres_infix(self):
         self.ext_thumbnailer.thumbnail_high_resolution = True
         self.ext_thumbnailer.thumbnail_highres_infix = '_2x'
