@@ -279,5 +279,12 @@ class Settings(AppSettings):
     the database to be recalled quickly when required. Note: the old method
     still works as a fall back.
     """
-
+    
+    THUMBNAIL_NAME_PROCESSOR = 'easy_thumbnails.files.default_name_processor'
+    """
+    Defines the path to a function which generates the suffix of a thumbnail
+    filename from the options passed to a Thumbnailer. The function takes one
+    argument, which is the list of options passed.
+    """
+    
 settings = Settings()

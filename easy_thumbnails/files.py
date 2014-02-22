@@ -14,7 +14,7 @@ from django.utils import timezone
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
-
+from easy_thumbnails.utils import dynamic_import
 
 def get_thumbnailer(obj, relative_name=None):
     """
@@ -90,6 +90,14 @@ def generate_all_aliases(fieldfile, include_global):
         for options in all_options.values():
             thumbnailer.get_thumbnail(options)
 
+def default_name_processor(options):
+    """
+    Generate a string from thumbnailer options.
+    This string is a concatenation of all options, and is used
+    at the end of a thumbnail filename.
+    """
+    name = '_'.join(options)
+    return name
 
 def database_get_image_dimensions(file, close=False, dimensions=None):
     """
@@ -404,8 +412,9 @@ class Thumbnailer(File):
 
         opts = ['%s' % (v is not True and '%s-%s' % (k, v) or k)
                 for k, v in sorted(thumbnail_options.items()) if v]
-
-        all_opts = '_'.join(initial_opts + opts)
+        
+        name_processor_path = settings.THUMBNAIL_NAME_PROCESSOR
+        all_opts = dynamic_import(name_processor_path)(initial_opts + opts) 
 
         data = {'opts': all_opts}
         basedir = self.thumbnail_basedir % data
