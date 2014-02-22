@@ -62,6 +62,14 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     if im.mode in ('L', 'RGB'):
         return im
 
+    if im.mode == 'I':
+        # Indexed PNGs won't convert directly to JPEG, and will result in a
+        # fully white image when converted to RGB mode.
+        # http://stackoverflow.com/q/19892919/1203785
+        # https://bitbucket.org/effbot/pil-2009-raclette/issue/37/
+        table = [i/256 for i in range(65536)]
+        return im.point(table, 'L')
+
     if is_transparent:
         if im.mode != 'RGBA':
             im = im.convert('RGBA')
