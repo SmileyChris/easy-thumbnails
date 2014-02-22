@@ -1,12 +1,14 @@
+import itertools
 import re
-from django.utils import six
 
+from django.utils import six
 try:
     from PIL import Image, ImageChops, ImageFilter
 except ImportError:
     import Image
     import ImageChops
     import ImageFilter
+
 from easy_thumbnails import utils
 
 
@@ -31,6 +33,15 @@ def _compare_entropy(start_slice, end_slice, slice, difference):
         return slice, 0
 
 
+def _points_table():
+    """
+    Iterable to map a 16 bit grayscale image to 8 bits.
+    """
+    for i in range(256):
+        for j in itertools.repeat(i, 256):
+            yield j
+
+
 def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     """
     Convert images to the correct color space.
@@ -50,6 +61,11 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
         white.
 
     """
+    if im.mode == 'I':
+        # PIL (and pillow) have can't convert 16 bit grayscale images to lower
+        # modes, so manually convert them to an 8 bit grayscale.
+        im = im.point(list(_points_table()), 'L')
+
     is_transparent = utils.is_transparent(im)
     if bw:
         if im.mode in ('L', 'LA'):
@@ -61,14 +77,6 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
 
     if im.mode in ('L', 'RGB'):
         return im
-
-    if im.mode == 'I':
-        # Indexed PNGs won't convert directly to JPEG, and will result in a
-        # fully white image when converted to RGB mode.
-        # http://stackoverflow.com/q/19892919/1203785
-        # https://bitbucket.org/effbot/pil-2009-raclette/issue/37/
-        table = [i/256 for i in range(65536)]
-        return im.point(table, 'L')
 
     if is_transparent:
         if im.mode != 'RGBA':
