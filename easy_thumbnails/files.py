@@ -403,7 +403,7 @@ class Thumbnailer(File):
                 del thumbnail_options[option]
 
         opts = ['%s' % (v is not True and '%s-%s' % (k, v) or k)
-                for k, v in sorted(thumbnail_options.items()) if v]
+                for k, v in sorted(thumbnail_options.items()) if v and not k.startswith('_')]
 
         all_opts = '_'.join(initial_opts + opts)
 
