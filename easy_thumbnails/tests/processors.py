@@ -125,6 +125,20 @@ class ScaleAndCropTest(TestCase):
         cropped = processors.scale_and_crop(image, size, crop=True)
         self.assertEqual(cropped.size, size)
 
+    def test_zoom_scale(self):
+        image = create_image(size=(2400, 3620))
+
+        size = (100, 100)
+        scaled = processors.scale_and_crop(image, size, zoom=40)
+        self.assertEqual(scaled.size, (66, 100))
+
+    def test_zoom_crop(self):
+        image = create_image(size=(2400, 3620))
+
+        size = (110, 1000)
+        cropped = processors.scale_and_crop(image, size, crop=True, zoom=40)
+        self.assertEqual(cropped.size, size)
+
 
 class ColorspaceTest(TestCase):
 

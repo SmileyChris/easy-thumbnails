@@ -21,6 +21,9 @@ HEAD
 
 * Thumbnail dimensions can now optionally be cached. Thanks David Novakovic.
 
+* New ``zoom`` option to generate a thumbnail of a source image with a
+  percentage clipped off each side.
+
 1.4
 ---
 

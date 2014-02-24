@@ -119,7 +119,7 @@ def autocrop(im, autocrop=False, **kwargs):
     return im
 
 
-def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
+def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, **kwargs):
     """
     Handle scaling and cropping the source image.
 
@@ -157,6 +157,10 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
     upscale
         Allow upscaling of the source image during scaling.
 
+    zoom
+        A percentage to zoom in on the scaled image. For example, a zoom of
+        ``40`` will clip 20% off each side of the source image before
+        thumbnailing.
     """
     source_x, source_y = [float(v) for v in im.size]
     target_x, target_y = [float(v) for v in size]
@@ -171,6 +175,13 @@ def scale_and_crop(im, size, crop=False, upscale=False, **kwargs):
         target_x = source_x * scale
     elif not target_y:
         target_y = source_y * scale
+
+    if zoom:
+        if not crop:
+            target_x = round(source_x * scale)
+            target_y = round(source_y * scale)
+            crop = True
+        scale *= (100 + int(zoom)) / 100.0
 
     if scale < 1.0 or (scale > 1.0 and upscale):
         # Resize the image to the target size boundary. Round the scaled
