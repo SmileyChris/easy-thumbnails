@@ -55,9 +55,12 @@ def save_image(image, destination=None, filename=None, **options):
     if destination is None:
         destination = BytesIO()
     filename = filename or ''
-    format = Image.EXTENSION.get(os.path.splitext(filename)[1], 'JPEG')
-    if format == 'JPEG':
+    # Ensure plugins are fully loaded so that Image.EXTENSION is populated.
+    Image.init()
+    format = Image.EXTENSION.get(os.path.splitext(filename)[1].lower(), 'JPEG')
+    if format in ('JPEG', 'WEBP'):
         options.setdefault('quality', 85)
+    if format == 'JPEG':
         try:
             image.save(destination, format=format, optimize=1, **options)
         except IOError:
