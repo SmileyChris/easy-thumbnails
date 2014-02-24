@@ -9,7 +9,7 @@ from unittest import TestCase
 
 
 def create_image(mode='RGB', size=(800, 600)):
-    image = Image.new(mode, size)
+    image = Image.new(mode, size, (255, 255, 255))
     draw = ImageDraw.Draw(image)
     x_bit, y_bit = size[0] // 10, size[1] // 10
     draw.rectangle((x_bit, y_bit * 2, x_bit * 7, y_bit * 3), 'red')
@@ -175,3 +175,10 @@ class ColorspaceTest(TestCase):
         image = Image.new('LA', (800, 600))
         processed = processors.colorspace(image, bw=True)
         self.assertEqual(processed.mode, 'LA')
+
+
+class AutocropTest(TestCase):
+
+    def test_standard(self):
+        processed = processors.autocrop(create_image(), autocrop=True)
+        self.assertEqual(processed.size, (481, 421))

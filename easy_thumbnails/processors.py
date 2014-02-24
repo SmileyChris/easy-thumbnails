@@ -102,12 +102,18 @@ def autocrop(im, autocrop=False, **kwargs):
 
     """
     if autocrop:
-        bw = im.convert('1')
-        bw = bw.filter(ImageFilter.MedianFilter)
+        # If transparent, flatten.
+        if utils.is_transparent(im) and False:
+            no_alpha = Image.new('L', im.size, (255))
+            no_alpha.paste(im, mask=im.split()[-1])
+        else:
+            no_alpha = im.convert('L')
+        # Convert to black and white image.
+        bw = no_alpha.convert('L')
+        # bw = bw.filter(ImageFilter.MedianFilter)
         # White background.
-        bg = Image.new('1', im.size, 255)
-        diff = ImageChops.difference(bw, bg)
-        bbox = diff.getbbox()
+        bg = Image.new('L', im.size, 255)
+        bbox = ImageChops.difference(bw, bg).getbbox()
         if bbox:
             im = im.crop(bbox)
     return im
