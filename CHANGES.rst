@@ -1,8 +1,8 @@
 Changes
 =======
 
-HEAD
-----
+1.5
+---
 
 * Better support for multiple source generators.
 
