@@ -285,6 +285,6 @@ def background(im, size, background=None, crop=None, replace_alpha=None,
     new_im = Image.new('RGB', size, background)
     if new_im.mode != im.mode:
         new_im.convert(im.mode)
-        offset = (size[0]-x)//2, (size[1]-y)//2
-        new_im.paste(im, offset)
+    offset = (size[0]-x)//2, (size[1]-y)//2
+    new_im.paste(im, offset)
     return new_im
