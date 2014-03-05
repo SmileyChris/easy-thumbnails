@@ -267,3 +267,24 @@ def filters(im, detail=False, sharpen=False, **kwargs):
     if sharpen:
         im = im.filter(ImageFilter.SHARPEN)
     return im
+
+
+def background(im, size, background=None, crop=None, replace_alpha=None,
+               **kwargs):
+    """
+    Add borders of a certain color to make the resized image fit exactly within
+    the dimensions given.
+
+    background
+        Background color to use
+    """
+    if not background or crop or not size[0] or not size[1]:
+        return im
+    im = colorspace(im, replace_alpha=background, **kwargs)
+    x, y = im.size
+    new_im = Image.new('RGB', size, background)
+    if new_im.mode != im.mode:
+        new_im.convert(im.mode)
+        offset = (size[0]-x)//2, (size[1]-y)//2
+        new_im.paste(im, offset)
+    return new_im

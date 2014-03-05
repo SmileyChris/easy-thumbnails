@@ -185,6 +185,7 @@ class Settings(AppSettings):
         'easy_thumbnails.processors.autocrop',
         'easy_thumbnails.processors.scale_and_crop',
         'easy_thumbnails.processors.filters',
+        'easy_thumbnails.processors.background',
     )
     """
     Defaults to::
@@ -194,6 +195,7 @@ class Settings(AppSettings):
             'easy_thumbnails.processors.autocrop',
             'easy_thumbnails.processors.scale_and_crop',
             'easy_thumbnails.processors.filters',
+            'easy_thumbnails.processors.background',
         )
 
     The :doc:`processors` through which the source image is run when you create
