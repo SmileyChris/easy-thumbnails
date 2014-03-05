@@ -4,6 +4,7 @@ from easy_thumbnails.tests.processors import (
     ScaleAndCropTest,
     ColorspaceTest,
     AutocropTest,
+    BackgroundTest,
 )
 from easy_thumbnails.tests.source_generators import PilImageTest
 from easy_thumbnails.tests.templatetags import (

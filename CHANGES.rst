@@ -24,6 +24,9 @@ HEAD
 * New ``zoom`` option to generate a thumbnail of a source image with a
   percentage clipped off each side.
 
+* New ``background`` source processor that can add a border color to ensure
+  scaled images fit within the exact dimensions given.
+
 1.4
 ---
 

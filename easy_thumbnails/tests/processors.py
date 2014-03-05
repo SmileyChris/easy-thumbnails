@@ -196,3 +196,32 @@ class AutocropTest(TestCase):
     def test_standard(self):
         processed = processors.autocrop(create_image(), autocrop=True)
         self.assertEqual(processed.size, (481, 421))
+
+
+class BackgroundTest(TestCase):
+
+    def test_basic(self):
+        image = create_image()
+        processed = processors.background(
+            image, background='#fff', size=(800, 800))
+        self.assertEqual(processed.size, (800, 800))
+
+    def test_grayscale(self):
+        image = create_image().convert('L')
+        processed = processors.background(
+            image, background='#fff', size=(800, 800))
+        self.assertEqual(processed.size, (800, 800))
+        self.assertEqual(processed.mode, 'L')
+
+    def test_mode_alpha(self):
+        image = create_image().convert('RGBA')
+        processed = processors.background(
+            image, background='#fff', size=(800, 800))
+        self.assertEqual(processed.size, (800, 800))
+        self.assertEqual(processed.mode, 'RGB')
+
+        image = create_image().convert('LA')
+        processed = processors.background(
+            image, background='#fff', size=(800, 800))
+        self.assertEqual(processed.size, (800, 800))
+        self.assertEqual(processed.mode, 'L')
