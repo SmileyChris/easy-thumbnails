@@ -1,4 +1,5 @@
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage, get_storage_class
+from django.utils.functional import LazyObject
 
 from easy_thumbnails.conf import settings
 
@@ -18,3 +19,11 @@ class ThumbnailFileSystemStorage(FileSystemStorage):
             base_url = settings.THUMBNAIL_MEDIA_URL or None
         super(ThumbnailFileSystemStorage, self).__init__(
             location, base_url, *args, **kwargs)
+
+
+class ThumbnailDefaultStorage(LazyObject):
+    def _setup(self):
+        self._wrapped = get_storage_class(
+            settings.THUMBNAIL_DEFAULT_STORAGE)()
+
+thumbnail_default_storage = ThumbnailDefaultStorage()
