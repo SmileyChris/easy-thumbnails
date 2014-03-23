@@ -337,8 +337,13 @@ class Thumbnailer(File):
         The thumbnail image is generated using the ``thumbnail_options``
         dictionary.
         """
+        orig_size = thumbnail_options['size']  # remember original size
+        # Size sanity check.
+        if orig_size == (0, 0) or min(orig_size) < 0:
+            raise exceptions.EasyThumbnailsError(
+                "The source image is an invalid size (%sx%s)" % orig_size)
+
         if high_resolution:
-            orig_size = thumbnail_options['size']  # remember original size
             thumbnail_options = thumbnail_options.copy()
             thumbnail_options['size'] = (orig_size[0] * 2, orig_size[1] * 2)
         image = engine.generate_source_image(

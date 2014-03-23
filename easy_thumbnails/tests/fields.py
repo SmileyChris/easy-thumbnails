@@ -6,7 +6,8 @@ from django.db import models
 from easy_thumbnails import test
 from easy_thumbnails.conf import settings
 from easy_thumbnails.fields import ThumbnailerField, ThumbnailerImageField
-from easy_thumbnails.exceptions import InvalidImageFormatError
+from easy_thumbnails.exceptions import (
+    InvalidImageFormatError, EasyThumbnailsError)
 
 
 class TestModel(models.Model):
@@ -49,6 +50,12 @@ class ThumbnailerFieldTest(test.BaseTest):
         instance = TestModel(avatar='avatars/invalid.jpg')
         generate = lambda: instance.avatar['small']
         self.assertRaises(InvalidImageFormatError, generate)
+
+    def test_generate_thumbnail_alias_0x0_size(self):
+        instance = TestModel(avatar='avatars/avatar.jpg')
+        self.assertRaises(
+            EasyThumbnailsError,
+            instance.avatar.generate_thumbnail, {'size': (0, 0)})
 
     def test_delete(self):
         instance = TestModel(avatar='avatars/avatar.jpg')
