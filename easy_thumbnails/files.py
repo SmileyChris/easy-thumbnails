@@ -339,7 +339,14 @@ class Thumbnailer(File):
         """
         orig_size = thumbnail_options['size']  # remember original size
         # Size sanity check.
-        if orig_size == (0, 0) or min(orig_size) < 0:
+        min_dim, max_dim = 0, 0
+        for dim in orig_size:
+            try:
+                dim = int(dim)
+            except (TypeError, ValueError):
+                continue
+            min_dim, max_dim = min(min_dim, dim), max(max_dim, dim)
+        if max_dim == 0 or min_dim < 0:
             raise exceptions.EasyThumbnailsError(
                 "The source image is an invalid size (%sx%s)" % orig_size)
 
