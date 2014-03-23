@@ -3,10 +3,9 @@ try:
 except ImportError:
     from django.utils.six import BytesIO
 from os import path
-import unittest
 
 from django.test import TestCase
-from django.utils import six
+from django.utils import six, unittest
 from easy_thumbnails import (
     files, utils, signals, test, exceptions, models, engine)
 from easy_thumbnails.conf import settings
