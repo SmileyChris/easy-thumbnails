@@ -3,6 +3,7 @@ try:
 except ImportError:
     from django.utils.six import BytesIO
 from os import path
+import unittest
 
 from django.test import TestCase
 from django.utils import six
@@ -221,6 +222,9 @@ class FilesTest(test.BaseTest):
         thumb = Image.open(hires_thumb_file)
         self.assertEqual(thumb.size, (200, 150))
 
+    @unittest.skipIf(
+        'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
+        'optimize app not installed')
     def test_postprocessor(self):
         """use a mock image optimizing post processor doing nothing"""
         settings.THUMBNAIL_OPTIMIZE_COMMAND = {
@@ -235,6 +239,9 @@ class FilesTest(test.BaseTest):
                 actual[2],
                 '^easy_thumbnails/tests/mockoptim.py [^ ]+ returned nothing$')
 
+    @unittest.skipIf(
+        'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
+        'optimize app not installed')
     def test_postprocessor_fail(self):
         """use a mock image optimizing post processor doing nothing"""
         settings.THUMBNAIL_OPTIMIZE_COMMAND = {
