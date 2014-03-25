@@ -14,6 +14,7 @@
 import os
 import sys
 from django.conf import settings
+import six.u
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -41,8 +42,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'easy-thumbnails'
-copyright = u'2009, Chris Beaven'
+project = six.u('easy-thumbnails')
+copyright = six.u('2009, Chris Beaven')
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -177,8 +178,8 @@ htmlhelp_basename = 'easy-thumbnailsdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'easy-thumbnails.tex', u'easy-thumbnails Documentation',
-     u'Chris Beaven', 'manual'),
+    ('index', 'easy-thumbnails.tex', 'easy-thumbnails Documentation',
+     'Chris Beaven', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
