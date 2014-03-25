@@ -50,7 +50,7 @@ class ScaleAndCropTest(TestCase):
         self.assertImagesEqual(x_cropped, expected)
 
         y_cropped = processors.scale_and_crop(image, (1000, 100), crop=True)
-        expected = image.crop([0, 350, 800, 450])
+        expected = image.crop([0, 250, 800, 350])
         self.assertImagesEqual(y_cropped, expected)
 
     def test_crop_corner(self):
