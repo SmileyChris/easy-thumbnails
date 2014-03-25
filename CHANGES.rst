@@ -9,6 +9,9 @@ HEAD
 * Add ``target`` option to the scale_and_crop processor, allowing for image
   focal points when cropping (or zooming) an image.
 
+* Add a THUMBNAIL_NAMER option which takes a function used to customize
+  the thumbnail filename.
+
 1.5
 ---
 

@@ -180,6 +180,33 @@ class Settings(AppSettings):
     The type of image to save thumbnails with a transparency layer (e.g. GIFs
     or transparent PNGs).
     """
+    THUMBNAIL_NAMER = 'easy_thumbnails.namers.default'
+    """
+    The function used to generate the filename for thumbnail images.
+
+    Three namers are included in easy_thumbnails:
+
+    ``easy_thumbnails.namers.default``
+        Descriptive filename containing the source and options like
+        ``source.jpg.100x100_q80_crop_upscale.jpg``.
+
+    ``easy_thumbnails.namers.hashed``
+        Short hashed filename like ``1xedFtqllFo9.jpg``.
+
+    ``easy_thumbnails.namers.source_hashed``
+        Filename with source hashed, size, then options hashed like
+        ``1xedFtqllFo9_100x100_QHCa6G1l.jpg``.
+
+    To write a custom namer, always catch all other keyword arguments arguments
+    (with \*\*kwargs). You have access to the following arguments:
+    ``thumbnailer``, ``source_filename``, ``thumbnail_extension`` (does *not*
+    include the ``'.'``), ``thumbnail_options``, ``prepared_options``.
+
+    The ``thumbnail_options`` are a copy of the options dictionary used to
+    build the thumbnail, ``prepared_options`` is a list of options prepared as
+    text, and excluding options that shouldn't be included in the filename.
+    """
+
     THUMBNAIL_PROCESSORS = (
         'easy_thumbnails.processors.colorspace',
         'easy_thumbnails.processors.autocrop',
@@ -214,6 +241,7 @@ class Settings(AppSettings):
     The order of the processors is the order in which they are sequentially
     tried.
     """
+
     THUMBNAIL_CHECK_CACHE_MISS = False
     """
     If this boolean setting is set to ``True``, and a thumbnail cannot

@@ -313,7 +313,8 @@ class Thumbnailer(File):
         for default in (
                 'basedir', 'subdir', 'prefix', 'quality', 'extension',
                 'preserve_extensions', 'transparency_extension',
-                'check_cache_miss', 'high_resolution', 'highres_infix'):
+                'check_cache_miss', 'high_resolution', 'highres_infix',
+                'namer'):
             attr_name = 'thumbnail_%s' % default
             if getattr(self, attr_name, None) is None:
                 value = getattr(settings, attr_name.upper())
@@ -393,7 +394,6 @@ class Thumbnailer(File):
         """
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
-        filename = '%s%s' % (self.thumbnail_prefix, source_filename)
         preserve_extensions = self.thumbnail_preserve_extensions
         if preserve_extensions and (
                 preserve_extensions is True or
@@ -405,43 +405,49 @@ class Thumbnailer(File):
             extension = self.thumbnail_extension
         extension = extension or 'jpg'
 
-        thumbnail_options = thumbnail_options.copy()
-        size = thumbnail_options.pop('size')
-        quality = thumbnail_options.pop('quality', self.thumbnail_quality)
-        all_opts = ['%sx%s' % tuple(size), 'q%s' % quality]
+        prepared_opts = [
+            '%sx%s' % tuple(thumbnail_options['size']),
+            'q%s' % thumbnail_options.get('quality', self.thumbnail_quality),
+        ]
 
         for key, value in sorted(thumbnail_options.items()):
             if key == key.upper():
                 # Uppercase options don't alter the filename.
                 continue
-            if not value:
+            if not value or key in ('size', 'quality'):
                 continue
             if value is True:
-                all_opts.append(key)
+                prepared_opts.append(key)
                 continue
             if not isinstance(value, six.string_types):
                 try:
                     value = ','.join([six.text_type(item) for item in value])
                 except TypeError:
-                    value = six.string_type(value)
-            all_opts.append('%s-%s' % (key, value))
+                    value = six.text_type(value)
+            prepared_opts.append('%s-%s' % (key, value))
 
-        opts_text = '_'.join(all_opts)
+        opts_text = '_'.join(prepared_opts)
 
         data = {'opts': opts_text}
         basedir = self.thumbnail_basedir % data
         subdir = self.thumbnail_subdir % data
 
-        filename_parts = [filename]
-        if ('%(opts)s' in self.thumbnail_basedir or
-                '%(opts)s' in self.thumbnail_subdir):
-            if extension != source_extension:
-                filename_parts.append(extension)
+        if isinstance(self.thumbnail_namer, six.string_types):
+            namer_func = utils.dynamic_import(self.thumbnail_namer)
         else:
-            filename_parts += [opts_text, extension]
+            namer_func = self.thumbnail_namer
+        filename = namer_func(
+            thumbnailer=self,
+            source_filename=source_filename,
+            thumbnail_extension=extension,
+            # Copy thumbnail_options so the func can mess with it safely.
+            thumbnail_options=thumbnail_options.copy(),
+            prepared_options=prepared_opts,
+        )
         if high_resolution:
-            filename_parts[-2] += self.thumbnail_highres_infix
-        filename = '.'.join(filename_parts)
+            filename = self.thumbnail_highres_infix.join(
+                os.path.splitext(filename))
+        filename = '%s%s' % (self.thumbnail_prefix, filename)
 
         return os.path.join(basedir, path, subdir, filename)
 
