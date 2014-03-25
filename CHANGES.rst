@@ -6,6 +6,9 @@ HEAD
 
 * Make ThumbnailerImageField.resize_source reflect change in extension.
 
+* Add ``target`` option to the scale_and_crop processor, allowing for image
+  focal points when cropping (or zooming) an image.
+
 1.5
 ---
 
