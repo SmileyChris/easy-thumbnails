@@ -722,5 +722,11 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
             if not 'quality' in options:
                 options['quality'] = self.thumbnail_quality
             content = Thumbnailer(content, name).generate_thumbnail(options)
+            # If the generated extension differs from the original, use it
+            # instead.
+            orig_name, ext = os.path.splitext(name)
+            generated_ext = os.path.splitext(content.name)[1]
+            if generated_ext.lower() != ext.lower():
+                name = orig_name + generated_ext
         super(ThumbnailerImageFieldFile, self).save(name, content, *args,
                                                     **kwargs)

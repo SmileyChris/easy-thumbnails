@@ -1,6 +1,11 @@
 Changes
 =======
 
+HEAD
+----
+
+* Make ThumbnailerImageField.resize_source reflect change in extension.
+
 1.5
 ---
 
