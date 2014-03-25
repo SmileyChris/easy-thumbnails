@@ -164,13 +164,18 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
         thumbnailing.
 
     target
-        Set the focal point for the image if it needs to be cropped (defaults
-        to ``'50,50'``).
+        Set the focal point as a percentage for the image if it needs to be
+        cropped (defaults to ``(50, 50)``).
 
         For example, ``target="10,20"`` will set the focal point as 10% and 20%
         from the left and top of the image, respectively. If the image needs to
         be cropped, it will trim off the right and bottom edges until the focal
         point is centered.
+
+        Can either be set as a two-item tuple such as ``(20, 30)`` or a comma
+        separated string such as ``"20,10"``.
+
+        A null value such as ``(20, None)`` or ``",60"`` will default to 50%.
     """
     source_x, source_y = [float(v) for v in im.size]
     target_x, target_y = [int(v) for v in size]
@@ -207,10 +212,12 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
         diff_x = int(source_x - min(source_x, target_x))
         diff_y = int(source_y - min(source_y, target_y))
         if crop != 'scale' and (diff_x or diff_y):
-            target = (isinstance(target, six.string_types) and
-                      re.match(r'(\d+)?,(\d+)?$', target))
+            if isinstance(target, six.string_types):
+                target = re.match(r'(\d+)?,(\d+)?$', target)
+                if target:
+                    target = target.groups()
             if target:
-                focal_point = [int(n) if n else 50 for n in target.groups()]
+                focal_point = [int(n) if (n or n == 0) else 50 for n in target]
             else:
                 focal_point = 50, 50
             # Crop around the focal point

@@ -143,7 +143,7 @@ class ScaleAndCropTest(TestCase):
         image = create_image()
 
         # Try bottom right target.
-        target = '95,95'
+        target = (95, 100)
 
         tl_crop = processors.scale_and_crop(
             image, size=(100, 600), crop=True, target=target)
@@ -156,7 +156,7 @@ class ScaleAndCropTest(TestCase):
         self.assertImagesEqual(tl_crop, expected)
 
         # Top left target.
-        target = '5,5'
+        target = (0, 5)
 
         tl_crop = processors.scale_and_crop(
             image, size=(100, 600), crop=True, target=target)
@@ -168,6 +168,8 @@ class ScaleAndCropTest(TestCase):
         expected = image.crop([0, 0, 800, 100])
         self.assertImagesEqual(tl_crop, expected)
 
+    def test_crop_target_text(self):
+        image = create_image()
         # Near centre target.
         target = '45,55'
 

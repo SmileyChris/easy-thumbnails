@@ -406,20 +406,29 @@ class Thumbnailer(File):
         extension = extension or 'jpg'
 
         thumbnail_options = thumbnail_options.copy()
-        size = tuple(thumbnail_options.pop('size'))
+        size = thumbnail_options.pop('size')
         quality = thumbnail_options.pop('quality', self.thumbnail_quality)
-        initial_opts = ['%sx%s' % size, 'q%s' % quality]
-        # Uppercase options don't alter the filename.
-        for option in list(thumbnail_options):
-            if option == option.upper():
-                del thumbnail_options[option]
+        all_opts = ['%sx%s' % tuple(size), 'q%s' % quality]
 
-        opts = ['%s' % (v is not True and '%s-%s' % (k, v) or k)
-                for k, v in sorted(thumbnail_options.items()) if v]
+        for key, value in sorted(thumbnail_options.items()):
+            if key == key.upper():
+                # Uppercase options don't alter the filename.
+                continue
+            if not value:
+                continue
+            if value is True:
+                all_opts.append(key)
+                continue
+            if not isinstance(value, six.string_types):
+                try:
+                    value = ','.join([six.text_type(item) for item in value])
+                except TypeError:
+                    value = six.string_type(value)
+            all_opts.append('%s-%s' % (key, value))
 
-        all_opts = '_'.join(initial_opts + opts)
+        opts_text = '_'.join(all_opts)
 
-        data = {'opts': all_opts}
+        data = {'opts': opts_text}
         basedir = self.thumbnail_basedir % data
         subdir = self.thumbnail_subdir % data
 
@@ -429,7 +438,7 @@ class Thumbnailer(File):
             if extension != source_extension:
                 filename_parts.append(extension)
         else:
-            filename_parts += [all_opts, extension]
+            filename_parts += [opts_text, extension]
         if high_resolution:
             filename_parts[-2] += self.thumbnail_highres_infix
         filename = '.'.join(filename_parts)
