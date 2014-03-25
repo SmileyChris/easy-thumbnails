@@ -139,6 +139,48 @@ class ScaleAndCropTest(TestCase):
         cropped = processors.scale_and_crop(image, size, crop=True, zoom=40)
         self.assertEqual(cropped.size, size)
 
+    def test_crop_target(self):
+        image = create_image()
+
+        # Try bottom right target.
+        target = '95,95'
+
+        tl_crop = processors.scale_and_crop(
+            image, size=(100, 600), crop=True, target=target)
+        expected = image.crop([700, 0, 800, 600])
+        self.assertImagesEqual(tl_crop, expected)
+
+        tl_crop = processors.scale_and_crop(
+            image, size=(800, 100), crop=True, target=target)
+        expected = image.crop([0, 500, 800, 600])
+        self.assertImagesEqual(tl_crop, expected)
+
+        # Top left target.
+        target = '5,5'
+
+        tl_crop = processors.scale_and_crop(
+            image, size=(100, 600), crop=True, target=target)
+        expected = image.crop([0, 0, 100, 600])
+        self.assertImagesEqual(tl_crop, expected)
+
+        tl_crop = processors.scale_and_crop(
+            image, size=(800, 100), crop=True, target=target)
+        expected = image.crop([0, 0, 800, 100])
+        self.assertImagesEqual(tl_crop, expected)
+
+        # Near centre target.
+        target = '45,55'
+
+        tl_crop = processors.scale_and_crop(
+            image, size=(100, 600), crop=True, target=target)
+        expected = image.crop([310, 0, 410, 600])
+        self.assertImagesEqual(tl_crop, expected)
+
+        tl_crop = processors.scale_and_crop(
+            image, size=(800, 100), crop=True, target=target)
+        expected = image.crop([0, 280, 800, 380])
+        self.assertImagesEqual(tl_crop, expected)
+
 
 class ColorspaceTest(TestCase):
 
