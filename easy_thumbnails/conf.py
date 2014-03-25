@@ -248,7 +248,7 @@ class Settings(AppSettings):
     displays.
 
     This can be overridden at a per-thumbnail level with the
-    ``HIGH_RESOLUTION``thumbnail option::
+    ``HIGH_RESOLUTION`` thumbnail option::
 
         opts = {'size': (100, 100), 'crop': True, HIGH_RESOLUTION: False}
         only_basic = get_thumbnailer(obj.image).get_thumbnail(opts)
