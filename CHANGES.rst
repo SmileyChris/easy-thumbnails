@@ -12,6 +12,9 @@ HEAD
 * Add a THUMBNAIL_NAMER option which takes a function used to customize
   the thumbnail filename.
 
+* New ``subsampling`` option to reduce color subsampling of JPEG images,
+  providing sharper color borders for a small increase in file size.
+
 1.5
 ---
 

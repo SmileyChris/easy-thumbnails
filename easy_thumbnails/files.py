@@ -14,6 +14,7 @@ from django.utils import timezone
 from easy_thumbnails import engine, exceptions, models, utils, signals
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
+from easy_thumbnails.options import ThumbnailOptions
 
 
 def get_thumbnailer(obj, relative_name=None):
@@ -153,6 +154,10 @@ class ThumbnailFile(ImageFieldFile):
         del self.field
         if file:
             self.file = file
+        if thumbnail_options is None:
+            thumbnail_options = ThumbnailOptions()
+        elif not isinstance(thumbnail_options, ThumbnailOptions):
+            thumbnail_options = ThumbnailOptions(thumbnail_options)
         self.thumbnail_options = thumbnail_options
 
     def save(self, *args, **kwargs):
@@ -330,6 +335,21 @@ class Thumbnailer(File):
             raise KeyError(alias)
         return self.get_thumbnail(options, silent_template_exception=True)
 
+    def get_options(self, thumbnail_options, **kwargs):
+        """
+        Get the thumbnail options that includes the default options for this
+        thumbnailer (and the project-wide default options).
+        """
+        if isinstance(thumbnail_options, ThumbnailOptions):
+            return thumbnail_options
+        args = []
+        if thumbnail_options is not None:
+            args.append(thumbnail_options)
+        opts = ThumbnailOptions(*args, **kwargs)
+        if 'quality' not in thumbnail_options:
+            opts['quality'] = self.thumbnail_quality
+        return opts
+
     def generate_thumbnail(self, thumbnail_options, high_resolution=False,
                            silent_template_exception=False):
         """
@@ -338,6 +358,7 @@ class Thumbnailer(File):
         The thumbnail image is generated using the ``thumbnail_options``
         dictionary.
         """
+        thumbnail_options = self.get_options(thumbnail_options)
         orig_size = thumbnail_options['size']  # remember original size
         # Size sanity check.
         min_dim, max_dim = 0, 0
@@ -352,7 +373,6 @@ class Thumbnailer(File):
                 "The source image is an invalid size (%sx%s)" % orig_size)
 
         if high_resolution:
-            thumbnail_options = thumbnail_options.copy()
             thumbnail_options['size'] = (orig_size[0] * 2, orig_size[1] * 2)
         image = engine.generate_source_image(
             self, thumbnail_options, self.source_generators,
@@ -363,8 +383,6 @@ class Thumbnailer(File):
 
         thumbnail_image = engine.process_image(image, thumbnail_options,
                                                self.thumbnail_processors)
-        quality = thumbnail_options.get('quality', self.thumbnail_quality)
-
         if high_resolution:
             thumbnail_options['size'] = orig_size  # restore original size
 
@@ -372,9 +390,12 @@ class Thumbnailer(File):
             thumbnail_options,
             transparent=utils.is_transparent(thumbnail_image),
             high_resolution=high_resolution)
+        quality = thumbnail_options['quality']
+        subsampling = thumbnail_options['subsampling']
 
         img = engine.save_image(
-            thumbnail_image, filename=filename, quality=quality)
+            thumbnail_image, filename=filename, quality=quality,
+            subsampling=subsampling)
         data = img.read()
 
         thumbnail = ThumbnailFile(
@@ -392,6 +413,7 @@ class Thumbnailer(File):
         dictionary and ``source_name`` (which defaults to the File's ``name``
         if not provided).
         """
+        thumbnail_options = self.get_options(thumbnail_options)
         path, source_filename = os.path.split(self.name)
         source_extension = os.path.splitext(source_filename)[1][1:]
         preserve_extensions = self.thumbnail_preserve_extensions
@@ -405,27 +427,7 @@ class Thumbnailer(File):
             extension = self.thumbnail_extension
         extension = extension or 'jpg'
 
-        prepared_opts = [
-            '%sx%s' % tuple(thumbnail_options['size']),
-            'q%s' % thumbnail_options.get('quality', self.thumbnail_quality),
-        ]
-
-        for key, value in sorted(thumbnail_options.items()):
-            if key == key.upper():
-                # Uppercase options don't alter the filename.
-                continue
-            if not value or key in ('size', 'quality'):
-                continue
-            if value is True:
-                prepared_opts.append(key)
-                continue
-            if not isinstance(value, six.string_types):
-                try:
-                    value = ','.join([six.text_type(item) for item in value])
-                except TypeError:
-                    value = six.text_type(value)
-            prepared_opts.append('%s-%s' % (key, value))
-
+        prepared_opts = thumbnail_options.prepared_options()
         opts_text = '_'.join(prepared_opts)
 
         data = {'opts': opts_text}
@@ -440,8 +442,7 @@ class Thumbnailer(File):
             thumbnailer=self,
             source_filename=source_filename,
             thumbnail_extension=extension,
-            # Copy thumbnail_options so the func can mess with it safely.
-            thumbnail_options=thumbnail_options.copy(),
+            thumbnail_options=thumbnail_options,
             prepared_options=prepared_opts,
         )
         if high_resolution:
@@ -456,6 +457,7 @@ class Thumbnailer(File):
         Return a ``ThumbnailFile`` containing an existing thumbnail for a set
         of thumbnail options, or ``None`` if not found.
         """
+        thumbnail_options = self.get_options(thumbnail_options)
         names = [
             self.get_thumbnail_name(
                 thumbnail_options, transparent=False,
@@ -497,6 +499,7 @@ class Thumbnailer(File):
         dictionary. If the ``save`` argument is ``True`` (default), the
         generated thumbnail will be saved too.
         """
+        thumbnail_options = self.get_options(thumbnail_options)
         if generate is None:
             generate = self.generate
 

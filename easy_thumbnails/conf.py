@@ -155,6 +155,7 @@ class Settings(AppSettings):
     (best). Technically, values up to 100 are allowed, but this is not
     recommended.
     """
+
     THUMBNAIL_EXTENSION = 'jpg'
     """
     The type of image to save thumbnails with no transparency layer as.

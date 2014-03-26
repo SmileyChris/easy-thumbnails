@@ -9,6 +9,7 @@ from django.utils import six, unittest
 from easy_thumbnails import (
     files, utils, signals, test, exceptions, models, engine)
 from easy_thumbnails.conf import settings
+from easy_thumbnails.options import ThumbnailOptions
 try:
     from PIL import Image
 except ImportError:
@@ -194,6 +195,40 @@ class FilesTest(test.BaseTest):
         thumb = Image.open(hires_thumb_file)
         self.assertEqual(thumb.size, (200, 150))
 
+    def test_subsampling(self):
+        samplings = {
+            0: (1, 1, 1, 1, 1, 1),
+            1: (2, 1, 1, 1, 1, 1),
+            2: (2, 2, 1, 1, 1, 1),
+        }
+        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        im = Image.open(thumb.path)
+        self.assertNotIn('ss', thumb.name)
+        sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
+        self.assertEqual(sampling, samplings[2])
+
+        thumb = self.ext_thumbnailer.get_thumbnail(
+            {'size': (100, 100), 'subsampling': 1})
+        im = Image.open(thumb.path)
+        self.assertIn('ss1', thumb.name)
+        sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
+        self.assertEqual(sampling, samplings[1])
+
+        thumb = self.ext_thumbnailer.get_thumbnail(
+            {'size': (100, 100), 'subsampling': 0})
+        im = Image.open(thumb.path)
+        self.assertIn('ss0', thumb.name)
+        sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
+        self.assertEqual(sampling, samplings[0])
+
+    def test_default_subsampling(self):
+        settings.THUMBNAIL_DEFAULT_OPTIONS = {'subsampling': 1}
+        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        im = Image.open(thumb.path)
+        self.assertIn('ss1', thumb.name)
+        sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
+        self.assertEqual(sampling, (2, 1, 1, 1, 1, 1))
+
     def test_high_resolution_force_off(self):
         self.ext_thumbnailer.thumbnail_high_resolution = True
         thumb = self.ext_thumbnailer.get_thumbnail(
@@ -264,7 +299,7 @@ class FilesTest(test.BaseTest):
     def test_thumbnailfile_options(self):
         opts = {'size': (50, 50), 'crop': True, 'upscale': True}
         thumb = self.thumbnailer.get_thumbnail(opts)
-        self.assertEqual(thumb.thumbnail_options, opts)
+        self.assertEqual(thumb.thumbnail_options, ThumbnailOptions(opts))
 
     def test_get_thumbnail_name(self):
         opts = {
@@ -388,7 +423,8 @@ class FilesTest(test.BaseTest):
             options = {'size': (10, 20)}
             thumb = self.thumbnailer.get_thumbnail(options, generate=False)
             self.assertEqual(thumb, None)
-            self.assertEqual(self.thumbnailer.missed_signal, options)
+            self.assertEqual(
+                self.thumbnailer.missed_signal, ThumbnailOptions(options))
         finally:
             signals.thumbnail_created.disconnect(signal_handler)
 
