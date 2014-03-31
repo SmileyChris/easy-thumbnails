@@ -14,7 +14,10 @@ try:
     from PIL import Image
 except ImportError:
     import Image
-from testfixtures import LogCapture
+try:
+    from testfixtures import LogCapture
+except ImportError:
+    LogCapture = None
 
 
 class FilesTest(test.BaseTest):
@@ -259,6 +262,7 @@ class FilesTest(test.BaseTest):
     @unittest.skipIf(
         'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
         'optimize app not installed')
+    @unittest.skipIf(LogCapture is None, 'testfixtures not installed')
     def test_postprocessor(self):
         """use a mock image optimizing post processor doing nothing"""
         settings.THUMBNAIL_OPTIMIZE_COMMAND = {
@@ -276,6 +280,7 @@ class FilesTest(test.BaseTest):
     @unittest.skipIf(
         'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
         'optimize app not installed')
+    @unittest.skipIf(LogCapture is None, 'testfixtures not installed')
     def test_postprocessor_fail(self):
         """use a mock image optimizing post processor doing nothing"""
         settings.THUMBNAIL_OPTIMIZE_COMMAND = {
