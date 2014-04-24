@@ -15,6 +15,9 @@ HEAD
 * New ``subsampling`` option to reduce color subsampling of JPEG images,
   providing sharper color borders for a small increase in file size.
 
+* Reimplementation of the ``thumbnail_cleanup`` command. Thanks Jørgen
+  Abrahamsen
+
 1.5
 ---
 
