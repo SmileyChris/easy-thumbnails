@@ -1,6 +1,11 @@
 Changes
 =======
 
+2.0.1 (2014-04-26)
+------------------
+
+* Fix packaging issue with old south migrations.
+
 2.0 (2014-04-25)
 ----------------
 
