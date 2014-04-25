@@ -2,11 +2,13 @@
 Easy Thumbnails
 ===============
 
+.. raw:: html
 
-.. image:: https://travis-ci.org/SmileyChris/easy-thumbnails.png?branch=master
-    :alt: Build Status
-    :target: https://travis-ci.org/SmileyChris/easy-thumbnails
-
+   <p>
+     <a href="https://travis-ci.org/SmileyChris/easy-thumbnails" >
+       <img src="https://travis-ci.org/SmileyChris/easy-thumbnails.png?branch=master" alt="Build Status"/>
+     </a>
+   </p>
 
 This documentation covers the |version| release of easy-thumbnails, a
 thumbnailing application for Django which is easy to use and customize.
