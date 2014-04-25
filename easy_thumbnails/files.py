@@ -128,7 +128,9 @@ class FakeField(object):
     name = 'fake'
 
     def __init__(self, storage=None):
-        self.storage = storage or default_storage
+        if storage is None:
+            storage = default_storage
+        self.storage = storage
 
     def generate_filename(self, instance, name, *args, **kwargs):
         return name
@@ -303,9 +305,12 @@ class Thumbnailer(File):
                  thumbnail_storage=None, remote_source=False, generate=True,
                  *args, **kwargs):
         super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
-        self.source_storage = source_storage or default_storage
-        self.thumbnail_storage = (
-            thumbnail_storage or storage.thumbnail_default_storage)
+        if source_storage is None:
+            source_storage = default_storage
+        self.source_storage = source_storage
+        if thumbnail_storage is None:
+            thumbnail_storage = storage.thumbnail_default_storage
+        self.thumbnail_storage = thumbnail_storage
         self.remote_source = remote_source
         self.alias_target = None
         self.generate = generate
