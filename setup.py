@@ -19,7 +19,7 @@ def read_files(*filenames):
 
 setup(
     name='easy-thumbnails',
-    version=easy_thumbnails.VERSION,
+    version=easy_thumbnails.get_version(),
     url='http://github.com/SmileyChris/easy-thumbnails',
     description='Easy thumbnails for Django',
     long_description=read_files('README.rst', 'CHANGES.rst'),
