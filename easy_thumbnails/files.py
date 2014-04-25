@@ -11,11 +11,10 @@ from django.utils.safestring import mark_safe
 from django.utils.html import escape
 from django.utils import timezone
 
-from easy_thumbnails import engine, exceptions, models, utils, signals
+from easy_thumbnails import engine, exceptions, models, utils, signals, storage
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
-from easy_thumbnails.storage import thumbnail_default_storage
 
 
 def get_thumbnailer(obj, relative_name=None):
@@ -305,7 +304,8 @@ class Thumbnailer(File):
                  *args, **kwargs):
         super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
         self.source_storage = source_storage or default_storage
-        self.thumbnail_storage = thumbnail_storage or thumbnail_default_storage
+        self.thumbnail_storage = (
+            thumbnail_storage or storage.thumbnail_default_storage)
         self.remote_source = remote_source
         self.alias_target = None
         self.generate = generate
