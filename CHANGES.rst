@@ -1,8 +1,11 @@
 Changes
 =======
 
-HEAD
-----
+2.0 (2014-04-25)
+----------------
+
+* Use Django 1.7 migrations. Thanks Trey Hunner.
+  **Note**: if using South, read the usage docs for required settings changes.
 
 * Make ThumbnailerImageField.resize_source reflect change in extension.
 
@@ -18,8 +21,10 @@ HEAD
 * Reimplementation of the ``thumbnail_cleanup`` command. Thanks Jørgen
   Abrahamsen
 
-1.5
----
+* More efficient thumbnail default storage. Thanks Sandip Agarwal.
+
+1.5 (2014-03-05)
+----------------
 
 * Better support for multiple source generators.
 
@@ -44,8 +49,8 @@ HEAD
 * New ``background`` source processor that can add a border color to ensure
   scaled images fit within the exact dimensions given.
 
-1.4
----
+1.4 (2013-09-23)
+----------------
 
 * Considerable speed up for remote storages by reducing queries.
   Brent O'Connor spent a lot of time debugging this, so thank you epicserve!
@@ -59,8 +64,8 @@ HEAD
 
 * Fixes Python 2.5 compatibility.
 
-1.3
----
+1.3 (2013-06-17)
+----------------
 
 * Some more Django 1.5 fixes.
 
@@ -69,15 +74,15 @@ HEAD
 * Add the ability to generate retina quality thumbnails in addition to the
   standard ones (off by default).
 
-1.2
----
+1.2 (2013-01-23)
+----------------
 
 * Django 1.5 compatibility.
 
 * Fixed a problem with the ``ImageClearableFileInput`` widget.
 
-1.1
----
+1.1 (2012-08-29)
+----------------
 
 * Added a way to avoid generating thumbnails if they don't exist already (with
   a signal to deal with them elsewhere).
@@ -85,26 +90,26 @@ HEAD
 * Added a ``thumbnailer_passive`` filter to allow templates to use the
   non-generating thumbnails functionality when dealing with aliases.
 
-1.0.3
------
+1.0.3 (2012-05-30)
+------------------
 
 * Changed the exception to catch from 1.0.2 to IOError.
 
-1.0.2
------
+1.0.2 (2012-05-29)
+------------------
 
 * Catch an OSError exception when trying to get the EXIF data of a touchy
   image.
 
-1.0.1
------
+1.0.1 (2012-05-23)
+------------------
 
 * Fix a Django 1.2 backwards incompatibility in ``easy_thumbnails.conf``
 
 * Introduced a ``thumbnail_created`` signal.
 
-1.0
----
+1.0 (2012-05-07)
+----------------
 
 * Introduction of aliased thumbnails.
 
