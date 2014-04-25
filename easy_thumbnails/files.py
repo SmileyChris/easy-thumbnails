@@ -3,7 +3,7 @@ from django.utils import six
 
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import (
-    get_storage_class, default_storage, Storage)
+    default_storage, Storage)
 from django.db.models.fields.files import ImageFieldFile, FieldFile
 from django.core.files.images import get_image_dimensions
 
@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from django.utils.html import escape
 from django.utils import timezone
 
-from easy_thumbnails import engine, exceptions, models, utils, signals
+from easy_thumbnails import engine, exceptions, models, utils, signals, storage
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
@@ -128,7 +128,9 @@ class FakeField(object):
     name = 'fake'
 
     def __init__(self, storage=None):
-        self.storage = storage or default_storage
+        if storage is None:
+            storage = default_storage
+        self.storage = storage
 
     def generate_filename(self, instance, name, *args, **kwargs):
         return name
@@ -303,10 +305,11 @@ class Thumbnailer(File):
                  thumbnail_storage=None, remote_source=False, generate=True,
                  *args, **kwargs):
         super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
-        self.source_storage = source_storage or default_storage
-        if not thumbnail_storage:
-            thumbnail_storage = get_storage_class(
-                settings.THUMBNAIL_DEFAULT_STORAGE)()
+        if source_storage is None:
+            source_storage = default_storage
+        self.source_storage = source_storage
+        if thumbnail_storage is None:
+            thumbnail_storage = storage.thumbnail_default_storage
         self.thumbnail_storage = thumbnail_storage
         self.remote_source = remote_source
         self.alias_target = None
