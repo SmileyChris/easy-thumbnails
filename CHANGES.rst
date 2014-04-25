@@ -5,7 +5,8 @@ Changes
 ----------------
 
 * Use Django 1.7 migrations. Thanks Trey Hunner.
-  **Note**: if using South, read the usage docs for required settings changes.
+  **Note**: if using South, read the installation docs for required settings
+  changes.
 
 * Make ThumbnailerImageField.resize_source reflect change in extension.
 
