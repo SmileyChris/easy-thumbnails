@@ -26,4 +26,5 @@ class ThumbnailDefaultStorage(LazyObject):
         self._wrapped = get_storage_class(
             settings.THUMBNAIL_DEFAULT_STORAGE)()
 
+
 thumbnail_default_storage = ThumbnailDefaultStorage()

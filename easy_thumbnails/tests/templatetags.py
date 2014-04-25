@@ -4,9 +4,9 @@ try:
 except ImportError:
     import Image
 
-from django.core.files import storage
+from django.core.files import storage as django_storage
 
-from easy_thumbnails import test, alias
+from easy_thumbnails import test, alias, storage
 from easy_thumbnails.conf import settings
 from easy_thumbnails.files import get_thumbnailer
 
@@ -212,12 +212,15 @@ class ThumbnailerBase(Base):
         }
         alias.aliases.populate_from_settings()
         # Make the temporary storage location the default storage for now.
-        self._old_default_storage = storage.default_storage._wrapped
-        storage.default_storage._wrapped = self.storage
+        self._old_default_storage = django_storage.default_storage._wrapped
+        django_storage.default_storage._wrapped = self.storage
+        self._old_thumbnail_default_storage = storage.thumbnail_default_storage
+        storage.thumbnail_default_storage = self.storage
 
     def tearDown(self):
         # Put the default storage back how we found it.
-        storage.default_storage._wrapped = self._old_default_storage
+        storage.thumbnail_default_storage = self._old_thumbnail_default_storage
+        django_storage.default_storage._wrapped = self._old_default_storage
         super(ThumbnailerBase, self).tearDown()
         # Repopulate the aliases (setting reverted by super)
         alias.aliases.populate_from_settings()
