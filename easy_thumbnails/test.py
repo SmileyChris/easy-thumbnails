@@ -4,7 +4,13 @@ try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
     from django.utils.six import BytesIO
+try:
+    from unittest import skipUnless
+except ImportError:  # Python 2.6
+    from django.utils.unittest import skipUnless
 
+import django
+from django.core.exceptions import ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
@@ -129,3 +135,13 @@ class BaseTest(TestCase):
             return data
         image_file = ContentFile(data.read())
         return storage.save(filename, image_file)
+
+
+class SouthSupportTest(TestCase):
+    @skipUnless(django.VERSION < (1, 7), "test only applies to 1.6 and below")
+    def test_import_migrations_module(self):
+        try:
+            from easy_thumbnails.migrations import __doc__  # noqa
+        except ImproperlyConfigured as e:
+            exception = e
+        self.assertIn("SOUTH_MIGRATION_MODULES", exception.args[0])
