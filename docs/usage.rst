@@ -40,6 +40,10 @@ Other options are only provided if the given functionality is required:
    
 - ``quality=<N>`` where N is an integer between 1 and 100 specifying output
   JPEG quality. The default is 85.
+- ``subsampling=<N>`` sets the JPEG color subsampling level where N is:
+    - ``2`` is 4:1:1 (both easy-thumbnails and PIL's default)
+    - ``1`` is 4:2:2 (slightly crisper color borders, small increase in size)
+    - ``0`` is 4:4:4 (very crisp color borders, ~15% increase in size)
 - ``autocrop`` removes any unnecessary whitespace from the edges of the source
   image.
 - ``bw`` converts the image to grayscale.
@@ -62,6 +66,11 @@ Other options are only provided if the given functionality is required:
 For a complete and detailed list of options, see the :doc:`ref/processors`
 reference documentation.
 
+To change a default options level, add it to the
+:attr:`~easy_thumbnails.conf.Settings.DEFAULT_OPTIONS` setting. Be aware that
+this will change the filename for thumbnails, so existing thumbnails which
+don't explicitly specify the new default option will have a new filename (and
+therefore be regenerated).
 
 .. _thumbnail-aliases:
 

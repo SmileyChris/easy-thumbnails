@@ -98,6 +98,16 @@ class ThumbnailNode(Node):
                     raise TemplateSyntaxError(
                         "%r is an invalid quality." % opts['quality'])
                 return self.bail_out(context)
+        # Ensure the subsampling level is an integer.
+        if 'subsampling' in opts:
+            try:
+                opts['subsampling'] = int(opts['subsampling'])
+            except (TypeError, ValueError):
+                if raise_errors:
+                    raise TemplateSyntaxError(
+                        "%r is an invalid subsampling level." %
+                        opts['subsampling'])
+                return self.bail_out(context)
 
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)

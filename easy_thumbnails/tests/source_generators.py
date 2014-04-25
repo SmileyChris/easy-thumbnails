@@ -53,13 +53,18 @@ class PilImageTest(test.BaseTest):
 
     def test_nearly_image(self):
         """
-        Broken images raise an exception.
+        Truncated images *don't* raise an exception if they can still be read.
         """
         data = self.create_image(None, None)
+        reference = source_generators.pil_image(data)
+        data.seek(0)
         trunc_data = BytesIO()
         trunc_data.write(data.read()[:-10])
         trunc_data.seek(0)
-        self.assertRaises(IOError, source_generators.pil_image, data)
+        im = source_generators.pil_image(trunc_data)
+        # im will be truncated, but it should be the same dimensions.
+        self.assertEqual(im.size, reference.size)
+        # self.assertRaises(IOError, source_generators.pil_image, trunc_data)
 
     def test_exif_orientation(self):
         """

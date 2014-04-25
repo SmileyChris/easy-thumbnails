@@ -21,3 +21,8 @@ from easy_thumbnails.tests.aliases import (
     GenerationTest,
     GlobalGenerationTest,
 )
+from easy_thumbnails.tests.namers import (
+    Default,
+    Hashed,
+    SourceHashed,
+)

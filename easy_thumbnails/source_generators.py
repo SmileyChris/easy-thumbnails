@@ -30,8 +30,14 @@ def pil_image(source, exif_orientation=True, **options):
     source = BytesIO(source.read())
 
     image = Image.open(source)
-    # Fully load the image now to catch any problems with the image
-    # contents.
+    # Fully load the image now to catch any problems with the image contents.
+    try:
+        # An "Image file truncated" exception can occur for some images that
+        # are still mostly valid -- we'll swallow the exception.
+        image.load()
+    except IOError:
+        pass
+    # Try a second time to catch any other potential exceptions.
     image.load()
 
     if exif_orientation:

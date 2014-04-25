@@ -6,7 +6,8 @@ from django.db import models
 from easy_thumbnails import test
 from easy_thumbnails.conf import settings
 from easy_thumbnails.fields import ThumbnailerField, ThumbnailerImageField
-from easy_thumbnails.exceptions import InvalidImageFormatError
+from easy_thumbnails.exceptions import (
+    InvalidImageFormatError, EasyThumbnailsError)
 
 
 class TestModel(models.Model):
@@ -22,8 +23,10 @@ class ThumbnailerFieldTest(test.BaseTest):
         # Save a test image.
         self.create_image(self.storage, 'avatars/avatar.jpg')
         # Set the test model to use the current temporary storage.
-        TestModel._meta.get_field('avatar').storage = self.storage
-        TestModel._meta.get_field('avatar').thumbnail_storage = self.storage
+        for name in ('avatar', 'picture'):
+            field = TestModel._meta.get_field(name)
+            field.storage = self.storage
+            field.thumbnail_storage = self.storage
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
@@ -49,6 +52,12 @@ class ThumbnailerFieldTest(test.BaseTest):
         instance = TestModel(avatar='avatars/invalid.jpg')
         generate = lambda: instance.avatar['small']
         self.assertRaises(InvalidImageFormatError, generate)
+
+    def test_generate_thumbnail_alias_0x0_size(self):
+        instance = TestModel(avatar='avatars/avatar.jpg')
+        self.assertRaises(
+            EasyThumbnailsError,
+            instance.avatar.generate_thumbnail, {'size': (0, 0)})
 
     def test_delete(self):
         instance = TestModel(avatar='avatars/avatar.jpg')
@@ -95,3 +104,9 @@ class ThumbnailerFieldTest(test.BaseTest):
         instance.picture.save(
             'file.jpg', ContentFile(instance.avatar.file.read()), save=False)
         self.assertEqual(instance.picture.width, 10)
+
+    def test_saving_image_field_with_resize_source_different_ext(self):
+        instance = TestModel(avatar='avatars/avatar.jpg')
+        instance.picture.save(
+            'file.gif', ContentFile(instance.avatar.file.read()), save=False)
+        self.assertEqual(instance.picture.name, 'pictures/file.jpg')

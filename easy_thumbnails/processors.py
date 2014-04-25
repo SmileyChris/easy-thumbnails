@@ -119,7 +119,8 @@ def autocrop(im, autocrop=False, **kwargs):
     return im
 
 
-def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, **kwargs):
+def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
+                   **kwargs):
     """
     Handle scaling and cropping the source image.
 
@@ -161,9 +162,23 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, **kwargs):
         A percentage to zoom in on the scaled image. For example, a zoom of
         ``40`` will clip 20% off each side of the source image before
         thumbnailing.
+
+    target
+        Set the focal point as a percentage for the image if it needs to be
+        cropped (defaults to ``(50, 50)``).
+
+        For example, ``target="10,20"`` will set the focal point as 10% and 20%
+        from the left and top of the image, respectively. If the image needs to
+        be cropped, it will trim off the right and bottom edges until the focal
+        point is centered.
+
+        Can either be set as a two-item tuple such as ``(20, 30)`` or a comma
+        separated string such as ``"20,10"``.
+
+        A null value such as ``(20, None)`` or ``",60"`` will default to 50%.
     """
     source_x, source_y = [float(v) for v in im.size]
-    target_x, target_y = [float(v) for v in size]
+    target_x, target_y = [int(v) for v in size]
 
     if crop or not target_x or not target_y:
         scale = max(target_x / source_x, target_y / source_y)
@@ -172,9 +187,9 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, **kwargs):
 
     # Handle one-dimensional targets.
     if not target_x:
-        target_x = source_x * scale
+        target_x = round(source_x * scale)
     elif not target_y:
-        target_y = source_y * scale
+        target_y = round(source_y * scale)
 
     if zoom:
         if not crop:
@@ -196,12 +211,25 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, **kwargs):
         # Difference between new image size and requested size.
         diff_x = int(source_x - min(source_x, target_x))
         diff_y = int(source_y - min(source_y, target_y))
-        if diff_x or diff_y:
-            # Center cropping (default).
-            halfdiff_x, halfdiff_y = diff_x // 2, diff_y // 2
-            box = [halfdiff_x, halfdiff_y,
-                   min(source_x, int(target_x) + halfdiff_x),
-                   min(source_y, int(target_y) + halfdiff_y)]
+        if crop != 'scale' and (diff_x or diff_y):
+            if isinstance(target, six.string_types):
+                target = re.match(r'(\d+)?,(\d+)?$', target)
+                if target:
+                    target = target.groups()
+            if target:
+                focal_point = [int(n) if (n or n == 0) else 50 for n in target]
+            else:
+                focal_point = 50, 50
+            # Crop around the focal point
+            halftarget_x, halftarget_y = int(target_x / 2), int(target_y / 2)
+            focal_point_x = int(source_x * focal_point[0] / 100)
+            focal_point_y = int(source_y * focal_point[1] / 100)
+            box = [
+                max(0, min(source_x - target_x, focal_point_x - halftarget_x)),
+                max(0, min(source_y - target_y, focal_point_y - halftarget_y)),
+            ]
+            box.append(min(source_x, box[0] + target_x))
+            box.append(min(source_y, box[1] + target_y))
             # See if an edge cropping argument was provided.
             edge_crop = (isinstance(crop, six.string_types) and
                          re.match(r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop))
@@ -245,8 +273,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, **kwargs):
                     diff_y = diff_y - add - remove
                 box = (left, top, right, bottom)
             # Finally, crop the image!
-            if crop != 'scale':
-                im = im.crop(box)
+            im = im.crop(box)
     return im
 
 

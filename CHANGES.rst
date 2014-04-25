@@ -1,6 +1,23 @@
 Changes
 =======
 
+HEAD
+----
+
+* Make ThumbnailerImageField.resize_source reflect change in extension.
+
+* Add ``target`` option to the scale_and_crop processor, allowing for image
+  focal points when cropping (or zooming) an image.
+
+* Add a THUMBNAIL_NAMER option which takes a function used to customize
+  the thumbnail filename.
+
+* New ``subsampling`` option to reduce color subsampling of JPEG images,
+  providing sharper color borders for a small increase in file size.
+
+* Reimplementation of the ``thumbnail_cleanup`` command. Thanks Jørgen
+  Abrahamsen
+
 1.5
 ---
 
