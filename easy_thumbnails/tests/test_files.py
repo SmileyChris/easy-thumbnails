@@ -6,10 +6,10 @@ from os import path
 
 from django.test import TestCase
 from django.utils import six, unittest
-from easy_thumbnails import (
-    files, utils, signals, test, exceptions, models, engine)
+from easy_thumbnails import files, utils, signals, exceptions, models, engine
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
+from easy_thumbnails.tests import utils as test
 try:
     from PIL import Image
 except ImportError:

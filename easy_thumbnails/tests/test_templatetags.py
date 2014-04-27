@@ -6,9 +6,10 @@ except ImportError:
 
 from django.core.files import storage as django_storage
 
-from easy_thumbnails import test, alias, storage
+from easy_thumbnails import alias, storage
 from easy_thumbnails.conf import settings
 from easy_thumbnails.files import get_thumbnailer
+from easy_thumbnails.tests import utils as test
 
 
 class Base(test.BaseTest):

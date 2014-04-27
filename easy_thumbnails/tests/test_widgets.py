@@ -1,6 +1,7 @@
-from easy_thumbnails import widgets, test
+from easy_thumbnails import widgets
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms.widgets import ClearableFileInput
+from easy_thumbnails.tests import utils as test
 
 
 class ImageClearableFileInput(test.BaseTest):

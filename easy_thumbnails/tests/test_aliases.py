@@ -3,7 +3,7 @@ from django.db import models
 from easy_thumbnails import files, fields, signals, signal_handlers
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
-from easy_thumbnails import test
+from easy_thumbnails.tests import utils as test
 
 
 class Profile(models.Model):

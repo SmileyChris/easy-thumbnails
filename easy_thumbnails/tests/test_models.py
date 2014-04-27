@@ -1,8 +1,9 @@
 """Tests for the models module.
 """
 
-from easy_thumbnails import utils, test
+from easy_thumbnails import utils
 from easy_thumbnails.models import Thumbnail, Source
+from easy_thumbnails.tests import utils as test
 
 
 class FileManagerTest(test.BaseTest):

@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'easy_thumbnails',
     'easy_thumbnails.optimize',
-    'easy_thumbnails.tests',
+    # 'easy_thumbnails.tests',
 ]
 
 # This is only needed for the 1.4.X test environment
