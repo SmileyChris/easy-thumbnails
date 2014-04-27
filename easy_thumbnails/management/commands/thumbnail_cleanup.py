@@ -30,8 +30,8 @@ class ThumbnailCollectionCleaner(object):
         try:
             return storage.exists(path)
         except Exception as e:
-            print "Something went wrong when checking existance of %s:" % path
-            print str(e)
+            print ("Something went wrong when checking existance of %s:" % path)
+            print (str(e))
 
     def _delete_sources_by_id(self, ids):
         Source.objects.all().filter(id__in=ids).delete()
@@ -44,7 +44,7 @@ class ThumbnailCollectionCleaner(object):
         database references).
         """
         if dry_run:
-            print "Dry run..."
+            print ("Dry run...")
 
         if not storage:
             storage = get_storage_class(settings.THUMBNAIL_DEFAULT_STORAGE)()
@@ -66,7 +66,7 @@ class ThumbnailCollectionCleaner(object):
 
             if not self._check_if_exists(storage, abs_source_path):
                 if verbosity > 0:
-                    print "Source not present:", abs_source_path
+                    print ("Source not present:", abs_source_path)
                 self.source_refs_deleted += 1
                 sources_to_delete.append(source.id)
 
@@ -78,7 +78,7 @@ class ThumbnailCollectionCleaner(object):
                         if not dry_run:
                             storage.delete(abs_thumbnail_path)
                         if verbosity > 0:
-                            print "Deleting thumbnail:", abs_thumbnail_path
+                            print ("Deleting thumbnail:", abs_thumbnail_path)
 
             if len(sources_to_delete) >= 1000 and not dry_run:
                 self._delete_sources_by_id(sources_to_delete)
@@ -92,13 +92,13 @@ class ThumbnailCollectionCleaner(object):
         """
         Print statistics about the cleanup performed.
         """
-        print '{:-<48}'.format(str(datetime.now().strftime('%Y-%m-%d %H:%M ')))
-        print "{:<40} {:>7}".format("Sources checked:", self.sources)
-        print "{:<40} {:>7}".format("Source references deleted from DB:",
-                                    self.source_refs_deleted)
-        print "{:<40} {:>7}".format("Thumbnails deleted from disk:",
-                                    self.thumbnails_deleted)
-        print "(Completed in %s seconds)\n" % self.execution_time
+        print ('{:-<48}'.format(str(datetime.now().strftime('%Y-%m-%d %H:%M '))))
+        print ("{:<40} {:>7}".format("Sources checked:", self.sources))
+        print ("{:<40} {:>7}".format("Source references deleted from DB:",
+                                    self.source_refs_deleted))
+        print ("{:<40} {:>7}".format("Thumbnails deleted from disk:",
+                                    self.thumbnails_deleted))
+        print ("(Completed in %s seconds)\n" % self.execution_time)
 
 
 def queryset_iterator(queryset, chunksize=1000):
