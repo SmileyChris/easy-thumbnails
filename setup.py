@@ -1,6 +1,25 @@
 #!/usr/bin/env python
+import os
+
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
+
 import easy_thumbnails
+
+
+class DjangoTests(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        from django.core import management
+        DSM = 'DJANGO_SETTINGS_MODULE'
+        if DSM not in os.environ:
+            os.environ[DSM] = 'easy_thumbnails.tests.settings'
+        management.execute_from_command_line()
 
 
 def read_files(*filenames):
@@ -32,6 +51,7 @@ setup(
         'django>=1.4.2',
         'pillow',
     ],
+    cmdclass={'test': DjangoTests},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
