@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+"""
+This file does nothing except to mock a optimizer which does not work.
+"""
 import sys
-# This file does nothing except to mock a optimizer which does not work
 
 print('Bad JPEG file')
 sys.exit(1)

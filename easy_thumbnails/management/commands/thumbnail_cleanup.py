@@ -30,8 +30,8 @@ class ThumbnailCollectionCleaner(object):
         try:
             return storage.exists(path)
         except Exception as e:
-            print ("Something went wrong when checking existance of %s:" % path)
-            print (str(e))
+            print("Something went wrong when checking existance of %s:" % path)
+            print(str(e))
 
     def _delete_sources_by_id(self, ids):
         Source.objects.all().filter(id__in=ids).delete()
@@ -92,13 +92,14 @@ class ThumbnailCollectionCleaner(object):
         """
         Print statistics about the cleanup performed.
         """
-        print ('{:-<48}'.format(str(datetime.now().strftime('%Y-%m-%d %H:%M '))))
-        print ("{:<40} {:>7}".format("Sources checked:", self.sources))
-        print ("{:<40} {:>7}".format("Source references deleted from DB:",
-                                    self.source_refs_deleted))
-        print ("{:<40} {:>7}".format("Thumbnails deleted from disk:",
+        print(
+            "{:-<48}".format(str(datetime.now().strftime('%Y-%m-%d %H:%M '))))
+        print("{:<40} {:>7}".format("Sources checked:", self.sources))
+        print("{:<40} {:>7}".format(
+            "Source references deleted from DB:", self.source_refs_deleted))
+        print("{:<40} {:>7}".format("Thumbnails deleted from disk:",
                                     self.thumbnails_deleted))
-        print ("(Completed in %s seconds)\n" % self.execution_time)
+        print("(Completed in %s seconds)\n" % self.execution_time)
 
 
 def queryset_iterator(queryset, chunksize=1000):

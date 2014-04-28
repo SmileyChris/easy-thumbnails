@@ -452,7 +452,8 @@ class EngineTest(TestCase):
 
     def test_single_fail(self):
         source_generators = [FakeSourceGenerator(fail=True)]
-        self.assertRaises(ValueError, engine.generate_source_image,
+        self.assertRaises(
+            ValueError, engine.generate_source_image,
             self.source, {}, source_generators, fail_silently=False)
 
     def test_single_silent_fail(self):
@@ -464,8 +465,8 @@ class EngineTest(TestCase):
     def test_multiple_fail(self):
         source_generators = [
             FakeSourceGenerator(fail=True), FakeSourceGenerator(fail=True)]
-        self.assertRaises(engine.NoSourceGenerator,
-            engine.generate_source_image,
+        self.assertRaises(
+            engine.NoSourceGenerator, engine.generate_source_image,
             self.source, {}, source_generators, fail_silently=False)
 
     def test_multiple_silent_fail(self):

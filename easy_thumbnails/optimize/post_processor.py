@@ -13,9 +13,12 @@ except ImportError:
     def check_output(*popenargs, **kwargs):
         """
         Run command with arguments and return its output as a byte string.
-        Backported from Python 2.7 as it's implemented as pure python on stdlib.
+
+        Backported from Python 2.7 as it's implemented as pure python on
+        stdlib.
         """
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        process = subprocess.Popen(
+            stdout=subprocess.PIPE, *popenargs, **kwargs)
         output, unused_err = process.communicate()
         retcode = process.poll()
         if retcode:
@@ -34,7 +37,8 @@ logger = logging.getLogger('easy_thumbnails.optimize')
 def optimize_thumbnail(thumbnail):
     '''Optimize thumbnail images by removing unnecessary data'''
     try:
-        optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[determinetype(thumbnail.path)]
+        optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[
+            determinetype(thumbnail.path)]
         if not optimize_command:
             return
     except (TypeError, KeyError, NotImplementedError):
@@ -46,9 +50,11 @@ def optimize_thumbnail(thumbnail):
             temp_file.write(thumbnail.read())
             temp_file.flush()
             optimize_command = optimize_command.format(filename=temp_file.name)
-            output = check_output(optimize_command, stderr=subprocess.STDOUT, shell=True)
+            output = check_output(
+                optimize_command, stderr=subprocess.STDOUT, shell=True)
             if output:
-                logger.warn('{0} returned {1}'.format(optimize_command, output))
+                logger.warn(
+                    '{0} returned {1}'.format(optimize_command, output))
             else:
                 logger.info('{0} returned nothing'.format(optimize_command))
             with open(temp_file.name, 'rb') as f:

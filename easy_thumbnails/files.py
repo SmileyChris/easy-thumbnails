@@ -740,7 +740,7 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
         """
         options = getattr(self.field, 'resize_source', None)
         if options:
-            if not 'quality' in options:
+            if 'quality' not in options:
                 options['quality'] = self.thumbnail_quality
             content = Thumbnailer(content, name).generate_thumbnail(options)
             # If the generated extension differs from the original, use it

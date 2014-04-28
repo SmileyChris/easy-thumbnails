@@ -16,7 +16,7 @@ class ImageClearableFileInput(ClearableFileInput):
     def __init__(self, thumbnail_options=None, attrs=None):
         thumbnail_options = thumbnail_options or {}
         thumbnail_options = thumbnail_options.copy()
-        if not 'size' in thumbnail_options:
+        if 'size' not in thumbnail_options:
             thumbnail_options['size'] = (80, 80)
         self.thumbnail_options = thumbnail_options.copy()
         super(ImageClearableFileInput, self).__init__(attrs)

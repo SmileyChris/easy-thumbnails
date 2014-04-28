@@ -8,4 +8,4 @@ class ThumbnailCleanupTests(test.BaseTest):
         Just a simple test to see if we can actually import the command without
         any syntax errors.
         """
-        from easy_thumbnails.management.commands import thumbnail_cleanup
+        import easy_thumbnails.management.commands.thumbnail_cleanup   # NOQA
