@@ -5,7 +5,7 @@ from django.db import models
 
 from easy_thumbnails.conf import settings
 from easy_thumbnails.fields import ThumbnailerField, ThumbnailerImageField
-from easy_thumbnails.tests import utils as test
+from easy_thumbnails.tests.test_aliases import BaseTest as AliasBaseTest
 from easy_thumbnails.exceptions import (
     InvalidImageFormatError, EasyThumbnailsError)
 
@@ -16,7 +16,7 @@ class TestModel(models.Model):
                                     resize_source=dict(size=(10, 10)))
 
 
-class ThumbnailerFieldTest(test.BaseTest):
+class ThumbnailerFieldTest(AliasBaseTest):
     def setUp(self):
         super(ThumbnailerFieldTest, self).setUp()
         self.storage = test.TemporaryStorage()
@@ -46,7 +46,6 @@ class ThumbnailerFieldTest(test.BaseTest):
         self.assertRaises(IOError, generate)
 
     def test_generate_thumbnail_alias_bad_image(self):
-        settings.THUMBNAIL_ALIASES = {'': {'small': {'size': (100, 100)}}}
         text_file = ContentFile("Lorem ipsum dolor sit amet. Not an image.")
         self.storage.save('avatars/invalid.jpg', text_file)
         instance = TestModel(avatar='avatars/invalid.jpg')
