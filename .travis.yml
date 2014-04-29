@@ -12,7 +12,7 @@ env:
 
 install:
   - pip install --use-mirrors "Django<$DJANGO_FUTURE_VERSION" testfixtures django-discover-runner
-  - pip install --use-mirrors .
+  - pip install --use-mirrors -e .
 
 script:
   - django-admin.py test --traceback
