@@ -3,8 +3,8 @@ import os
 from django.core.files.base import ContentFile
 from django.db import models
 
-from easy_thumbnails.conf import settings
 from easy_thumbnails.fields import ThumbnailerField, ThumbnailerImageField
+from easy_thumbnails.tests import utils as test
 from easy_thumbnails.tests.test_aliases import BaseTest as AliasBaseTest
 from easy_thumbnails.exceptions import (
     InvalidImageFormatError, EasyThumbnailsError)
