@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+from __future__ import unicode_literals
+import codecs
 import os
-
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
@@ -28,7 +29,7 @@ def read_files(*filenames):
     """
     output = []
     for filename in filenames:
-        f = open(filename)
+        f = codecs.open(filename, encoding='utf-8')
         try:
             output.append(f.read())
         finally:
