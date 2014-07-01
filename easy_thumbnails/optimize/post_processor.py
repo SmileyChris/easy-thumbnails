@@ -40,7 +40,7 @@ def optimize_thumbnail(thumbnail):
     try:
         file_type = determinetype(thumbnail.path)
     except NotImplementedError:
-        file_type = os.path.splitext(thumbnail.url)[1:]
+        file_type = os.path.splitext(thumbnail.url)[1][1:]
         if file_type == 'jpg':
             file_type = 'jpeg'
     except (TypeError, KeyError):
