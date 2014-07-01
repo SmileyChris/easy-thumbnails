@@ -93,11 +93,11 @@ class ThumbnailCollectionCleaner(object):
         Print statistics about the cleanup performed.
         """
         print(
-            "{:-<48}".format(str(datetime.now().strftime('%Y-%m-%d %H:%M '))))
-        print("{:<40} {:>7}".format("Sources checked:", self.sources))
-        print("{:<40} {:>7}".format(
+            "{0:-<48}".format(str(datetime.now().strftime('%Y-%m-%d %H:%M '))))
+        print("{0:<40} {1:>7}".format("Sources checked:", self.sources))
+        print("{0:<40} {1:>7}".format(
             "Source references deleted from DB:", self.source_refs_deleted))
-        print("{:<40} {:>7}".format("Thumbnails deleted from disk:",
+        print("{0:<40} {1:>7}".format("Thumbnails deleted from disk:",
                                     self.thumbnails_deleted))
         print("(Completed in %s seconds)\n" % self.execution_time)
 
