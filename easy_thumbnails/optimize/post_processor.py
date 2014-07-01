@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 import subprocess
 from imghdr import what as determinetype
 from django.core.files.base import ContentFile
