@@ -66,8 +66,12 @@ def optimize_thumbnail(thumbnail):
             else:
                 logger.info('{0} returned nothing'.format(optimize_command))
             with open(temp_file.name, 'rb') as f:
-                thumbnail.file.open()
-                thumbnail.file.write(f.read())
-                thumbnail.flush()
+                try:
+                    storage.delete(thumbnail.path)
+                    storage.save(thumbnail.path, thumbnail)
+                except NotImplementedError:
+                    # Alternative object-based storage backends use name
+                    storage.delete(thumbnail.name)
+                    storage.save(thumbnail.name, thumbnail)
     except Exception as e:
         logger.error(e)
