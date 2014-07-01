@@ -37,17 +37,18 @@ logger = logging.getLogger('easy_thumbnails.optimize')
 def optimize_thumbnail(thumbnail):
     '''Optimize thumbnail images by removing unnecessary data'''
     try:
-        if thumbnail.path:
-            file_type = determinetype(thumbnail.path)
-        else:
-            file_type = os.path.splitext(thumbnail.url)[1:]
+        file_type = determinetype(thumbnail.path)
+    except NotImplementedError:
+        file_type = os.path.splitext(thumbnail.url)[1:]
         if file_type == 'jpg':
             file_type = 'jpeg'
+    except (TypeError, KeyError):
+        return
+    finally:
         optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[file_type]
         if not optimize_command:
             return
-    except (TypeError, KeyError, NotImplementedError):
-        return
+
     storage = thumbnail.storage
     try:
         with NamedTemporaryFile() as temp_file:
