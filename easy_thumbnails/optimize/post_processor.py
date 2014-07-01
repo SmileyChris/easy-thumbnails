@@ -40,6 +40,7 @@ def optimize_thumbnail(thumbnail):
     try:
         file_type = determinetype(thumbnail.path)
     except NotImplementedError:
+        # System is using an alternative storage backend
         file_type = os.path.splitext(thumbnail.url)[1][1:]
         if file_type == 'jpg':
             file_type = 'jpeg'
@@ -65,8 +66,8 @@ def optimize_thumbnail(thumbnail):
             else:
                 logger.info('{0} returned nothing'.format(optimize_command))
             with open(temp_file.name, 'rb') as f:
-                thumbnail.file = ContentFile(f.read())
-                storage.delete(thumbnail.path)
-                storage.save(thumbnail.path, thumbnail)
+                thumbnail.file.open()
+                thumbnail.file.write(f.read())
+                thumbnail.flush()
     except Exception as e:
         logger.error(e)
