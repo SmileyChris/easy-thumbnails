@@ -66,6 +66,7 @@ def optimize_thumbnail(thumbnail):
             else:
                 logger.info('{0} returned nothing'.format(optimize_command))
             with open(temp_file.name, 'rb') as f:
+                thumbnail.file = ContentFile(f.read())
                 try:
                     storage.delete(thumbnail.path)
                     storage.save(thumbnail.path, thumbnail)
