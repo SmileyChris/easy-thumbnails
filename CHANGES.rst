@@ -1,6 +1,15 @@
 Changes
 =======
 
+HEAD
+----
+
+* Fix Python 3.4 installation issue.
+
+* Avoid an OverflowError due to invalid EXIF data.
+
+* Fix bug causing JPEG images to be saved without optimization :(
+
 2.0.1 (2014-04-26)
 ------------------
 
