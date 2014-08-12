@@ -53,14 +53,17 @@ def save_image(image, destination=None, filename=None, **options):
     format = Image.EXTENSION.get(os.path.splitext(filename)[1].lower(), 'JPEG')
     if format in ('JPEG', 'WEBP'):
         options.setdefault('quality', 85)
+    saved = False
     if format == 'JPEG':
         try:
             image.save(destination, format=format, optimize=1, **options)
+            saved = True
         except IOError:
             # Try again, without optimization (PIL can't optimize an image
             # larger than ImageFile.MAXBLOCK, which is 64k by default)
             pass
-    image.save(destination, format=format, **options)
+    if not saved:
+        image.save(destination, format=format, **options)
     if hasattr(destination, 'seek'):
         destination.seek(0)
     return destination
