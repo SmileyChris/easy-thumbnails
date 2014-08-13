@@ -4,6 +4,7 @@ python:
   - "2.6"
   - "2.7"
   - "3.3"
+  - "3.4"
 
 env:
   - DJANGO_FUTURE_VERSION=1.5 DJANGO_SETTINGS_MODULE=easy_thumbnails.tests.settings_old
@@ -11,8 +12,8 @@ env:
   - DJANGO_FUTURE_VERSION=1.7 DJANGO_SETTINGS_MODULE=easy_thumbnails.tests.settings
 
 install:
-  - pip install --use-mirrors "Django<$DJANGO_FUTURE_VERSION" testfixtures django-discover-runner
-  - pip install --use-mirrors -e .
+  - pip install "Django<$DJANGO_FUTURE_VERSION" testfixtures django-discover-runner
+  - pip install -e .
 
 script:
   - django-admin.py test --traceback
@@ -21,3 +22,5 @@ matrix:
   exclude:
     - env: DJANGO_FUTURE_VERSION=1.5 DJANGO_SETTINGS_MODULE=easy_thumbnails.tests.settings_old
       python: "3.3"
+    - env: DJANGO_FUTURE_VERSION=1.5 DJANGO_SETTINGS_MODULE=easy_thumbnails.tests.settings_old
+      python: "3.4"
