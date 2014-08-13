@@ -156,6 +156,17 @@ class Settings(AppSettings):
     recommended.
     """
 
+    THUMBNAIL_PROGRESSIVE = 100
+    """
+    Use progressive JPGs for thumbnails where either dimension is at least this
+    many pixels.
+
+    For example, a 90x90 image will be saved as a baseline JPG while a 728x90
+    image will be saved as a progressive JPG.
+
+    Set to ``False`` to never use progressive encoding.
+    """
+
     THUMBNAIL_EXTENSION = 'jpg'
     """
     The type of image to save thumbnails with no transparency layer as.

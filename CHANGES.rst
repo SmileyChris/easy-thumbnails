@@ -10,6 +10,10 @@ HEAD
 
 * Fix bug causing JPEG images to be saved without optimization :(
 
+* JPEG files can now be saved with progressive encoding. By default, any image
+  with a dimension larger than 100px will be saved progressively. Configured
+  with the ``THUMBNAILER_PROGRESSIVE`` setting.
+
 2.0.1 (2014-04-26)
 ------------------
 

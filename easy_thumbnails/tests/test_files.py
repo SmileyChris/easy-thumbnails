@@ -433,6 +433,25 @@ class FilesTest(test.BaseTest):
         finally:
             signals.thumbnail_created.disconnect(signal_handler)
 
+    def test_progressive_encoding(self):
+        thumb = self.thumbnailer.generate_thumbnail(
+            {'size': (99, 99), 'crop': True})
+        self.assertFalse(utils.is_progressive(Image.open(thumb)))
+
+        thumb = self.thumbnailer.generate_thumbnail(
+            {'size': (1, 100), 'crop': True})
+        self.assertTrue(utils.is_progressive(Image.open(thumb)))
+        thumb = self.thumbnailer.generate_thumbnail(
+            {'size': (100, 1), 'crop': True})
+        self.assertTrue(utils.is_progressive(Image.open(thumb)))
+        thumb = self.thumbnailer.generate_thumbnail({'size': (200, 200)})
+        self.assertTrue(utils.is_progressive(Image.open(thumb)))
+
+    def test_no_progressive_encoding(self):
+        settings.THUMBNAIL_PROGRESSIVE = False
+        thumb = self.thumbnailer.generate_thumbnail({'size': (200, 200)})
+        self.assertFalse(utils.is_progressive(Image.open(thumb)))
+
 
 class FakeSourceGenerator(object):
 

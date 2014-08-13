@@ -98,6 +98,16 @@ def is_transparent(image):
             (image.mode == 'P' and 'transparency' in image.info))
 
 
+def is_progressive(image):
+    """
+    Check to see if an image is progressive.
+    """
+    if not isinstance(image, Image.Image):
+        # Can only check PIL images for progressive encoding.
+        return False
+    return ('progressive' in image.info) or ('progression' in image.info)
+
+
 def exif_orientation(im):
     """
     Rotate and/or flip an image to respect the image's EXIF orientation data.
