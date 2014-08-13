@@ -1,8 +1,8 @@
 Changes
 =======
 
-HEAD
-----
+2.1 (2014-08-13)
+----------------
 
 * Fix Python 3.4 installation issue.
 
