@@ -1,4 +1,6 @@
-# encoding: utf8
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from django.db import models, migrations
 
 
@@ -12,10 +14,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ThumbnailDimensions',
             fields=[
-                (u'id', models.AutoField(verbose_name=u'ID', serialize=False, auto_created=True, primary_key=True)),
-                ('thumbnail', models.OneToOneField(to='easy_thumbnails.Thumbnail', to_field=u'id')),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('width', models.PositiveIntegerField(null=True)),
                 ('height', models.PositiveIntegerField(null=True)),
+                ('thumbnail', models.OneToOneField(related_name=b'dimensions', to='easy_thumbnails.Thumbnail')),
             ],
             options={
             },
