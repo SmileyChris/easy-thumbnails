@@ -150,4 +150,5 @@ class Command(BaseCommand):
             verbosity=int(options.get('verbosity', 1)),
             last_n_days=int(options.get('last_n_days', 0)),
             cleanup_path=options.get('cleanup_path'))
-        tcc.print_stats()
+        if int(options.get('verbosity', 1) > 0:
+            tcc.print_stats()
