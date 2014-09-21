@@ -1,20 +1,14 @@
-from django.db import models
+from django.db.models import FileField
+from django.db.models.signals import pre_save, post_save
 
-from easy_thumbnails import files, fields, signals, signal_handlers
+from easy_thumbnails import files, signals, signal_handlers
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
-from easy_thumbnails.tests import utils as test
+
+from easy_thumbnails.tests import utils, models
 
 
-class Profile(models.Model):
-    avatar = fields.ThumbnailerField(upload_to='avatars')
-    logo = models.FileField(upload_to='avatars')
-
-    class Meta:
-        app_label = 'some_app'
-
-
-class BaseTest(test.BaseTest):
+class BaseTest(utils.BaseTest):
     create_file = False
 
     def setUp(self):
@@ -25,11 +19,11 @@ class BaseTest(test.BaseTest):
                 'medium': {'size': (300, 300)},
                 'small': {'size': (100, 100)},
             },
-            'some_app.Profile': {
+            'easy_thumbnails_tests.Profile': {
                 'large': {'size': (200, 200)},
                 'banner': {'size': (600, 80), 'crop': True},
             },
-            'some_app.Profile.avatar': {
+            'easy_thumbnails_tests.Profile.avatar': {
                 'avatar': {'size': (80, 80), 'crop': True},
                 'small': {'size': (20, 20), 'crop': True},
             },
@@ -42,12 +36,13 @@ class BaseTest(test.BaseTest):
         aliases.populate_from_settings()
 
         if self.create_file:
-            self.storage = test.TemporaryStorage()
+            self.storage = utils.TemporaryStorage()
             # Save a test image.
             self.create_image(self.storage, 'avatars/test.jpg')
             # Set the test model to use the current temporary storage.
-            Profile._meta.get_field('avatar').storage = self.storage
-            Profile._meta.get_field('avatar').thumbnail_storage = self.storage
+            field = models.Profile._meta.get_field('avatar')
+            field.storage = self.storage
+            field.thumbnail_storage = self.storage
 
     def tearDown(self):
         aliases._aliases = self.__aliases
@@ -66,33 +61,40 @@ class AliasTest(BaseTest):
 
     def test_target(self):
         self.assertEqual(
-            aliases.get('avatar', target='some_app.Profile.avatar'),
+            aliases.get(
+                'avatar', target='easy_thumbnails_tests.Profile.avatar'),
             {'size': (80, 80), 'crop': True})
         self.assertEqual(
-            aliases.get('small', target='some_app.Profile.avatar'),
+            aliases.get(
+                'small', target='easy_thumbnails_tests.Profile.avatar'),
             {'size': (20, 20), 'crop': True})
 
     def test_partial_target(self):
         self.assertEqual(
-            aliases.get('banner', target='some_app.Profile.avatar'),
+            aliases.get(
+                'banner', target='easy_thumbnails_tests.Profile.avatar'),
             {'size': (600, 80), 'crop': True})
         self.assertEqual(
-            aliases.get('banner', target='some_app.Profile'),
+            aliases.get('banner', target='easy_thumbnails_tests.Profile'),
             {'size': (600, 80), 'crop': True})
-        self.assertEqual(aliases.get('banner', target='some_app'), None)
+        self.assertEqual(
+            aliases.get('banner', target='easy_thumbnails_tests'), None)
 
     def test_target_fallback(self):
         # Unknown target.
         self.assertEqual(
-            aliases.get('small', target='some_app.Profile.not_avatar'),
+            aliases.get(
+                'small', target='easy_thumbnails_tests.Profile.not_avatar'),
             {'size': (100, 100)})
         # Known target with no matching alias (but a matching global alias).
         self.assertEqual(
-            aliases.get('medium', target='some_app.Profile.avatar'),
+            aliases.get(
+                'medium', target='easy_thumbnails_tests.Profile.avatar'),
             {'size': (300, 300)})
         # Known target with no matching alias.
         self.assertEqual(
-            aliases.get('invalid', target='some_app.Profile.avatar'),
+            aliases.get(
+                'invalid', target='easy_thumbnails_tests.Profile.avatar'),
             None)
 
     def test_all(self):
@@ -113,7 +115,7 @@ class AliasTest(BaseTest):
             })
 
         self.assertEqual(
-            aliases.all('some_app.Profile'),
+            aliases.all('easy_thumbnails_tests.Profile'),
             {
                 'banner': {'size': (600, 80), 'crop': True},
                 'large': {'size': (200, 200)},
@@ -122,7 +124,7 @@ class AliasTest(BaseTest):
             })
 
         self.assertEqual(
-            aliases.all('some_app.Profile.avatar'),
+            aliases.all('easy_thumbnails_tests.Profile.avatar'),
             {
                 'avatar': {'size': (80, 80), 'crop': True},
                 'banner': {'size': (600, 80), 'crop': True},
@@ -134,20 +136,22 @@ class AliasTest(BaseTest):
     def test_all_no_global(self):
 
         self.assertEqual(
-            aliases.all('some_app.Profile', include_global=False),
-            {
-                'banner': {'size': (600, 80), 'crop': True},
-                'large': {'size': (200, 200)},
-            })
+            aliases.all(
+                'easy_thumbnails_tests.Profile', include_global=False),
+                {
+                    'banner': {'size': (600, 80), 'crop': True},
+                    'large': {'size': (200, 200)},
+                })
 
         self.assertEqual(
-            aliases.all('some_app.Profile.avatar', include_global=False),
-            {
-                'avatar': {'size': (80, 80), 'crop': True},
-                'banner': {'size': (600, 80), 'crop': True},
-                'large': {'size': (200, 200)},
-                'small': {'crop': True, 'size': (20, 20)},
-            })
+            aliases.all(
+                'easy_thumbnails_tests.Profile.avatar', include_global=False),
+                {
+                    'avatar': {'size': (80, 80), 'crop': True},
+                    'banner': {'size': (600, 80), 'crop': True},
+                    'large': {'size': (200, 200)},
+                    'small': {'crop': True, 'size': (20, 20)},
+                })
 
 
 class AliasThumbnailerTest(BaseTest):
@@ -160,7 +164,7 @@ class AliasThumbnailerTest(BaseTest):
         self.assertEqual((thumb.width, thumb.height), (100, 75))
 
     def test_thumbnailer_fieldfile(self):
-        profile = Profile(avatar='avatars/test.jpg')
+        profile = models.Profile(avatar='avatars/test.jpg')
         thumbnailer = files.get_thumbnailer(profile.avatar)
         thumb = thumbnailer['small']
         self.assertEqual((thumb.width, thumb.height), (20, 20))
@@ -174,22 +178,23 @@ class GenerationBase(BaseTest):
 
     def setUp(self):
         super(GenerationBase, self).setUp()
-        signals.saved_file.connect(self.get_signal_handler(), sender=Profile)
+        signals.saved_file.connect(
+            self.get_signal_handler(), sender=models.Profile)
         # Fix the standard storage to use the test's temporary location.
         settings.MEDIA_ROOT = self.storage.temporary_location
 
     def tearDown(self):
         signals.saved_file.disconnect(
-            self.get_signal_handler(), sender=Profile)
+            self.get_signal_handler(), sender=models.Profile)
         super(GenerationBase, self).tearDown()
 
     def fake_save(self, instance):
         cls = instance.__class__
-        models.signals.pre_save.send(sender=cls, instance=instance)
+        pre_save.send(sender=cls, instance=instance)
         for field in cls._meta.fields:
-            if isinstance(field, models.FileField):
+            if isinstance(field, FileField):
                 getattr(instance, field.name)._committed = True
-        models.signals.post_save.send(sender=cls, instance=instance)
+        post_save.send(sender=cls, instance=instance)
         return self.storage.listdir('avatars')[1]
 
 
@@ -205,7 +210,7 @@ class GenerationTest(GenerationBase):
         """
         Thumbnails are not generated if there isn't anything to generate...
         """
-        profile = Profile(avatar=None)
+        profile = models.Profile(avatar=None)
         files = self.fake_save(profile)
         self.assertEqual(len(files), 1)
 
@@ -213,7 +218,7 @@ class GenerationTest(GenerationBase):
         """
         Thumbnails are only generated when the file is modified.
         """
-        profile = Profile(avatar='avatars/test.jpg')
+        profile = models.Profile(avatar='avatars/test.jpg')
         files = self.fake_save(profile)
         self.assertEqual(len(files), 1)
 
@@ -222,20 +227,20 @@ class GenerationTest(GenerationBase):
         When a file is modified, thumbnails are built for all matching
         non-global aliases.
         """
-        profile = Profile(avatar='avatars/test.jpg')
+        profile = models.Profile(avatar='avatars/test.jpg')
         profile.avatar._committed = False
         files = self.fake_save(profile)
         # 1 source, 4 thumbs.
         self.assertEqual(len(files), 5)
 
     def test_deleted(self):
-        profile = Profile(avatar='avatars/test.jpg')
+        profile = models.Profile(avatar='avatars/test.jpg')
         profile.avatar.delete(save=False)
         files = self.fake_save(profile)
         self.assertEqual(len(files), 0)
 
     def test_standard_filefield(self):
-        profile = Profile(avatar='avatars/test.jpg')
+        profile = models.Profile(avatar='avatars/test.jpg')
         # Attach a File object to the FileField descriptor, emulating an
         # upload.
         profile.logo = self.storage.open(
@@ -257,7 +262,7 @@ class GlobalGenerationTest(GenerationBase):
         """
         Thumbnails are only generated when the file is modified.
         """
-        profile = Profile(avatar='avatars/test.jpg')
+        profile = models.Profile(avatar='avatars/test.jpg')
         files = self.fake_save(profile)
         self.assertEqual(len(files), 1)
 
@@ -266,7 +271,7 @@ class GlobalGenerationTest(GenerationBase):
         When a file is modified, thumbnails are built for all matching and
         project-wide aliases.
         """
-        profile = Profile(avatar='avatars/test.jpg')
+        profile = models.Profile(avatar='avatars/test.jpg')
         profile.avatar._committed = False
         files = self.fake_save(profile)
         # 1 source, 4 specific thumbs, 1 project-wide thumb.
