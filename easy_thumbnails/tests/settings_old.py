@@ -1,6 +1,8 @@
 """
-Allow older versions of Django to use the same test discovery runner method.
+Don't add the test app to pre-1.7 versions of Django (since it's unnecessary
+and we use the new application registry).
 """
 from .settings import *   # NOQA
 
-TEST_RUNNER = 'discover_runner.DiscoverRunner'
+INSTALLED_APPS = INSTALLED_APPS[:]
+INSTALLED_APPS.remove('easy_thumbnails.apps.EasyThumbnailsTestConfig')

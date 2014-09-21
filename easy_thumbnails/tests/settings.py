@@ -21,8 +21,15 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'easy_thumbnails',
     'easy_thumbnails.optimize',
-    # 'easy_thumbnails.tests',
+    'easy_thumbnails.apps.EasyThumbnailsTestConfig',
 ]
+
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+)
 
 # This is only needed for the 1.4.X test environment
 USE_TZ = True
