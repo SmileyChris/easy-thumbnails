@@ -1,6 +1,13 @@
 Changes
 =======
 
+2.2 (2014-10-04)
+----------------
+
+* Fix migrations for Django 1.7 final.
+
+* Fix contain bad image EXIFs being able to still raise an exception.
+
 2.1 (2014-08-13)
 ----------------
 
