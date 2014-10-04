@@ -1,7 +1,8 @@
+from django.core.files import storage as django_storage
 from django.db.models import FileField
 from django.db.models.signals import pre_save, post_save
 
-from easy_thumbnails import files, signals, signal_handlers
+from easy_thumbnails import files, signals, signal_handlers, storage
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 
@@ -181,9 +182,19 @@ class GenerationBase(BaseTest):
         signals.saved_file.connect(
             self.get_signal_handler(), sender=models.Profile)
         # Fix the standard storage to use the test's temporary location.
+        self._MEDIA_ROOT = settings.MEDIA_ROOT
         settings.MEDIA_ROOT = self.storage.temporary_location
+        # Make the temporary storage location the default storage for now.
+        self._old_default_storage = django_storage.default_storage._wrapped
+        django_storage.default_storage._wrapped = self.storage
+        self._old_thumbnail_default_storage = storage.thumbnail_default_storage
+        storage.thumbnail_default_storage = self.storage
 
     def tearDown(self):
+        # Put the default storage back how we found it.
+        storage.thumbnail_default_storage = self._old_thumbnail_default_storage
+        django_storage.default_storage._wrapped = self._old_default_storage
+        settings.MEDIA_ROOT = self._MEDIA_ROOT
         signals.saved_file.disconnect(
             self.get_signal_handler(), sender=models.Profile)
         super(GenerationBase, self).tearDown()
