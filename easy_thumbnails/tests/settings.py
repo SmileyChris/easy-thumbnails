@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'easy_thumbnails',
     'easy_thumbnails.optimize',
-    'easy_thumbnails.apps.EasyThumbnailsTestConfig',
+    'easy_thumbnails.tests.apps.EasyThumbnailsTestConfig',
 ]
 
 MIDDLEWARE_CLASSES = (

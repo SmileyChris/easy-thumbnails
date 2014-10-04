@@ -5,4 +5,4 @@ and we use the new application registry).
 from .settings import *   # NOQA
 
 INSTALLED_APPS = INSTALLED_APPS[:]
-INSTALLED_APPS.remove('easy_thumbnails.apps.EasyThumbnailsTestConfig')
+INSTALLED_APPS.remove('easy_thumbnails.tests.apps.EasyThumbnailsTestConfig')
