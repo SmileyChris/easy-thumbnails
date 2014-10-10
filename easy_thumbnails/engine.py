@@ -47,7 +47,7 @@ def save_image(image, destination=None, filename=None, **options):
     """
     if destination is None:
         destination = BytesIO()
-    if not options['icc_profile']:
+    if not options.get('icc_profile', None):
 	options['icc_profile'] = image.info.get('icc_profile')
     filename = filename or ''
     # Ensure plugins are fully loaded so that Image.EXTENSION is populated.
