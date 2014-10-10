@@ -1,6 +1,6 @@
 import os
 try:
-    from cStringIO import cStringIO as BytesIO
+    from cStringIO import StringIO as BytesIO
 except ImportError:
     from django.utils.six import BytesIO
 
