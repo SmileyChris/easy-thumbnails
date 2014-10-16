@@ -500,6 +500,9 @@ class Thumbnailer(File):
         Force the generation behaviour by setting the ``generate`` param to
         either ``True`` or ``False`` as required.
 
+        Force re-generation behaviour (even if thumbnail already exists) by setting
+        the force param to either True or False as required.
+
         The new thumbnail image is generated using the ``thumbnail_options``
         dictionary. If the ``save`` argument is ``True`` (default), the
         generated thumbnail will be saved too.
