@@ -76,7 +76,7 @@ def get_thumbnailer(obj, relative_name=None):
         remote_source=obj is not None)
 
 
-def generate_all_aliases(fieldfile, include_global, generate=None):
+def generate_all_aliases(fieldfile, include_global, force=False):
     """
     Generate all of a file's aliases.
 
@@ -84,14 +84,14 @@ def generate_all_aliases(fieldfile, include_global, generate=None):
     :param include_global: A boolean which determines whether to generate
         thumbnails for project-wide aliases in addition to field, model, and
         app specific aliases.
-    :param generate: Force the generation behaviour by setting the generate param
+    :param force: Force the generation behaviour by setting the generate param
         to either True or False as required.
     """
     all_options = aliases.all(fieldfile, include_global=include_global)
     if all_options:
         thumbnailer = get_thumbnailer(fieldfile)
         for options in all_options.values():
-            thumbnailer.get_thumbnail(options, generate=generate)
+            thumbnailer.get_thumbnail(options, force=force)
 
 
 def database_get_image_dimensions(file, close=False, dimensions=None):
@@ -486,7 +486,7 @@ class Thumbnailer(File):
                     thumbnail_file.set_image_dimensions(exists)
                 return thumbnail_file
 
-    def get_thumbnail(self, thumbnail_options, save=True, generate=None,
+    def get_thumbnail(self, thumbnail_options, save=True, generate=None, force=False,
                       silent_template_exception=False):
         """
         Return a ``ThumbnailFile`` containing a thumbnail.
@@ -509,7 +509,7 @@ class Thumbnailer(File):
             generate = self.generate
 
         thumbnail = self.get_existing_thumbnail(thumbnail_options)
-        if not thumbnail:
+        if force or not thumbnail:
             if generate:
                 thumbnail = self.generate_thumbnail(
                     thumbnail_options,
