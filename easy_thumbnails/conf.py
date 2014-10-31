@@ -322,4 +322,10 @@ class Settings(AppSettings):
     still works as a fall back.
     """
 
+    THUMBNAIL_WIDGET_OPTIONS = {'size': (80, 80)}
+    """
+    Default options for the
+    :class:`easy_thumbnails.widgets.ImageClearableFileInput` widget.
+    """
+
 settings = Settings()

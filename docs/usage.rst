@@ -246,6 +246,12 @@ source images before saving.
 
 .. autoclass:: easy_thumbnails.fields.ThumbnailerImageField
 
+Forms
+-----
+
+.. autoclass:: easy_thumbnails.widgets.ImageClearableFileInput
+   :members: __init__
+
 
 Python
 ======
