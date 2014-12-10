@@ -382,7 +382,7 @@ class Thumbnailer(File):
             fail_silently=silent_template_exception)
         if image is None:
             raise exceptions.InvalidImageFormatError(
-                "The source file does not appear to be an image")
+                    "The source file does not appear to be an image: %s" % self.name)
 
         thumbnail_image = engine.process_image(image, thumbnail_options,
                                                self.thumbnail_processors)
