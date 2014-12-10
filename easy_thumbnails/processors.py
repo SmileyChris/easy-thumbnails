@@ -228,8 +228,8 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
                 max(0, min(source_x - target_x, focal_point_x - halftarget_x)),
                 max(0, min(source_y - target_y, focal_point_y - halftarget_y)),
             ]
-            box.append(min(source_x, box[0] + target_x))
-            box.append(min(source_y, box[1] + target_y))
+            box.append(int(min(source_x, box[0] + target_x)))
+            box.append(int(min(source_y, box[1] + target_y)))
             # See if an edge cropping argument was provided.
             edge_crop = (isinstance(crop, six.string_types) and
                          re.match(r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop))
