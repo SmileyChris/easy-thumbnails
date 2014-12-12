@@ -61,7 +61,8 @@ class File(models.Model):
 
 
 class Source(File):
-    pass
+    class Meta(File.Meta):
+        app_label = 'easy_thumbnails'
 
 
 class Thumbnail(File):
@@ -69,6 +70,7 @@ class Thumbnail(File):
 
     class Meta:
         unique_together = (('storage_hash', 'name', 'source'),)
+        app_label = 'easy_thumbnails'
 
 
 class ThumbnailDimensions(models.Model):
@@ -82,6 +84,9 @@ class ThumbnailDimensions(models.Model):
     @property
     def size(self):
         return self.width, self.height
+
+    class Meta:
+        app_label = 'easy_thumbnails'
 
 
 models.signals.pre_save.connect(signal_handlers.find_uncommitted_filefields)
