@@ -1,6 +1,11 @@
 Changes
 =======
 
+2.2.1 (2014-12-30)
+------------------
+
+* Fixed: Option ``zoom`` can also be used by itself, without combining it with ``crop``.
+
 2.2 (2014-10-04)
 ----------------
 
