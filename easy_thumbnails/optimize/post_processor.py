@@ -53,7 +53,7 @@ def optimize_thumbnail(thumbnail):
             output = check_output(
                 optimize_command, stderr=subprocess.STDOUT, shell=True)
             if output:
-                logger.warn(
+                logger.warning(
                     '{0} returned {1}'.format(optimize_command, output))
             else:
                 logger.info('{0} returned nothing'.format(optimize_command))
