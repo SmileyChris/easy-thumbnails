@@ -154,6 +154,13 @@ class AliasTest(BaseTest):
                     'small': {'crop': True, 'size': (20, 20)},
                 })
 
+    def test_deferred(self):
+        models.Profile.objects.create(avatar='avatars/test.jpg')
+        instance = models.Profile.objects.only('avatar').first()
+        self.assertEqual(
+            aliases.get('small', target=instance.avatar),
+            {'size': (20, 20), 'crop': True})
+
 
 class AliasThumbnailerTest(BaseTest):
     create_file = True
