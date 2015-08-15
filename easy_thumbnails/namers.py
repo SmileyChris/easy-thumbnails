@@ -21,6 +21,16 @@ def default(thumbnailer, prepared_options, source_filename,
     return '.'.join(filename_parts)
 
 
+def alias(thumbnailer, thumbnail_options, source_filename,
+            thumbnail_extension, **kwargs):
+    """
+    Generate filename based on thumbnail alias name (option ``THUMBNAIL_ALIASES``).
+
+    For example: ``source.jpg.medium_large.jpg``
+    """
+    return '.'.join([source_filename, thumbnail_options.get('ALIAS', ''), thumbnail_extension])
+
+
 def hashed(source_filename, prepared_options, thumbnail_extension, **kwargs):
     """
     Generate a short hashed thumbnail filename.
