@@ -107,15 +107,15 @@ def queryset_iterator(queryset, chunksize=1000):
     The queryset iterator helps to keep the memory consumption down.
     And also making it easier to process for weaker computers.
     """
-
-    primary_key = 0
-    last_pk = queryset.order_by('-pk')[0].pk
-    queryset = queryset.order_by('pk')
-    while primary_key < last_pk:
-        for row in queryset.filter(pk__gt=primary_key)[:chunksize]:
-            primary_key = row.pk
-            yield row
-        gc.collect()
+    if queryset.exists():
+        primary_key = 0
+        last_pk = queryset.order_by('-pk')[0].pk
+        queryset = queryset.order_by('pk')
+        while primary_key < last_pk:
+            for row in queryset.filter(pk__gt=primary_key)[:chunksize]:
+                primary_key = row.pk
+                yield row
+            gc.collect()
 
 
 class Command(BaseCommand):
