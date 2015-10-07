@@ -1,5 +1,6 @@
 from django.core.files import storage as django_storage
-from django.db.models import FileField
+from django.core.management import call_command
+from django.db.models import FileField, loading
 from django.db.models.signals import pre_save, post_save
 
 from easy_thumbnails import files, signals, signal_handlers, storage
@@ -7,6 +8,7 @@ from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 
 from easy_thumbnails.tests import utils, models
+from django.db.models.query_utils import deferred_class_factory
 
 
 class BaseTest(utils.BaseTest):
@@ -155,8 +157,10 @@ class AliasTest(BaseTest):
                 })
 
     def test_deferred(self):
-        models.Profile.objects.create(avatar='avatars/test.jpg')
-        instance = models.Profile.objects.only('avatar').first()
+        loading.cache.loaded = False
+        call_command('syncdb', verbosity=0)
+        deferred_profile = deferred_class_factory(models.Profile, ('logo',))
+        instance = deferred_profile(avatar='avatars/test.jpg')
         self.assertEqual(
             aliases.get('small', target=instance.avatar),
             {'size': (20, 20), 'crop': True})
