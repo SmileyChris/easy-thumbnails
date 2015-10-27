@@ -40,6 +40,12 @@ class FileManager(models.Manager):
         return obj
 
     def _get_thumbnail_manager(self):
+        return self
+
+
+class ThumbnailManager(FileManager):
+
+    def _get_thumbnail_manager(self):
         if settings.THUMBNAIL_CACHE_DIMENSIONS:
             return self.select_related("dimensions")
         return self
@@ -66,6 +72,8 @@ class Source(File):
 
 class Thumbnail(File):
     source = models.ForeignKey(Source, related_name='thumbnails')
+
+    objects = ThumbnailManager()
 
     class Meta:
         unique_together = (('storage_hash', 'name', 'source'),)
