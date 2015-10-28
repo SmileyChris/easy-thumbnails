@@ -1,14 +1,13 @@
 from django.core.files import storage as django_storage
 from django.core.management import call_command
 from django.db.models import FileField, loading
-from django.db.models.signals import pre_save, post_save
+from django.db.models.query_utils import deferred_class_factory
+from django.db.models.signals import post_save, pre_save
 
-from easy_thumbnails import files, signals, signal_handlers, storage
+from easy_thumbnails import files, signal_handlers, signals, storage
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
-
-from easy_thumbnails.tests import utils, models
-from django.db.models.query_utils import deferred_class_factory
+from easy_thumbnails.tests import models, utils
 
 
 class BaseTest(utils.BaseTest):
