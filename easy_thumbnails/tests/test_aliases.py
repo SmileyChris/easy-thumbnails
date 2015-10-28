@@ -157,7 +157,6 @@ class AliasTest(BaseTest):
 
     def test_deferred(self):
         loading.cache.loaded = False
-        call_command('syncdb', verbosity=0)
         deferred_profile = deferred_class_factory(models.Profile, ('logo',))
         instance = deferred_profile(avatar='avatars/test.jpg')
         self.assertEqual(
