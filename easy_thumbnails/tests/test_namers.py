@@ -52,6 +52,19 @@ class Hashed(TestCase):
         self.assertEqual(filename, '6qW1buHgLaZ9.jpg')
 
 
+class Alias(TestCase):
+
+    def test_basic(self):
+        filename = namers.alias(
+            thumbnailer=FakeThumbnailer(),
+            prepared_options=['100x100', 'q80', 'crop', 'upscale'],
+            thumbnail_options={'size': (100, 100), 'ALIAS': 'medium_large'},
+            source_filename='source.jpg',
+            thumbnail_extension='jpg',
+        )
+        self.assertEqual(filename, 'source.jpg.medium_large.jpg')
+
+
 class SourceHashed(TestCase):
 
     def test_basic(self):

@@ -88,7 +88,8 @@ def generate_all_aliases(fieldfile, include_global):
     all_options = aliases.all(fieldfile, include_global=include_global)
     if all_options:
         thumbnailer = get_thumbnailer(fieldfile)
-        for options in all_options.values():
+        for key, options in six.iteritems(all_options):
+            options['ALIAS'] = key
             thumbnailer.get_thumbnail(options)
 
 

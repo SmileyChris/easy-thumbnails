@@ -196,7 +196,7 @@ class Settings(AppSettings):
     """
     The function used to generate the filename for thumbnail images.
 
-    Three namers are included in easy_thumbnails:
+    Four namers are included in easy_thumbnails:
 
     ``easy_thumbnails.namers.default``
         Descriptive filename containing the source and options like
@@ -204,6 +204,9 @@ class Settings(AppSettings):
 
     ``easy_thumbnails.namers.hashed``
         Short hashed filename like ``1xedFtqllFo9.jpg``.
+
+    ``easy_thumbnails.namers.alias``
+        Filename based on ``THUMBNAIL_ALIASES`` dictionary key like ``source.jpg.medium_large.jpg``.
 
     ``easy_thumbnails.namers.source_hashed``
         Filename with source hashed, size, then options hashed like
