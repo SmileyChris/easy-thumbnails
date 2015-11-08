@@ -296,8 +296,7 @@ def filters(im, detail=False, sharpen=False, **kwargs):
     return im
 
 
-def background(im, size, background=None, crop=None, replace_alpha=None,
-               **kwargs):
+def background(im, size, background=None, **kwargs):
     """
     Add borders of a certain color to make the resized image fit exactly within
     the dimensions given.
