@@ -1,6 +1,15 @@
 Changes
 =======
 
+2.3 (release pending)
+---------------------
+
+* New ``Alias`` namer.
+
+* Fix incorrect use of select_related for source thumbnail model.
+
+* Removed some vestigal processor arguments.
+
 2.2.1 (2014-12-30)
 ------------------
 
