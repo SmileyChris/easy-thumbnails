@@ -27,9 +27,10 @@ class FileManager(models.Manager):
             except self.model.DoesNotExist:
 
                 if check_cache_miss and storage.exists(name):
-                    # File already in storage, update cache
-                    obj = self.create(**kwargs)
-                    created = True
+                    # File already in storage, update cache. Using
+                    # get_or_create again in case this was updated while
+                    # storage.exists was running.
+                    obj, created = self.get_or_create(**kwargs)
                 else:
                     return
 

@@ -6,6 +6,8 @@ Changes
 
 * New ``Alias`` namer.
 
+* Avoid a potential concurrency issue with creating the cache.
+
 * Fix incorrect use of select_related for source thumbnail model.
 
 * Removed some vestigal processor arguments.
