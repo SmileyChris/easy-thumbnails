@@ -128,6 +128,7 @@ class ThumbnailNode(Node):
         return ''
 
 
+@register.tag
 def thumbnail(parser, token):
     """
     Creates a thumbnail of an ImageField.
@@ -228,6 +229,7 @@ def thumbnail(parser, token):
     return ThumbnailNode(source_var, opts=opts, context_name=context_name)
 
 
+@register.filter
 def thumbnailer(obj, relative_name=None):
     """
     Creates a thumbnailer from an object (usually a ``FileField``).
@@ -251,6 +253,7 @@ def thumbnailer(obj, relative_name=None):
     return get_thumbnailer(obj, relative_name=relative_name)
 
 
+@register.filter
 def thumbnailer_passive(obj):
     """
     Creates a thumbnailer from an object (usually a ``FileFile``) that won't
@@ -277,6 +280,7 @@ def thumbnailer_passive(obj):
     return thumbnailer
 
 
+@register.filter
 def thumbnail_url(source, alias):
     """
     Return the thumbnail url for a source file using an aliased set of
@@ -295,7 +299,3 @@ def thumbnail_url(source, alias):
     return thumb.url
 
 
-register.tag(thumbnail)
-register.filter(thumbnailer)
-register.filter(thumbnailer_passive)
-register.filter(thumbnail_url)
