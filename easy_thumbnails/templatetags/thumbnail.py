@@ -1,4 +1,6 @@
 import re
+from base64 import b64encode
+import mimetypes
 from django.utils import six
 
 from django.template import (
@@ -299,3 +301,24 @@ def thumbnail_url(source, alias):
     return thumb.url
 
 
+@register.filter
+def data_uri(thumbnail):
+    """
+    This filter will return the base64 encoded data URI for a given thumbnail object.
+
+    Example usage::
+
+        {% thumbnail sample_image 25x25 crop as thumb %}
+        <img src="{{ thumb|data_uri }}">
+
+    will for instance be rendered as:
+
+        <img src="data:image/png;base64,iVBORw0KGgo...">
+    """
+    try:
+        thumbnail.open('rb')
+        data = thumbnail.read()
+    finally:
+        thumbnail.close()
+    mime_type = mimetypes.guess_type(str(thumbnail.file))[0] or 'application/octet-stream'
+    return 'data:{0};base64,{1}'.format(mime_type, b64encode(data))
