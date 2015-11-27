@@ -340,6 +340,6 @@ class ThumbnailerDataUriTest(ThumbnailerBase):
             '{% thumbnail source 25x25 as thumb %}'
             '{{ thumb|data_uri }}'
         )
-        output = self.render_template(src)
-        startswith = 'data:application/octet-stream;base64,b&#39;/9j/4AAQSkZJRgABAQAAAQABAAD'
-        self.assertTrue(output.startswith(startswith))
+        output = self.render_template(src)[:64]
+        startswith = 'data:application/octet-stream;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
+        self.assertEqual(output, startswith)
