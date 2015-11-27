@@ -321,4 +321,5 @@ def data_uri(thumbnail):
     finally:
         thumbnail.close()
     mime_type = mimetypes.guess_type(str(thumbnail.file))[0] or 'application/octet-stream'
-    return 'data:{0};base64,{1}'.format(mime_type, b64encode(data))
+    data = b64encode(data).decode('utf-8')
+    return 'data:{0};base64,{1}'.format(mime_type, data)
