@@ -331,3 +331,15 @@ class ThumbnailTagAliasTest(ThumbnailerBase):
             bw=True,
             upscale=True,
         )
+
+
+class ThumbnailerDataUriTest(ThumbnailerBase):
+
+    def test_data_uri(self):
+        src = (
+            '{% thumbnail source 25x25 as thumb %}'
+            '{{ thumb|data_uri }}'
+        )
+        output = self.render_template(src)[:64]
+        startswith = 'data:application/octet-stream;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
+        self.assertEqual(output, startswith)

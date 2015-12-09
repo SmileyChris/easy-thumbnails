@@ -1,4 +1,6 @@
 import re
+from base64 import b64encode
+import mimetypes
 from django.utils import six
 
 from django.template import (
@@ -128,6 +130,7 @@ class ThumbnailNode(Node):
         return ''
 
 
+@register.tag
 def thumbnail(parser, token):
     """
     Creates a thumbnail of an ImageField.
@@ -228,6 +231,7 @@ def thumbnail(parser, token):
     return ThumbnailNode(source_var, opts=opts, context_name=context_name)
 
 
+@register.filter
 def thumbnailer(obj, relative_name=None):
     """
     Creates a thumbnailer from an object (usually a ``FileField``).
@@ -251,6 +255,7 @@ def thumbnailer(obj, relative_name=None):
     return get_thumbnailer(obj, relative_name=relative_name)
 
 
+@register.filter
 def thumbnailer_passive(obj):
     """
     Creates a thumbnailer from an object (usually a ``FileFile``) that won't
@@ -277,6 +282,7 @@ def thumbnailer_passive(obj):
     return thumbnailer
 
 
+@register.filter
 def thumbnail_url(source, alias):
     """
     Return the thumbnail url for a source file using an aliased set of
@@ -295,7 +301,25 @@ def thumbnail_url(source, alias):
     return thumb.url
 
 
-register.tag(thumbnail)
-register.filter(thumbnailer)
-register.filter(thumbnailer_passive)
-register.filter(thumbnail_url)
+@register.filter
+def data_uri(thumbnail):
+    """
+    This filter will return the base64 encoded data URI for a given thumbnail object.
+
+    Example usage::
+
+        {% thumbnail sample_image 25x25 crop as thumb %}
+        <img src="{{ thumb|data_uri }}">
+
+    will for instance be rendered as:
+
+        <img src="data:image/png;base64,iVBORw0KGgo...">
+    """
+    try:
+        thumbnail.open('rb')
+        data = thumbnail.read()
+    finally:
+        thumbnail.close()
+    mime_type = mimetypes.guess_type(str(thumbnail.file))[0] or 'application/octet-stream'
+    data = b64encode(data).decode('utf-8')
+    return 'data:{0};base64,{1}'.format(mime_type, data)
