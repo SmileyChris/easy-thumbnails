@@ -12,10 +12,19 @@ Changes
 
 * Removed some vestigal processor arguments.
 
+* Allow ``HIGH_RESOLUTION`` argument on thumbnail template tag.
+
+* Add logic to correctly handle thumbnail images on deferred models (e.g. when
+  using ``.only()``).
+
+* Add a ``data_uri`` filter to allow rendering of an image inline as a data
+  uri.
+
 2.2.1 (2014-12-30)
 ------------------
 
-* Fixed: Option ``zoom`` can also be used by itself, without combining it with ``crop``.
+* Fixed: Option ``zoom`` can also be used by itself, without combining it with
+  ``crop``.
 
 2.2 (2014-10-04)
 ----------------
