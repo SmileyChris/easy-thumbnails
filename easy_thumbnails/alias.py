@@ -115,7 +115,12 @@ class Aliases(object):
             return target
         if not hasattr(target, 'instance'):
             return None
-        model = target.instance.__class__
+
+        if getattr(target.instance, '_deferred', False):
+            model = target.instance._meta.proxy_for_model
+        else:
+            model = target.instance.__class__
+
         return '%s.%s.%s' % (
             model._meta.app_label,
             model.__name__,
