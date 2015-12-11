@@ -222,8 +222,8 @@ Where the image string is relative to your default storage (usually the
 
 .. _thumbnailer_filters:
 
-``thumbnailer`` filters
------------------------
+Other ``thumbnailer`` filters
+-----------------------------
 
 There are two filters that you can use if you want to get direct access to a
 thumbnailer in your template. This can be useful when dealing with aliased
@@ -232,6 +232,11 @@ thumbnails.
 .. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnailer
 
 .. autofunction:: easy_thumbnails.templatetags.thumbnail.thumbnailer_passive
+
+Finally, if you want to have an image inserted inline into the template as a
+data URI, use this filter:
+
+.. autofunction:: easy_thumbnails.templatetags.thumbnail.data_uri
 
 
 Models
