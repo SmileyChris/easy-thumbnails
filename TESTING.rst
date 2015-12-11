@@ -10,7 +10,7 @@ just as relevant for Debian)::
 
 	sudo add-apt-repository ppa:fkrull/deadsnakes
 	sudo apt-get update
-	sudo apt-get install python2.5 python2.5-dev python2.6 python2.6-dev
+	sudo apt-get install python2.6 python2.6-dev
 
 	sudo apt-get install build-essential python-dev python3-dev 
 	sudo apt-get install libjpeg8-dev zlib1g-dev
