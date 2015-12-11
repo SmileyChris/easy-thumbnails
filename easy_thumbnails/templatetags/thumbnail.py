@@ -18,6 +18,7 @@ RE_SIZE = re.compile(r'(\d+)x(\d+)$')
 
 VALID_OPTIONS = utils.valid_processor_options()
 VALID_OPTIONS.remove('size')
+VALID_OPTIONS.append('HIGH_RESOLUTION')
 
 
 def split_args(args):

@@ -1,3 +1,5 @@
+from os import path
+
 from django.template import Template, Context, TemplateSyntaxError
 try:
     from PIL import Image
@@ -198,6 +200,17 @@ class ThumbnailTagTest(Base):
         expected = self.verify_thumbnail((100, 75), {'size': (100, 0)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
+
+    def test_high_resolution(self):
+        output = self.render_template(
+            'src="{% thumbnail source 80x80 HIGH_RESOLUTION %}"')
+        expected = self.verify_thumbnail((80, 60), {'size': (80, 80)})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="%s"' % expected_url)
+        base, ext = path.splitext(expected)
+        hires_thumb_file = ''.join([base + '@2x', ext])
+        self.assertTrue(
+            self.storage.exists(hires_thumb_file), hires_thumb_file)
 
 
 class ThumbnailerBase(Base):
