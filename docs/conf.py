@@ -13,12 +13,17 @@
 
 import os
 import sys
+import django
 from django.conf import settings
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-settings.configure(SECRET_KEY='easy')
+settings.configure(
+    SECRET_KEY='easy',
+    INSTALLED_APPS=['easy_thumbnails'],
+)
+django.setup()
 
 import easy_thumbnails
 
