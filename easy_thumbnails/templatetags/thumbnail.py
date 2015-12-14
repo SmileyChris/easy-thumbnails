@@ -295,10 +295,7 @@ def thumbnail_url(source, alias):
 
         <img src="{{ person.photo|thumbnail_url:'small' }}" alt="">
     """
-    try:
-        thumb = get_thumbnailer(source)[alias]
-    except Exception:
-        return ''
+    thumb = get_thumbnailer(source)[alias]
     return thumb.url
 
 
