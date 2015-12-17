@@ -172,7 +172,7 @@ def thumbnail(parser, token):
     use the variable like a standard ``ImageFieldFile`` object::
 
         {% thumbnail obj.picture 200x200 upscale as thumb %}
-        <img href="{{ thumb.url }}"
+        <img src="{{ thumb.url }}"
              width="{{ thumb.width }}"
              height="{{ thumb.height }}" />
 
