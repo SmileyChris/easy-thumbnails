@@ -299,7 +299,7 @@ def thumbnail_url(source, alias):
         thumb = get_thumbnailer(source)[alias]
     except Exception as e:
         if settings.THUMBNAIL_DEBUG:
-            raise
+            raise e
         return ''
     return thumb.url
 
