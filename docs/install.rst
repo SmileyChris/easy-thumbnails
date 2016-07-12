@@ -50,7 +50,7 @@ In your Django project's settings module, add easy-thumbnails to your
         'easy_thumbnails',
     )
 
-If you are using Django 1.7, run ``python manage.py migrate easy_thumbnails``.
+If you are using Django 1.7 or later, run ``python manage.py migrate easy_thumbnails``.
 Otherwise, just run ``python manage.py syncdb``.
 
 You're done! You'll want to head on over now to the
