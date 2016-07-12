@@ -18,3 +18,7 @@ just as relevant for Debian)::
 For Ubuntu >=14.04, you'll also want::
 
     sudo apt-get install python3.3 python3.3-dev
+
+For Ubuntu >=16.04, you'll also want::
+
+    sudo apt-get install python3.4 python3.4-dev

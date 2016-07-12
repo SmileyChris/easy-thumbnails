@@ -3,8 +3,8 @@ python: 2.7
 env:
     - TOX_ENV=lts
     - TOX_ENV=old
+    - TOX_ENV=old-lts
     - TOX_ENV=py27
-    - TOX_ENV=py33
     - TOX_ENV=py34
     - TOX_ENV=docs
 install: pip install tox
