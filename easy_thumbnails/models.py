@@ -72,7 +72,8 @@ class Source(File):
 
 
 class Thumbnail(File):
-    source = models.ForeignKey(Source, related_name='thumbnails')
+    source = models.ForeignKey(Source, related_name='thumbnails',
+                               on_delete=models.CASCADE)
 
     objects = ThumbnailManager()
 
@@ -81,7 +82,8 @@ class Thumbnail(File):
 
 
 class ThumbnailDimensions(models.Model):
-    thumbnail = models.OneToOneField(Thumbnail, related_name="dimensions")
+    thumbnail = models.OneToOneField(Thumbnail, related_name="dimensions",
+                                     on_delete=models.CASCADE)
     width = models.PositiveIntegerField(null=True)
     height = models.PositiveIntegerField(null=True)
 

@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('storage_hash', models.CharField(max_length=40, db_index=True)),
                 ('name', models.CharField(max_length=255, db_index=True)),
                 ('modified', models.DateTimeField(default=django.utils.timezone.now)),
-                ('source', models.ForeignKey(related_name='thumbnails', to='easy_thumbnails.Source')),
+                ('source', models.ForeignKey(on_delete=models.CASCADE, related_name='thumbnails', to='easy_thumbnails.Source')),
             ],
             options={
             },
