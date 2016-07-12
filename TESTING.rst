@@ -15,6 +15,6 @@ just as relevant for Debian)::
 	sudo apt-get install build-essential python-dev python3-dev 
 	sudo apt-get install libjpeg8-dev zlib1g-dev
 
-For Ubuntu >=14.04, you'll also want:
+For Ubuntu >=14.04, you'll also want::
 
     sudo apt-get install python3.3 python3.3-dev
