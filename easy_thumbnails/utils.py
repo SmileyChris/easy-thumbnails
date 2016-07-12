@@ -123,17 +123,17 @@ def exif_orientation(im):
         if orientation == 2:
             im = im.transpose(Image.FLIP_LEFT_RIGHT)
         elif orientation == 3:
-            im = im.rotate(180)
+            im = im.transpose(Image.ROTATE_180)
         elif orientation == 4:
             im = im.transpose(Image.FLIP_TOP_BOTTOM)
         elif orientation == 5:
-            im = im.rotate(-90).transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT)
         elif orientation == 6:
-            im = im.rotate(-90)
+            im = im.transpose(Image.ROTATE_270)
         elif orientation == 7:
-            im = im.rotate(90).transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image.ROTATE_90).transpose(Image.FLIP_LEFT_RIGHT)
         elif orientation == 8:
-            im = im.rotate(90)
+            im = im.transpose(Image.ROTATE_90)
     return im
 
 
