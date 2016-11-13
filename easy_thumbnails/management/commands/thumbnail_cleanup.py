@@ -121,27 +121,31 @@ def queryset_iterator(queryset, chunksize=1000):
 class Command(BaseCommand):
     help = """ Deletes thumbnails that no longer have an original file. """
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        # Named (optional) arguments
+        parser.add_argument(
             '--dry-run',
             action='store_true',
             dest='dry_run',
             default=False,
-            help='Dry run the execution.'),
-        make_option(
+            help='Dry run the execution.'
+        )
+
+        parser.add_argument(
             '--last-n-days',
             action='store',
             dest='last_n_days',
             default=0,
-            type='int',
-            help='The number of days back in time to clean thumbnails for.'),
-        make_option(
+            type=int,
+            help='The number of days back in time to clean thumbnails for.'
+        )
+
+        parser.add_argument(
             '--path',
             action='store',
             dest='cleanup_path',
-            type='string',
-            help='Specify a path to clean up.'),
-    )
+            help='Specify a path to clean up.'
+        )
 
     def handle(self, *args, **options):
         tcc = ThumbnailCollectionCleaner()
