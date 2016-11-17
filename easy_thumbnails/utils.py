@@ -1,6 +1,8 @@
 import hashlib
 import inspect
 import math
+
+import django
 from django.utils import six
 
 from django.utils.functional import LazyObject
@@ -143,7 +145,10 @@ def get_modified_time(storage, name):
     datetime.
     """
     try:
-        modified_time = storage.modified_time(name)
+        if django.VERSION >= (1,10):
+            return storage.get_modified_time(name)
+        else:
+            modified_time = storage.modified_time(name)
     except OSError:
         return 0
     except NotImplementedError:

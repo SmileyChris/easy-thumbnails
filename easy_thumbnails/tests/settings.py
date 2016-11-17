@@ -14,6 +14,11 @@ DATABASES = {
     }
 }
 
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+}]
+
+
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sites',
