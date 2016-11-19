@@ -6,6 +6,15 @@ from django.utils import timezone
 from easy_thumbnails import utils, signal_handlers
 from easy_thumbnails.conf import settings
 
+if settings.THUMBNAIL_CACHE:
+    try:
+        from django.core.cache import caches
+    except ImportError:
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured(
+                'You are trying to use the cache on a version of Django '
+                'that does not support caching')
+
 
 class FileManager(models.Manager):
 
@@ -13,6 +22,9 @@ class FileManager(models.Manager):
                  check_cache_miss=False, **kwargs):
         kwargs.update(dict(storage_hash=utils.get_storage_hash(storage),
                            name=name))
+        if settings.THUMBNAIL_CACHE:
+            cache = caches[settings.THUMBNAIL_CACHE]
+            cache_key = self._get_cache_key(kwargs)
         if create:
             if update_modified:
                 defaults = kwargs.setdefault('defaults', {})
@@ -21,27 +33,38 @@ class FileManager(models.Manager):
         else:
             created = False
             kwargs.pop('defaults', None)
-            try:
-                manager = self._get_thumbnail_manager()
-                obj = manager.get(**kwargs)
-            except self.model.DoesNotExist:
+            obj = None
+            if settings.THUMBNAIL_CACHE:
+                obj = cache.get(cache_key)
+            if obj is None:
+                try:
+                    manager = self._get_thumbnail_manager()
+                    obj = manager.get(**kwargs)
+                except self.model.DoesNotExist:
 
-                if check_cache_miss and storage.exists(name):
-                    # File already in storage, update cache. Using
-                    # get_or_create again in case this was updated while
-                    # storage.exists was running.
-                    obj, created = self.get_or_create(**kwargs)
-                else:
-                    return
+                    if check_cache_miss and storage.exists(name):
+                        # File already in storage, update cache. Using
+                        # get_or_create again in case this was updated while
+                        # storage.exists was running.
+                        obj, created = self.get_or_create(**kwargs)
+                    else:
+                        return
 
         if update_modified and not created:
             if obj.modified != update_modified:
-                self.filter(pk=obj.pk).update(modified=update_modified)
+                obj.modified = update_modified
+                obj.save()
+
+        if settings.THUMBNAIL_CACHE:
+            cache.set(cache_key, obj, None)
 
         return obj
 
     def _get_thumbnail_manager(self):
         return self
+
+    def _get_cache_key(self, kwargs):
+        return 'et:source:{storage_hash}:{name}'.format(**kwargs)
 
 
 class ThumbnailManager(FileManager):
@@ -50,6 +73,9 @@ class ThumbnailManager(FileManager):
         if settings.THUMBNAIL_CACHE_DIMENSIONS:
             return self.select_related("dimensions")
         return self
+
+    def _get_cache_key(self, kwargs):
+        return 'et:thumbnail:{storage_hash}:{name}:{source_id}'.format(**kwargs)
 
 
 class File(models.Model):
