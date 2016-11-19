@@ -75,6 +75,7 @@ class ThumbnailManager(FileManager):
         return self
 
     def _get_cache_key(self, kwargs):
+        kwargs['source_id'] = kwargs['source'].pk
         return 'et:thumbnail:{storage_hash}:{name}:{source_id}'.format(**kwargs)
 
 
