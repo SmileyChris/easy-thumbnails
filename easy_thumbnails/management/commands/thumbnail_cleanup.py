@@ -121,7 +121,7 @@ def queryset_iterator(queryset, chunksize=1000):
 class Command(BaseCommand):
     help = """ Deletes thumbnails that no longer have an original file. """
 
-    option_list = BaseCommand.option_list + (
+    option_list = getattr(BaseCommand, "option_list", ()) + (
         make_option(
             '--dry-run',
             action='store_true',
