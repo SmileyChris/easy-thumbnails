@@ -42,7 +42,7 @@ class Base(test.BaseTest):
             'strsize': '80x90',
             'invalid_strsize': ('1notasize2'),
             'invalid_q': 'notanumber'})
-        source = '{% load {} %}'.format(template_tag_library) + source
+        source = '{% load ' + template_tag_library + ' %}' + source
         return Template(source).render(context)
 
     def verify_thumbnail(self, expected_size, options, source_filename=None,
