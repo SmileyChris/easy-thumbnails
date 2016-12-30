@@ -118,30 +118,41 @@ def queryset_iterator(queryset, chunksize=1000):
             gc.collect()
 
 
-class Command(BaseCommand):
-    help = """ Deletes thumbnails that no longer have an original file. """
-
-    option_list = BaseCommand.option_list + (
-        make_option(
+def _add_options(target):
+    return (
+        target(
             '--dry-run',
             action='store_true',
             dest='dry_run',
             default=False,
             help='Dry run the execution.'),
-        make_option(
+        target(
             '--last-n-days',
             action='store',
             dest='last_n_days',
             default=0,
-            type='int',
+            type=int,
             help='The number of days back in time to clean thumbnails for.'),
-        make_option(
+        target(
             '--path',
             action='store',
             dest='cleanup_path',
-            type='string',
-            help='Specify a path to clean up.'),
+            type=unicode,
+            help='Specify a path to clean up.'
+        )
     )
+
+
+class Command(BaseCommand):
+    """ Deletes thumbnails that no longer have an original file. """
+
+    if hasattr(BaseCommand, 'option_list'):
+        # Django < 1.10
+        option_list = BaseCommand.option_list + _add_options(make_option)
+    else:
+        # Django >= 1.10
+        def add_arguments(self, parser):
+            _add_options(parser.add_argument)
 
     def handle(self, *args, **options):
         tcc = ThumbnailCollectionCleaner()
