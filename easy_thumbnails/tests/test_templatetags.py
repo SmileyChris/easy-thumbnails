@@ -29,7 +29,7 @@ class Base(test.BaseTest):
         self.storage.delete_temporary_storage()
         super(Base, self).tearDown()
 
-    def render_template(self, source):
+    def render_template(self, source, template_tag_library='thumbnail'):
         source_image = get_thumbnailer(self.storage, self.filename)
         source_image.thumbnail_storage = self.storage
         context = Context({
@@ -42,7 +42,7 @@ class Base(test.BaseTest):
             'strsize': '80x90',
             'invalid_strsize': ('1notasize2'),
             'invalid_q': 'notanumber'})
-        source = '{% load thumbnail %}' + source
+        source = '{% load ' + template_tag_library + ' %}' + source
         return Template(source).render(context)
 
     def verify_thumbnail(self, expected_size, options, source_filename=None,
@@ -198,6 +198,24 @@ class ThumbnailTagTest(Base):
         # One dimensional resize
         output = self.render_template('src="{% thumbnail source 100x0 %}"')
         expected = self.verify_thumbnail((100, 75), {'size': (100, 0)})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="%s"' % expected_url)
+
+    def test_mirror_templatetag_library(self):
+        """Testing the mirror `easy_thumbnails_tags` templatetag library.
+
+        Testing the loading {% load easy_thumbnails_tags %} instead of
+        traditional {% load thumbnail %}.
+        """
+        # Set THUMBNAIL_DEBUG = True to make it easier to trace any failures
+        settings.THUMBNAIL_DEBUG = True
+
+        # Basic (just one basic test is enough)
+        output = self.render_template(
+            'src="{% thumbnail source 240x240 %}"',
+            'easy_thumbnails_tags'
+        )
+        expected = self.verify_thumbnail((240, 180), {'size': (240, 240)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
 
