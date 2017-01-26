@@ -1,6 +1,5 @@
 from django.core.files import storage as django_storage
 from django.db.models import FileField
-from django.db.models.query_utils import deferred_class_factory
 from django.db.models.signals import post_save, pre_save
 
 from easy_thumbnails import files, signal_handlers, signals, storage
@@ -164,6 +163,7 @@ class AliasTest(BaseTest):
 
     @unittest.skipUnless(loading, 'Only needed in Django <1.9')
     def test_deferred(self):
+        from django.db.models.query_utils import deferred_class_factory
         loading.cache.loaded = False
         deferred_profile = deferred_class_factory(models.Profile, ('logo',))
         instance = deferred_profile(avatar='avatars/test.jpg')

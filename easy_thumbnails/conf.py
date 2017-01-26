@@ -1,8 +1,8 @@
 from django.conf import settings as django_settings
-try:
-    from django.conf import BaseSettings
-except ImportError:  # Django <= 1.2
-    from django.conf import Settings as BaseSettings
+
+
+class BaseSettings(object):
+    pass
 
 
 class AppSettings(BaseSettings):
