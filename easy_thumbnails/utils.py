@@ -49,8 +49,8 @@ def valid_processor_options(processors=None):
     if processors is None:
         processors = [
             dynamic_import(p) for p in
-            settings.THUMBNAIL_PROCESSORS +
-            settings.THUMBNAIL_SOURCE_GENERATORS]
+            tuple(settings.THUMBNAIL_PROCESSORS) +
+            tuple(settings.THUMBNAIL_SOURCE_GENERATORS)]
     valid_options = set(['size', 'quality', 'subsampling'])
     for processor in processors:
         args = inspect.getargspec(processor)[0]
