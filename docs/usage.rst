@@ -291,6 +291,9 @@ For example, assuming an ``aardvark.jpg`` image exists in the default storage::
         thumbnail_options.update({'size': (size, size)})
         thumbnailer.get_thumbnail(thumbnail_options)
 
+    # or to get a thumbnail by alias
+    thumbnailer['large']
+
 Non-Django file objects
 -----------------------
 
