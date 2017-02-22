@@ -134,13 +134,13 @@ class Command(BaseCommand):
             action='store',
             dest='last_n_days',
             default=0,
-            type='int',
+            type=int,
             help='The number of days back in time to clean thumbnails for.'),
         make_option(
             '--path',
             action='store',
             dest='cleanup_path',
-            type='string',
+            type=str,
             help='Specify a path to clean up.'),
     )
 
@@ -156,13 +156,13 @@ class Command(BaseCommand):
             action='store',
             dest='last_n_days',
             default=0,
-            type='int',
+            type=int,
             help='The number of days back in time to clean thumbnails for.')
         parser.add_argument(
             '--path',
             action='store',
             dest='cleanup_path',
-            type='string',
+            type=str,
             help='Specify a path to clean up.')
 
     def handle(self, *args, **options):
