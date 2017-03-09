@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import codecs
 import os
+import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
@@ -50,7 +51,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'django>=1.4.2',
-        'pillow',
+        'pillow<4' if sys.version_info < (2, 7) else 'pillow',
     ],
     cmdclass={'test': DjangoTests},
     classifiers=[

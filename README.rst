@@ -86,7 +86,7 @@ same name (`thumbnail`) for the templatetag module::
 Fields
 ======
 
-You can use ``ThumbnailerImageField`` (or ``ThumbnailerFileField``) for easier
+You can use ``ThumbnailerImageField`` (or ``ThumbnailerField``) for easier
 access to retrieve or generate thumbnail images.
 
 For example::
