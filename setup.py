@@ -51,7 +51,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'django>=1.4.2',
-        'pillow<4' if sys.version < (2, 7) else 'pillow',
+        'pillow<4' if sys.version_info < (2, 7) else 'pillow',
     ],
     cmdclass={'test': DjangoTests},
     classifiers=[
