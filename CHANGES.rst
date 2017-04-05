@@ -1,6 +1,29 @@
 Changes
 =======
 
+2.4 (2017-04-05)
+----------------
+
+* New minimum requirement of Django 1.4 or 1.7+.
+
+* Fix EXIF orientation to use transpose.
+
+* Upgrades to avoid deprecation warnings.
+
+* Fix app settings not working in Django 1.11.
+
+* Fix a bad conditional check causing incorrect behaviour in autocropping
+  transparent images.
+
+* Django 1.8+ compatibility for ``thumbnail_cleanup`` command.
+
+* Add ``easy_thumbnails_tags`` template tag mirror to allow multiple
+  thumbnailer libraries to coexist happily.
+
+* Limit pillow to its final compatible version when on Python 2.6
+
+* Fix tests.
+
 2.3 (2015-12-11)
 ----------------
 
