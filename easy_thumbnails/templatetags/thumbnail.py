@@ -222,7 +222,7 @@ def thumbnail(parser, token):
     # All further arguments are options.
     args_list = split_args(args[3:]).items()
     for arg, value in args_list:
-        if arg in VALID_OPTIONS:
+        if arg in VALID_OPTIONS or hasattr(settings, 'THUMBNAIL_' + arg):
             if value and value is not True:
                 value = parser.compile_filter(value)
             opts[arg] = value
