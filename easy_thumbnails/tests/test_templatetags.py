@@ -1,3 +1,5 @@
+from os import path
+
 from django.template import Template, Context, TemplateSyntaxError
 try:
     from PIL import Image
@@ -27,7 +29,7 @@ class Base(test.BaseTest):
         self.storage.delete_temporary_storage()
         super(Base, self).tearDown()
 
-    def render_template(self, source):
+    def render_template(self, source, template_tag_library='thumbnail'):
         source_image = get_thumbnailer(self.storage, self.filename)
         source_image.thumbnail_storage = self.storage
         context = Context({
@@ -40,7 +42,7 @@ class Base(test.BaseTest):
             'strsize': '80x90',
             'invalid_strsize': ('1notasize2'),
             'invalid_q': 'notanumber'})
-        source = '{% load thumbnail %}' + source
+        source = '{% load ' + template_tag_library + ' %}' + source
         return Template(source).render(context)
 
     def verify_thumbnail(self, expected_size, options, source_filename=None,
@@ -199,6 +201,35 @@ class ThumbnailTagTest(Base):
         expected_url = ''.join((settings.MEDIA_URL, expected))
         self.assertEqual(output, 'src="%s"' % expected_url)
 
+    def test_mirror_templatetag_library(self):
+        """Testing the mirror `easy_thumbnails_tags` templatetag library.
+
+        Testing the loading {% load easy_thumbnails_tags %} instead of
+        traditional {% load thumbnail %}.
+        """
+        # Set THUMBNAIL_DEBUG = True to make it easier to trace any failures
+        settings.THUMBNAIL_DEBUG = True
+
+        # Basic (just one basic test is enough)
+        output = self.render_template(
+            'src="{% thumbnail source 240x240 %}"',
+            'easy_thumbnails_tags'
+        )
+        expected = self.verify_thumbnail((240, 180), {'size': (240, 240)})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="%s"' % expected_url)
+
+    def test_high_resolution(self):
+        output = self.render_template(
+            'src="{% thumbnail source 80x80 HIGH_RESOLUTION %}"')
+        expected = self.verify_thumbnail((80, 60), {'size': (80, 80)})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="%s"' % expected_url)
+        base, ext = path.splitext(expected)
+        hires_thumb_file = ''.join([base + '@2x', ext])
+        self.assertTrue(
+            self.storage.exists(hires_thumb_file), hires_thumb_file)
+
 
 class ThumbnailerBase(Base):
     restore_settings = ['THUMBNAIL_ALIASES', 'THUMBNAIL_MEDIA_ROOT']
@@ -331,3 +362,15 @@ class ThumbnailTagAliasTest(ThumbnailerBase):
             bw=True,
             upscale=True,
         )
+
+
+class ThumbnailerDataUriTest(ThumbnailerBase):
+
+    def test_data_uri(self):
+        src = (
+            '{% thumbnail source 25x25 as thumb %}'
+            '{{ thumb|data_uri }}'
+        )
+        output = self.render_template(src)[:64]
+        startswith = 'data:application/octet-stream;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
+        self.assertEqual(output, startswith)

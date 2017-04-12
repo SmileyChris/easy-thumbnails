@@ -103,7 +103,7 @@ def autocrop(im, autocrop=False, **kwargs):
     """
     if autocrop:
         # If transparent, flatten.
-        if utils.is_transparent(im) and False:
+        if utils.is_transparent(im):
             no_alpha = Image.new('L', im.size, (255))
             no_alpha.paste(im, mask=im.split()[-1])
         else:

@@ -107,21 +107,22 @@ def queryset_iterator(queryset, chunksize=1000):
     The queryset iterator helps to keep the memory consumption down.
     And also making it easier to process for weaker computers.
     """
-
-    primary_key = 0
-    last_pk = queryset.order_by('-pk')[0].pk
-    queryset = queryset.order_by('pk')
-    while primary_key < last_pk:
-        for row in queryset.filter(pk__gt=primary_key)[:chunksize]:
-            primary_key = row.pk
-            yield row
-        gc.collect()
+    if queryset.exists():
+        primary_key = 0
+        last_pk = queryset.order_by('-pk')[0].pk
+        queryset = queryset.order_by('pk')
+        while primary_key < last_pk:
+            for row in queryset.filter(pk__gt=primary_key)[:chunksize]:
+                primary_key = row.pk
+                yield row
+            gc.collect()
 
 
 class Command(BaseCommand):
     help = """ Deletes thumbnails that no longer have an original file. """
 
-    option_list = BaseCommand.option_list + (
+    # Legacy options, not needed in Django 1.8+
+    option_list = getattr(BaseCommand, 'option_list', ()) + (
         make_option(
             '--dry-run',
             action='store_true',
@@ -142,6 +143,27 @@ class Command(BaseCommand):
             type='string',
             help='Specify a path to clean up.'),
     )
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            dest='dry_run',
+            default=False,
+            help='Dry run the execution.')
+        parser.add_argument(
+            '--last-n-days',
+            action='store',
+            dest='last_n_days',
+            default=0,
+            type='int',
+            help='The number of days back in time to clean thumbnails for.')
+        parser.add_argument(
+            '--path',
+            action='store',
+            dest='cleanup_path',
+            type='string',
+            help='Specify a path to clean up.')
 
     def handle(self, *args, **options):
         tcc = ThumbnailCollectionCleaner()

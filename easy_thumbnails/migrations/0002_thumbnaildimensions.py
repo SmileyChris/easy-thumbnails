@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='ThumbnailDimensions',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('thumbnail', models.OneToOneField(related_name='dimensions', to='easy_thumbnails.Thumbnail')),
+                ('thumbnail', models.OneToOneField(on_delete=models.CASCADE, related_name='dimensions', to='easy_thumbnails.Thumbnail')),
                 ('width', models.PositiveIntegerField(null=True)),
                 ('height', models.PositiveIntegerField(null=True)),
             ],

@@ -119,9 +119,11 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
             return dimensions_cache.width, dimensions_cache.height
     dimensions = get_image_dimensions(file, close=close)
     if settings.THUMBNAIL_CACHE_DIMENSIONS and thumbnail:
-        dimensions_cache = models.ThumbnailDimensions(thumbnail=thumbnail)
-        dimensions_cache.width, dimensions_cache.height = dimensions
-        dimensions_cache.save()
+        # Using get_or_create in case dimensions were created
+        # while running get_image_dimensions.
+        models.ThumbnailDimensions.objects.get_or_create(
+            thumbnail=thumbnail,
+            defaults={'width': dimensions[0], 'height': dimensions[1]})
     return dimensions
 
 

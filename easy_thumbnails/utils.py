@@ -49,8 +49,8 @@ def valid_processor_options(processors=None):
     if processors is None:
         processors = [
             dynamic_import(p) for p in
-            settings.THUMBNAIL_PROCESSORS +
-            settings.THUMBNAIL_SOURCE_GENERATORS]
+            tuple(settings.THUMBNAIL_PROCESSORS) +
+            tuple(settings.THUMBNAIL_SOURCE_GENERATORS)]
     valid_options = set(['size', 'quality', 'subsampling'])
     for processor in processors:
         args = inspect.getargspec(processor)[0]
@@ -123,17 +123,17 @@ def exif_orientation(im):
         if orientation == 2:
             im = im.transpose(Image.FLIP_LEFT_RIGHT)
         elif orientation == 3:
-            im = im.rotate(180)
+            im = im.transpose(Image.ROTATE_180)
         elif orientation == 4:
             im = im.transpose(Image.FLIP_TOP_BOTTOM)
         elif orientation == 5:
-            im = im.rotate(-90).transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT)
         elif orientation == 6:
-            im = im.rotate(-90)
+            im = im.transpose(Image.ROTATE_270)
         elif orientation == 7:
-            im = im.rotate(90).transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image.ROTATE_90).transpose(Image.FLIP_LEFT_RIGHT)
         elif orientation == 8:
-            im = im.rotate(90)
+            im = im.transpose(Image.ROTATE_90)
     return im
 
 

@@ -2,8 +2,9 @@
 Installation
 ============
 
-Before installing easy-thumbnails, you'll obviously need to have copy of Django
-installed. For the |version| release, Django 1.4 and up is supported.
+Before installing easy-thumbnails, you'll obviously need to have copy of
+Django installed. For the |version| release, both Django 1.4 and Django 1.7 or
+above is supported.
 
 By default, all of the image manipulation is handled by the
 `Python Imaging Library`__ (a.k.a. PIL), so you'll probably want that
@@ -50,7 +51,7 @@ In your Django project's settings module, add easy-thumbnails to your
         'easy_thumbnails',
     )
 
-If you are using Django 1.7, run ``python manage.py migrate easy_thumbnails``.
+If you are using Django 1.7 or later, run ``python manage.py migrate easy_thumbnails``.
 Otherwise, just run ``python manage.py syncdb``.
 
 You're done! You'll want to head on over now to the

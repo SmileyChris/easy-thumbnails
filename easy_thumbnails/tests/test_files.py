@@ -5,7 +5,7 @@ except ImportError:
 from os import path
 
 from django.test import TestCase
-from django.utils import six, unittest
+from django.utils import six
 from easy_thumbnails import files, utils, signals, exceptions, models, engine
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
@@ -18,6 +18,10 @@ try:
     from testfixtures import LogCapture
 except ImportError:
     LogCapture = None
+try:
+    from django.utils import unittest
+except ImportError:  # Django 1.7+ no longer needs custom unittest module.
+    import unittest
 
 
 class FilesTest(test.BaseTest):

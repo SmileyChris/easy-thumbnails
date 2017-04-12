@@ -1,8 +1,31 @@
 Changes
 =======
 
-2.3 (release pending)
----------------------
+2.4.1 (2017-04-05)
+------------------
+
+* New minimum requirement of Django 1.4 or 1.7+.
+
+* Fix EXIF orientation to use transpose.
+
+* Upgrades to avoid deprecation warnings.
+
+* Fix app settings not working in Django 1.11.
+
+* Fix a bad conditional check causing incorrect behaviour in autocropping
+  transparent images.
+
+* Django 1.8+ compatibility for ``thumbnail_cleanup`` command.
+
+* Add ``easy_thumbnails_tags`` template tag mirror to allow multiple
+  thumbnailer libraries to coexist happily.
+
+* Limit pillow to its final compatible version when on Python 2.6
+
+* Fix tests.
+
+2.3 (2015-12-11)
+----------------
 
 * New ``Alias`` namer.
 
@@ -12,10 +35,19 @@ Changes
 
 * Removed some vestigal processor arguments.
 
+* Allow ``HIGH_RESOLUTION`` argument on thumbnail template tag.
+
+* Add logic to correctly handle thumbnail images on deferred models (e.g. when
+  using ``.only()``).
+
+* Add a ``data_uri`` filter to allow rendering of an image inline as a data
+  uri.
+
 2.2.1 (2014-12-30)
 ------------------
 
-* Fixed: Option ``zoom`` can also be used by itself, without combining it with ``crop``.
+* Fixed: Option ``zoom`` can also be used by itself, without combining it with
+  ``crop``.
 
 2.2 (2014-10-04)
 ----------------
