@@ -1,4 +1,5 @@
 from django.db.models.fields.files import FileField, ImageField
+from django.core.files.storage import default_storage
 from easy_thumbnails import files
 
 
@@ -15,7 +16,7 @@ class ThumbnailerField(FileField):
     def __init__(self, *args, **kwargs):
         # Arguments not explicitly defined so that the normal ImageField
         # positional arguments can be used.
-        self.thumbnail_storage = kwargs.pop('thumbnail_storage', None)
+        self.thumbnail_storage = kwargs.pop('thumbnail_storage', default_storage)
 
         super(ThumbnailerField, self).__init__(*args, **kwargs)
 
