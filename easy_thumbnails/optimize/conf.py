@@ -5,7 +5,7 @@ from easy_thumbnails.conf import Settings
 class OptimizeSettings(Settings):
     THUMBNAIL_OPTIMIZE_COMMAND = {'png': None, 'jpeg': None, 'gif': None}
     """
-    Postprocess thumbnails of type PNG, GIF or JEPG after transformation but
+    Postprocess thumbnails of type PNG, GIF or JPEG after transformation but
     before storage.
 
     Apply an external post processing program to images after they have been
