@@ -143,7 +143,11 @@ def get_modified_time(storage, name):
     datetime.
     """
     try:
-        modified_time = storage.modified_time(name)
+        try:
+            # Prefer Django 1.10 API and fall back to old one
+            modified_time = storage.get_modified_time(name)
+        except AttributeError:
+            modified_time = storage.modified_time(name)
     except OSError:
         return 0
     except NotImplementedError:
