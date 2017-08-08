@@ -55,6 +55,10 @@ def save_image(image, destination=None, filename=None, **options):
         options.setdefault('quality', 85)
     saved = False
     if format == 'JPEG':
+        if image.mode.endswith('A'):
+            # From PIL 4.2, saving an image with a transparency layer raises an
+            # IOError, so explicitly remove it.
+            image = image.convert(image.mode[:-1])
         if settings.THUMBNAIL_PROGRESSIVE and (
                 max(image.size) >= settings.THUMBNAIL_PROGRESSIVE):
             options['progressive'] = True
