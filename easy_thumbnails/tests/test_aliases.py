@@ -10,10 +10,7 @@ try:
     from django.db.models import loading
 except ImportError:  # Removed in Django 1.9
     loading = None
-try:
-    from django.utils import unittest
-except ImportError:  # Django 1.7+ no longer needs custom unittest module.
-    import unittest
+import unittest
 
 
 class BaseTest(utils.BaseTest):

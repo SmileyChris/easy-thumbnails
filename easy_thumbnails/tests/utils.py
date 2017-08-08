@@ -4,10 +4,7 @@ try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
     from django.utils.six import BytesIO
-try:
-    from unittest import skipUnless
-except ImportError:  # Python 2.6
-    from django.utils.unittest import skipUnless
+from unittest import skipUnless
 
 import django
 from django.core.exceptions import ImproperlyConfigured

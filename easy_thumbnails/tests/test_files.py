@@ -18,10 +18,7 @@ try:
     from testfixtures import LogCapture
 except ImportError:
     LogCapture = None
-try:
-    from django.utils import unittest
-except ImportError:  # Django 1.7+ no longer needs custom unittest module.
-    import unittest
+import unittest
 
 
 class FilesTest(test.BaseTest):
