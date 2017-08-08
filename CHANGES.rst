@@ -1,6 +1,11 @@
 Changes
 =======
 
+HEAD
+----
+
+* Supported Django versions are now 1.8 or 1.10+.
+
 2.4.1 (2017-04-05)
 ------------------
 
