@@ -4,7 +4,9 @@ Changes
 HEAD
 ----
 
-* Supported Django versions are now 1.8 or 1.10+.
+* Supported Django versions are now 1.8 or 1.10+, Python 2.7 minimum.
+
+* Fix IOError saving JPEG files with transparency on Pillow 4.2+.
 
 2.4.1 (2017-04-05)
 ------------------
