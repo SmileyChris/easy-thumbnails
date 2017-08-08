@@ -6,6 +6,5 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  - "3.6-dev"
 install: pip install tox-travis
 script: tox
