@@ -680,7 +680,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         # Next, delete the source image.
         super(ThumbnailerFieldFile, self).delete(*args, **kwargs)
         # Finally, delete the source cache entry.
-        if source_cache:
+        if source_cache and source_cache.pk is not None:
             source_cache.delete()
 
     delete.alters_data = True
