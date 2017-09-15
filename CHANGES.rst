@@ -1,12 +1,17 @@
 Changes
 =======
 
-HEAD
-----
+2.4.2 (2017-09-14)
+------------------
 
 * Supported Django versions are now 1.8 or 1.10+, Python 2.7 minimum.
 
 * Fix IOError saving JPEG files with transparency on Pillow 4.2+.
+
+* Fix #450, #473: fixed int/string is not a callable in management command.
+
+* Fix #456: Delete method of ThumbnailerFieldFile is called twice.
+
 
 2.4.1 (2017-04-05)
 ------------------
