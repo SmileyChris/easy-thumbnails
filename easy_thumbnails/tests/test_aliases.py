@@ -264,6 +264,24 @@ class GenerationTest(GenerationBase):
         files = self.fake_save(profile)
         self.assertEqual(len(files), 0)
 
+    def test_clearable(self):
+        """
+        A ClearablFileInput will set field value to False before pre_save
+        """
+        profile = models.Profile(avatar='avatars/test.jpg')
+        cls = profile.__class__
+
+        profile.avatar = False
+        pre_save.send(sender=cls, instance=profile)
+
+        # Saving will then properly clear
+        profile.avatar = ''
+        post_save.send(sender=cls, instance=profile)
+
+        # FileField is cleared, but not explicitly deleted, file remains
+        files = self.storage.listdir('avatars')[1]
+        self.assertEqual(len(files), 1)
+
     def test_standard_filefield(self):
         profile = models.Profile(avatar='avatars/test.jpg')
         # Attach a File object to the FileField descriptor, emulating an

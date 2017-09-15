@@ -17,7 +17,8 @@ def find_uncommitted_filefields(sender, instance, **kwargs):
         fields = update_fields.intersection(fields)
     for field in fields:
         if isinstance(field, FileField):
-            if not getattr(instance, field.name)._committed:
+            fieldfile = getattr(instance, field.name)
+            if fieldfile and not fieldfile._committed:
                 uncommitted.append(field.name)
 
 
