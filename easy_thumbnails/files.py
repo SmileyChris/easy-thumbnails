@@ -727,11 +727,11 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
                                         storage=self.thumbnail_storage)
 
     def __getstate__(self):
-        state = super().__getstate__()
+        state = super(ThumbnailerFieldFile, self).__getstate__()
         state.update({
             k: v
             for k, v in self.__dict__.items()
-            if k.startswith('thumbnail') or k in ['generate', 'remote_source']
+            if k.startswith('thumbnail') or k in ['generate', 'remote_source', 'source_storage']
         })
         return state
 
