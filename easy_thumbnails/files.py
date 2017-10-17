@@ -726,6 +726,19 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
                     yield ThumbnailFile(name=thumbnail_cache.name,
                                         storage=self.thumbnail_storage)
 
+    def __getstate__(self):
+        state = super().__getstate__()
+        state.update({
+            k: v
+            for k, v in self.__dict__.items()
+            if k.startswith('thumbnail') or k in ['generate', 'remote_source']
+        })
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.__dict__['alias_target'] = self
+
 
 class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
     """
