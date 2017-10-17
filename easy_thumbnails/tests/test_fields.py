@@ -1,4 +1,5 @@
 import os
+import pickle
 
 from django.core.files.base import ContentFile
 
@@ -87,6 +88,12 @@ class ThumbnailerFieldTest(AliasBaseTest):
         instance.avatar.get_thumbnail({'size': (300, 300)})
         instance.avatar.get_thumbnail({'size': (200, 200)})
         self.assertEqual(len(list(instance.avatar.get_thumbnails())), 2)
+
+    def test_serialization(self):
+        instance = models.TestModel(avatar='avatars/avatar.jpg')
+        self.assertEqual('/media/avatars/avatar.jpg.100x100_q85.jpg', instance.avatar['small'].url)
+        new_instance = pickle.loads(pickle.dumps(instance))
+        self.assertEqual('/media/avatars/avatar.jpg.100x100_q85.jpg', new_instance.avatar['small'].url)
 
     def test_saving_image_field_with_resize_source(self):
         # Ensure that saving ThumbnailerImageField with resize_source enabled
