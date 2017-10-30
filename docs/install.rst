@@ -51,23 +51,7 @@ In your Django project's settings module, add easy-thumbnails to your
         'easy_thumbnails',
     )
 
-If you are using Django 1.7 or later, run ``python manage.py migrate easy_thumbnails``.
-Otherwise, just run ``python manage.py syncdb``.
+Run ``python manage.py migrate easy_thumbnails``.
 
 You're done! You'll want to head on over now to the
 :doc:`usage documentation <usage>`.
-
-
-Using with Django South
-=======================
-
-Django South migrations are stored in the ``south_migrations`` sub-package.
-
-In order to use South with easy_thumbnails, you will need to customize the
-``SOUTH_MIGRATION_MODULES`` setting:
-
-.. code-block:: python
-
-    SOUTH_MIGRATION_MODULES = {
-        'easy_thumbnails': 'easy_thumbnails.south_migrations',
-    }
