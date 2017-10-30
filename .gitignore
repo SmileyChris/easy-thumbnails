@@ -3,6 +3,7 @@ dist
 build
 docs/_build
 .tox/
+*.egg-info
 *.egg
 *.pyc
 reports/*
