@@ -27,8 +27,7 @@ Add ``easy_thumbnails`` to your ``INSTALLED_APPS`` setting::
         'easy_thumbnails',
     )
 
-If you have South installed then run ``manage.py migrate easy_thumbnails``,
-otherwise just run ``manage.py syncdb``.
+Run ``manage.py migrate easy_thumbnails``.
 
 
 Example usage

@@ -19,15 +19,6 @@ class ThumbnailerField(FileField):
 
         super(ThumbnailerField, self).__init__(*args, **kwargs)
 
-    def south_field_triple(self):
-        """
-        Return a suitable description of this field for South.
-        """
-        from south.modelsinspector import introspector
-        field_class = 'django.db.models.fields.files.FileField'
-        args, kwargs = introspector(self)
-        return (field_class, args, kwargs)
-
 
 class ThumbnailerImageField(ThumbnailerField, ImageField):
     """
@@ -52,12 +43,3 @@ class ThumbnailerImageField(ThumbnailerField, ImageField):
         self.resize_source = kwargs.pop('resize_source', None)
 
         super(ThumbnailerImageField, self).__init__(*args, **kwargs)
-
-    def south_field_triple(self):
-        """
-        Return a suitable description of this field for South.
-        """
-        from south.modelsinspector import introspector
-        field_class = 'django.db.models.fields.files.ImageField'
-        args, kwargs = introspector(self)
-        return (field_class, args, kwargs)
