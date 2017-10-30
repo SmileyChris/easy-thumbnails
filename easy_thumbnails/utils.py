@@ -53,7 +53,7 @@ def valid_processor_options(processors=None):
             tuple(settings.THUMBNAIL_SOURCE_GENERATORS)]
     valid_options = set(['size', 'quality', 'subsampling'])
     for processor in processors:
-        args = inspect.getargspec(processor)[0]
+        args = inspect.signature(processor)[0]
         # Add all arguments apart from the first (the source image).
         valid_options.update(args[1:])
     return list(valid_options)
