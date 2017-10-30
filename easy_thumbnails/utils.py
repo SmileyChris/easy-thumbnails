@@ -11,6 +11,11 @@ try:
     from PIL import Image
 except ImportError:
     import Image
+    
+try:
+     signature = inspect.signature
+except AttributeError:
+     signature = inspect.getargspec
 
 from easy_thumbnails.conf import settings
 
@@ -53,7 +58,7 @@ def valid_processor_options(processors=None):
             tuple(settings.THUMBNAIL_SOURCE_GENERATORS)]
     valid_options = set(['size', 'quality', 'subsampling'])
     for processor in processors:
-        args = inspect.getargspec(processor)[0]
+        args = signature(processor)[0]
         # Add all arguments apart from the first (the source image).
         valid_options.update(args[1:])
     return list(valid_options)
