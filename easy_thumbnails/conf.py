@@ -18,7 +18,6 @@ class AppSettings(BaseSettings):
         self.isolated = isolated
         self._changed = {}
         self._added = []
-        super(AppSettings, self).__init__(*args, **kwargs)
 
     def get_isolated(self):
         return self._isolated
