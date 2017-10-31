@@ -1,6 +1,17 @@
 Changes
 =======
 
+2.5.0 (2017-10-31)
+------------------
+
+* Support Django versions up to 1.11. Version 2.0 is in beta.
+
+* Fix: Pickle/unpickle machine. The ThumbnailerField fields no longer
+  generated thumbnails.
+
+* Removed all references to South migrations.
+
+
 2.4.2 (2017-09-14)
 ------------------
 
