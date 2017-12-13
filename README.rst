@@ -71,8 +71,8 @@ Python::
     options = {'size': (100, 100), 'crop': True}
     thumb_url = get_thumbnailer(profile.photo).get_thumbnail(options).url
 
-Using in combination with other thumbnalers
--------------------------------------------
+Using in combination with other thumbnailers
+--------------------------------------------
 
 Alternatively, you load the templatetags by {% load easy_thumbnails_tags %} 
 instead of traditional {% load thumbnail %}. It's especially useful in 
