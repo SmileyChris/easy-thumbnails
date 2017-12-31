@@ -8,7 +8,7 @@ If you want to test against other versions of Python then you might need to
 install them, too. Here's a quick log for installing them in Ubuntu (probably
 just as relevant for Debian)::
 
-	sudo add-apt-repository ppa:fkrull/deadsnakes
+	sudo add-apt-repository ppa:deadsnakes/ppa
 	sudo apt-get update
 	sudo apt-get install pythonX.Y pythonX.Y-dev
 
