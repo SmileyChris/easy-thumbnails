@@ -2,7 +2,7 @@
 Easy Thumbnails
 ===============
 
-.. image:: https://secure.travis-ci.org/SmileyChris/easy-thumbnails.png?branch=master
+.. image:: https://secure.travis-ci.org/SmileyChris/easy-thumbnails.svg?branch=master
     :alt: Build Status
     :target: http://travis-ci.org/SmileyChris/easy-thumbnails
 
