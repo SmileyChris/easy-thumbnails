@@ -105,19 +105,22 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
     storage_hash = utils.get_storage_hash(file.storage)
     dimensions = None
     dimensions_cache = None
-    try:
-        thumbnail = models.Thumbnail.objects.select_related('dimensions').get(
-            storage_hash=storage_hash, name=file.name)
-    except models.Thumbnail.DoesNotExist:
-        thumbnail = None
-    else:
+    if settings.THUMBNAIL_CACHE_DIMENSIONS:
         try:
-            dimensions_cache = thumbnail.dimensions
-        except models.ThumbnailDimensions.DoesNotExist:
-            dimensions_cache = None
-        if dimensions_cache:
-            return dimensions_cache.width, dimensions_cache.height
+            thumbnail = models.Thumbnail.objects.select_related('dimensions').get(
+                storage_hash=storage_hash, name=file.name)
+        except models.Thumbnail.DoesNotExist:
+            thumbnail = None
+        else:
+            try:
+                dimensions_cache = thumbnail.dimensions
+            except models.ThumbnailDimensions.DoesNotExist:
+                dimensions_cache = None
+            if dimensions_cache:
+                return dimensions_cache.width, dimensions_cache.height
+            
     dimensions = get_image_dimensions(file, close=close)
+    
     if settings.THUMBNAIL_CACHE_DIMENSIONS and thumbnail:
         # Using get_or_create in case dimensions were created
         # while running get_image_dimensions.
