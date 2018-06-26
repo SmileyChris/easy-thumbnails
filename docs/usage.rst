@@ -308,6 +308,6 @@ If you don't even need to save the thumbnail to storage because you are
 planning on using it in some more direct way, you can use the
 :meth:`Thumbnailer.generate_thumbnail` method. 
 
-Thumbnails generated in this manor don't use any cache reference, i.e. every
+Thumbnails generated in this manner don't use any cache reference, i.e. every
 call to :meth:`Thumbnailer.get_thumbnail` will generate a fresh thumbnail
 image.
