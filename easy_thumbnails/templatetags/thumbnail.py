@@ -1,3 +1,4 @@
+import os
 import re
 from base64 import b64encode
 import mimetypes
@@ -113,7 +114,13 @@ class ThumbnailNode(Node):
                 return self.bail_out(context)
 
         try:
-            thumbnail = get_thumbnailer(source).get_thumbnail(opts)
+            bits = False
+            if settings.THUMBNAIL_PREVENT_GIF_CONVERT:
+                bits = os.path.splitext(getattr(source, 'url', source.name))
+            if bits and bits[1] == '.gif':
+                thumbnail = source
+            else:
+                thumbnail = get_thumbnailer(source).get_thumbnail(opts)
         except Exception:
             if raise_errors:
                 raise

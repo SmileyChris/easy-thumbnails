@@ -186,6 +186,11 @@ class Settings(AppSettings):
     Instead of a tuple, you can also set this to ``True`` in order to always
     preserve the original extension.
     """
+    THUMBNAIL_PREVENT_GIF_CONVERT = False
+    """
+    Prevent thumbnail creation for GIFs. Created thumbnails for GIFs have no
+    preserved animations, set to ``True`` if you want to keep them.
+    """
     THUMBNAIL_TRANSPARENCY_EXTENSION = 'png'
     """
     The type of image to save thumbnails with a transparency layer (e.g. GIFs
