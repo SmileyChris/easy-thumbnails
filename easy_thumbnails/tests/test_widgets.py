@@ -1,6 +1,10 @@
-from easy_thumbnails import widgets
+from unittest.case import skipIf
+
+from django import VERSION as DJANGO_VERSION
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms.widgets import ClearableFileInput
+
+from easy_thumbnails import widgets
 from easy_thumbnails.tests import utils as test
 
 
@@ -49,7 +53,7 @@ class ImageClearableFileInput(test.BaseTest):
         self.assertIn(source_filename, html)
         self.assertIn('.80x80_', html)
 
-    def test_render_custom(self):
+    def test_render_custom_thumb_options(self):
         """
         The thumbnail is generated using the options provided to the widget.
         """
@@ -86,6 +90,30 @@ class ImageClearableFileInput(test.BaseTest):
         self.assertIn('.80x80_', html)
         self.assertIn('FOO', html)
 
+    @skipIf(DJANGO_VERSION < (1, 11), 'Custom widget renderer works for Django >=1.11')
+    def test_custom_renderer(self):
+        """
+        The form renderer used to render the thumbnail and the standard
+        ``ClearableFileInput`` output can be customized since Django 1.11
+        """
+        from django.forms.renderers import DjangoTemplates
+
+        source_filename = self.create_image(self.storage, 'test.jpg')
+        widget = widgets.ImageClearableFileInput()
+        class CustomRenderer(DjangoTemplates):
+            def render(self, template_name, context, request=None):
+                output = super(DjangoTemplates, self).render(template_name, context, request)
+                return output + ' FOOBAR'
+
+        with self.storage.open(source_filename) as source_file:
+            source_file.storage = self.storage
+            source_file.thumbnail_storage = self.storage
+            html = widget.render('photo', source_file, renderer=CustomRenderer())
+
+        self.assertIn(source_filename, html)
+        self.assertIn('.80x80_', html)
+        self.assertIn('FOOBAR', html)
+
     def test_render_without_value(self):
         """
         If value not passed, use super widget.
@@ -115,3 +143,4 @@ class ImageClearableFileInput(test.BaseTest):
         base_html = base_widget.render('photo', upload_file)
         self.assertEqual(base_html, html)
         self.assertNotIn(file_name, html)   # Widget is empty.
+
