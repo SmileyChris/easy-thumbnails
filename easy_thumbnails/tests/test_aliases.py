@@ -286,11 +286,12 @@ class GenerationTest(GenerationBase):
         profile = models.Profile(avatar='avatars/test.jpg')
         # Attach a File object to the FileField descriptor, emulating an
         # upload.
-        profile.logo = self.storage.open(
-            self.create_image(self.storage, 'avatars/second.jpg'))
-        list_files = self.fake_save(profile)
-        # 2 source, 2 thumbs.
-        self.assertEqual(len(list_files), 4)
+        with self.storage.open(self.create_image(self.storage, 'avatars/second.jpg')) as logo:
+            profile.logo = logo
+            list_files = self.fake_save(profile)
+
+            # 2 source, 2 thumbs.
+            self.assertEqual(len(list_files), 4)
 
 
 class GlobalGenerationTest(GenerationBase):

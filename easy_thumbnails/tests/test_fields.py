@@ -1,6 +1,7 @@
 import os
 import pickle
 
+from django import VERSION as DJANGO_VERSION
 from django.core.files.base import ContentFile
 
 from easy_thumbnails.tests import utils, models
@@ -95,16 +96,28 @@ class ThumbnailerFieldTest(AliasBaseTest):
         new_instance = pickle.loads(pickle.dumps(instance))
         self.assertEqual('/media/avatars/avatar.jpg.100x100_q85.jpg', new_instance.avatar['small'].url)
 
+    def _read_filefield(self, field):
+        if DJANGO_VERSION < (2, 0):
+            try:
+                return field.file.read()
+            finally:
+                field.file.close()
+
+        with field.open('rb') as fd:
+            return fd.read()
+
     def test_saving_image_field_with_resize_source(self):
         # Ensure that saving ThumbnailerImageField with resize_source enabled
         # using instance.field.save() does not fail
         instance = models.TestModel(avatar='avatars/avatar.jpg')
         instance.picture.save(
-            'file.jpg', ContentFile(instance.avatar.file.read()), save=False)
+            'file.jpg', ContentFile(self._read_filefield(instance.avatar)), save=False)
+
         self.assertEqual(instance.picture.width, 10)
 
     def test_saving_image_field_with_resize_source_different_ext(self):
         instance = models.TestModel(avatar='avatars/avatar.jpg')
         instance.picture.save(
-            'file.gif', ContentFile(instance.avatar.file.read()), save=False)
+            'file.gif', ContentFile(self._read_filefield(instance.avatar)), save=False)
+
         self.assertEqual(instance.picture.name, 'pictures/file.jpg')
