@@ -40,10 +40,12 @@ class ImageClearableFileInput(test.BaseTest):
         """
         source_filename = self.create_image(self.storage, 'test.jpg')
         widget = widgets.ImageClearableFileInput()
-        source_file = self.storage.open(source_filename)
-        source_file.storage = self.storage
-        source_file.thumbnail_storage = self.storage
-        html = widget.render('photo', source_file)
+
+        with self.storage.open(source_filename) as source_file:
+            source_file.storage = self.storage
+            source_file.thumbnail_storage = self.storage
+            html = widget.render('photo', source_file)
+
         self.assertIn(source_filename, html)
         self.assertIn('.80x80_', html)
 
@@ -54,10 +56,12 @@ class ImageClearableFileInput(test.BaseTest):
         source_filename = self.create_image(self.storage, 'test.jpg')
         options = {'size': (100, 500), 'quality': 90, 'crop': True}
         widget = widgets.ImageClearableFileInput(thumbnail_options=options)
-        source_file = self.storage.open(source_filename)
-        source_file.storage = self.storage
-        source_file.thumbnail_storage = self.storage
-        html = widget.render('photo', source_file)
+
+        with self.storage.open(source_filename) as source_file:
+            source_file.storage = self.storage
+            source_file.thumbnail_storage = self.storage
+            html = widget.render('photo', source_file)
+
         self.assertIn(source_filename, html)
         self.assertIn('.100x500_q90_crop.jpg', html)
 
@@ -72,10 +76,12 @@ class ImageClearableFileInput(test.BaseTest):
             u'%(template)s<br />'
             u'<a href="%(source_url)s">%(thumb)s</a> FOO'
         )
-        source_file = self.storage.open(source_filename)
-        source_file.storage = self.storage
-        source_file.thumbnail_storage = self.storage
-        html = widget.render('photo', source_file)
+
+        with self.storage.open(source_filename) as source_file:
+            source_file.storage = self.storage
+            source_file.thumbnail_storage = self.storage
+            html = widget.render('photo', source_file)
+
         self.assertIn(source_filename, html)
         self.assertIn('.80x80_', html)
         self.assertIn('FOO', html)
