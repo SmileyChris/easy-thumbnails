@@ -370,6 +370,9 @@ class FilesTest(test.BaseTest):
             (thumb.width, thumb.height),
             (dimensions.width, dimensions.height))
 
+        # close the filefield (cause unclosed file ResourceWarning)
+        thumb.close()
+
     def test_thumbnail_created_signal(self):
 
         def signal_handler(sender, **kwargs):

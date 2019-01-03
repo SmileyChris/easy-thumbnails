@@ -1,5 +1,7 @@
+from django import VERSION as DJANGO_VERSION
 from django.forms.widgets import ClearableFileInput
 from django.utils.safestring import mark_safe
+
 from easy_thumbnails.files import get_thumbnailer
 from easy_thumbnails.conf import settings
 
@@ -55,8 +57,13 @@ class ImageClearableFileInput(ClearableFileInput):
         return thumbnailer.get_thumbnail(self.thumbnail_options)
 
     def render(self, name, value, attrs=None, renderer=None):
-        output = super(ImageClearableFileInput, self).render(
-            name, value, attrs)
+        # Backward compatibility for Django < 1.11
+        if DJANGO_VERSION < (1, 11):
+            output = super(ImageClearableFileInput, self).render(
+                name, value, attrs)
+        else:
+            output = super(ImageClearableFileInput, self).render(
+                name, value, attrs, renderer)
         if not value or not hasattr(value, 'storage'):
             return output
         thumb = self.get_thumbnail(value)
