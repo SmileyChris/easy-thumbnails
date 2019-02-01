@@ -44,15 +44,12 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE = MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )
-
-# This is only needed for the 1.4.X test environment
-USE_TZ = True
 
 SECRET_KEY = 'easy'
