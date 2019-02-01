@@ -6,11 +6,6 @@ from easy_thumbnails import files, signal_handlers, signals, storage
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.tests import models, utils
-try:
-    from django.db.models import loading
-except ImportError:  # Removed in Django 1.9
-    loading = None
-import unittest
 
 
 class BaseTest(utils.BaseTest):
@@ -158,12 +153,9 @@ class AliasTest(BaseTest):
                     'small': {'crop': True, 'size': (20, 20)},
                 })
 
-    @unittest.skipUnless(loading, 'Only needed in Django <1.9')
     def test_deferred(self):
-        from django.db.models.query_utils import deferred_class_factory
-        loading.cache.loaded = False
-        deferred_profile = deferred_class_factory(models.Profile, ('logo',))
-        instance = deferred_profile(avatar='avatars/test.jpg')
+        models.Profile.objects.create(avatar='avatars/test.jpg')
+        instance = models.Profile.objects.only('avatar').first()
         self.assertEqual(
             aliases.get('small', target=instance.avatar),
             {'size': (20, 20), 'crop': True})

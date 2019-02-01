@@ -1,7 +1,5 @@
-from unittest.case import skipIf
-
-from django import VERSION as DJANGO_VERSION
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms.renderers import DjangoTemplates
 from django.forms.widgets import ClearableFileInput
 
 from easy_thumbnails import widgets
@@ -90,14 +88,11 @@ class ImageClearableFileInput(test.BaseTest):
         self.assertIn('.80x80_', html)
         self.assertIn('FOO', html)
 
-    @skipIf(DJANGO_VERSION < (1, 11), 'Custom widget renderer works for Django >=1.11')
     def test_custom_renderer(self):
         """
         The form renderer used to render the thumbnail and the standard
-        ``ClearableFileInput`` output can be customized since Django 1.11
+        ``ClearableFileInput`` output can be customized.
         """
-        from django.forms.renderers import DjangoTemplates
-
         source_filename = self.create_image(self.storage, 'test.jpg')
         widget = widgets.ImageClearableFileInput()
         class CustomRenderer(DjangoTemplates):
@@ -143,4 +138,3 @@ class ImageClearableFileInput(test.BaseTest):
         base_html = base_widget.render('photo', upload_file)
         self.assertEqual(base_html, html)
         self.assertNotIn(file_name, html)   # Widget is empty.
-
