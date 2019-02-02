@@ -19,6 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.auth',
     'django.contrib.admin',
+    'django.contrib.messages',
+    'django.contrib.sessions',
     'easy_thumbnails',
     'easy_thumbnails.optimize',
     'easy_thumbnails.tests.apps.EasyThumbnailsTestConfig',
@@ -42,11 +44,12 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 # This is only needed for the 1.4.X test environment

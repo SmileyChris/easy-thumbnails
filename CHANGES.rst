@@ -1,6 +1,11 @@
 Changes
 =======
 
+2.6.0 (YYYY-MM-DD)
+------------------
+
+* Added testing for Django 2.2 (no code changes required).
+
 2.5.0 (2017-10-31)
 ------------------
 
