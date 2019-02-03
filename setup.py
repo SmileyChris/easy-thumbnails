@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 import codecs
 import os
-import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
