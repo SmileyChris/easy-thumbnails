@@ -1,7 +1,7 @@
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from django.utils.six import BytesIO
+    from six import BytesIO
 from os import path
 
 from django.test import TestCase
