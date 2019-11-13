@@ -1,31 +1,46 @@
 import hashlib
 import inspect
-import math
-from django.utils import six
 
+from django.utils import six
 from django.utils.functional import LazyObject
 from django.utils import timezone
 
-
 try:
-    from PIL import Image
+    from PIL import Image, ImageMode
 except ImportError:
-    import Image
+    import Image, ImageMode
 
 from easy_thumbnails.conf import settings
 
 
-def image_entropy(im):
+def color_count(image):
+    """ 
+    Return the number of color values in the input image --
+    this is the number of pixels times the band count of the image.
     """
-    Calculate the entropy of an image. Used for "smart cropping".
+    mode_descriptor = ImageMode.getmode(image.mode)
+    width, height = image.size
+    return width * height * len(mode_descriptor.bands)
+
+
+def image_entropy_py(image):
     """
-    if not isinstance(im, Image.Image):
+    Calculate the entropy of an images' histogram.
+    """
+    if not isinstance(image, Image.Image):
         # Can only deal with PIL images. Fall back to a constant entropy.
         return 0
-    hist = im.histogram()
-    hist_size = float(sum(hist))
-    hist = [h / hist_size for h in hist]
-    return -sum([p * math.log(p, 2) for p in hist if p != 0])
+    from math import log2, fsum
+    histosum = float(color_count(image))
+    histonorm = (histocol / histosum for histocol in image.histogram())
+    return -fsum(p * log2(p) for p in histonorm if p != 0.0)
+
+
+# Select the Pillow native image entropy function - if available -
+# and fall back to our Python implementation:
+image_entropy = hasattr(Image.Image, 'entropy') \
+                    and Image.Image.entropy \
+                     or image_entropy_py
 
 
 def dynamic_import(import_string):
