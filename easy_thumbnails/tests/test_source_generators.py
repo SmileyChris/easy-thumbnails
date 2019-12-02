@@ -1,10 +1,13 @@
 import base64
-from django.utils import six
+from easy_thumbnails.utils import six
 
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from django.utils.six import BytesIO
+    try:
+        from django.utils.six import BytesIO
+    except ImportError:
+        from io import BytesIO
 
 try:
     from PIL import Image, ImageChops

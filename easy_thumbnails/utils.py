@@ -1,7 +1,24 @@
 import hashlib
 import inspect
 import math
-from django.utils import six
+try:
+    from django.utils import six
+except ImportError:
+    class Six(object):
+        def __init__(self):
+            self.PY3 = True
+            self.text_type = str
+            self.string_types = str
+
+        @staticmethod
+        def iteritems(d, **kwargs):
+            return iter(d.items(**kwargs))
+
+        @staticmethod
+        def b(s):
+            return s.encode("latin-1")
+
+    six = Six()
 
 from django.utils.functional import LazyObject
 from django.utils import timezone

@@ -1,4 +1,4 @@
-from django.utils import six
+from easy_thumbnails.utils import six
 
 from easy_thumbnails.conf import settings
 

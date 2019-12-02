@@ -1,7 +1,10 @@
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from django.utils.six import BytesIO
+    try:
+        from django.utils.six import BytesIO
+    except ImportError:
+        from io import BytesIO
 
 try:
     from PIL import Image

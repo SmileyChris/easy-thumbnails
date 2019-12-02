@@ -1,7 +1,7 @@
 import re
 from base64 import b64encode
 import mimetypes
-from django.utils import six
+from easy_thumbnails.utils import six
 
 from django.template import (
     Library, Node, VariableDoesNotExist, TemplateSyntaxError)

@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from django.utils import six
+from easy_thumbnails.utils import six
 try:
     from PIL import Image, ImageChops, ImageFilter
 except ImportError:
