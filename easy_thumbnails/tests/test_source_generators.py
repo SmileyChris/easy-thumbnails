@@ -1,10 +1,10 @@
 import base64
-from django.utils import six
+import six
 
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from django.utils.six import BytesIO
+    from six import BytesIO
 
 try:
     from PIL import Image, ImageChops

@@ -1,11 +1,11 @@
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
-    from django.utils.six import BytesIO
+    from six import BytesIO
 from os import path
 
 from django.test import TestCase
-from django.utils import six
+import six
 from easy_thumbnails import files, utils, signals, exceptions, models, engine
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
