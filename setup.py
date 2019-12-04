@@ -53,7 +53,8 @@ setup(
         'django>=1.8;python_version>="3"',
         'six',
         'pillow<4;python_version<"2.7"',
-        'pillow;python_version>="2.7"',
+        'pillow<7;python_version>="2.7"',
+        'pillow>7;python_version>="3"',
     ],
     cmdclass={'test': DjangoTests},
     classifiers=[

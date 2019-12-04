@@ -1,5 +1,5 @@
 import base64
-from django.utils import six
+import six
 
 try:
     from cStringIO import cStringIO as BytesIO
