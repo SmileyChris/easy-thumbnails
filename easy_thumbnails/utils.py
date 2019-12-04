@@ -1,7 +1,7 @@
 import hashlib
 import inspect
 import math
-from django.utils import six
+import six
 
 from django.utils.functional import LazyObject
 from django.utils import timezone
