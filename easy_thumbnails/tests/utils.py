@@ -5,10 +5,12 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
+from django.utils.deconstruct import deconstructible
 from PIL import Image
 from easy_thumbnails.conf import settings
 
 
+@deconstructible
 class TemporaryStorage(FileSystemStorage):
     """
     A storage class useful for tests that uses a temporary location to store
@@ -23,8 +25,7 @@ class TemporaryStorage(FileSystemStorage):
         if location is None:
             location = tempfile.mkdtemp()
             self.temporary_location = location
-        super().__init__(location=location, *args,
-                                               **kwargs)
+        super().__init__(location=location, *args, **kwargs)
 
     def delete_temporary_storage(self):
         """
@@ -37,6 +38,7 @@ class TemporaryStorage(FileSystemStorage):
             shutil.rmtree(temporary_location)
 
 
+@deconstructible
 class FakeRemoteStorage(TemporaryStorage):
     """
     A temporary storage class that acts similar to remote storage.
@@ -116,9 +118,11 @@ class BaseTest(TestCase):
         will be passed instead.
         """
         data = BytesIO()
-        Image.new(image_mode, size).save(data, image_format)
+        with Image.new(image_mode, size) as img:
+            img.save(data, image_format)
         data.seek(0)
         if not storage:
             return data
         image_file = ContentFile(data.read())
-        return storage.save(filename, image_file)
+        storage_file = storage.save(filename, image_file)
+        return storage_file

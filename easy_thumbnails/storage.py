@@ -1,9 +1,11 @@
 from django.core.files.storage import FileSystemStorage, get_storage_class
+from django.utils.deconstruct import deconstructible
 from django.utils.functional import LazyObject
 
 from easy_thumbnails.conf import settings
 
 
+@deconstructible
 class ThumbnailFileSystemStorage(FileSystemStorage):
     """
     Standard file system storage.
@@ -17,8 +19,7 @@ class ThumbnailFileSystemStorage(FileSystemStorage):
             location = settings.THUMBNAIL_MEDIA_ROOT or None
         if base_url is None:
             base_url = settings.THUMBNAIL_MEDIA_URL or None
-        super().__init__(
-            location, base_url, *args, **kwargs)
+        super().__init__(location, base_url, *args, **kwargs)
 
 
 class ThumbnailDefaultStorage(LazyObject):

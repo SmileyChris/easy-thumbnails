@@ -763,5 +763,4 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
             generated_ext = os.path.splitext(content.name)[1]
             if generated_ext.lower() != ext.lower():
                 name = orig_name + generated_ext
-        super().save(name, content, *args,
-                                                    **kwargs)
+        super().save(name, content, *args, **kwargs)

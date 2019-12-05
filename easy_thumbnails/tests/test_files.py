@@ -106,26 +106,26 @@ class FilesTest(test.BaseTest):
         thumb_file = self.thumbnailer.get_thumbnail(
             {'size': (100, 100)})
         thumb_file.seek(0)
-        thumb = Image.open(thumb_file)
-        self.assertFalse(
-            utils.is_transparent(thumb),
-            "%s shouldn't be transparent." % thumb_file.name)
+        with Image.open(thumb_file) as thumb:
+            self.assertFalse(
+                utils.is_transparent(thumb),
+                "%s shouldn't be transparent." % thumb_file.name)
 
         thumb_file = self.transparent_thumbnailer.get_thumbnail(
             {'size': (100, 100)})
         thumb_file.seek(0)
-        thumb = Image.open(thumb_file)
-        self.assertTrue(
-            utils.is_transparent(thumb),
-            "%s should be transparent." % thumb_file.name)
+        with Image.open(thumb_file) as thumb:
+            self.assertTrue(
+                utils.is_transparent(thumb),
+                "%s should be transparent." % thumb_file.name)
 
         thumb_file = self.transparent_greyscale_thumbnailer.get_thumbnail(
             {'size': (100, 100)})
         thumb_file.seek(0)
-        thumb = Image.open(thumb_file)
-        self.assertTrue(
-            utils.is_transparent(thumb),
-            "%s should be transparent." % thumb_file.name)
+        with Image.open(thumb_file) as thumb:
+            self.assertTrue(
+                utils.is_transparent(thumb),
+                "%s should be transparent." % thumb_file.name)
 
     def test_missing_thumb(self):
         opts = {'size': (100, 100)}
@@ -183,8 +183,8 @@ class FilesTest(test.BaseTest):
         base, ext = path.splitext(thumb.path)
         hires_thumb_file = ''.join([base + '@2x', ext])
         self.assertTrue(path.isfile(hires_thumb_file))
-        thumb = Image.open(hires_thumb_file)
-        self.assertEqual(thumb.size, (200, 150))
+        with Image.open(hires_thumb_file) as thumb:
+            self.assertEqual(thumb.size, (200, 150))
 
     def test_subsampling(self):
         samplings = {
@@ -193,32 +193,32 @@ class FilesTest(test.BaseTest):
             2: (2, 2, 1, 1, 1, 1),
         }
         thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
-        im = Image.open(thumb.path)
-        self.assertNotIn('ss', thumb.name)
-        sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
-        self.assertEqual(sampling, samplings[2])
+        with Image.open(thumb.path) as im:
+            self.assertNotIn('ss', thumb.name)
+            sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
+            self.assertEqual(sampling, samplings[2])
 
         thumb = self.ext_thumbnailer.get_thumbnail(
             {'size': (100, 100), 'subsampling': 1})
-        im = Image.open(thumb.path)
-        self.assertIn('ss1', thumb.name)
-        sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
-        self.assertEqual(sampling, samplings[1])
+        with Image.open(thumb.path) as im:
+            self.assertIn('ss1', thumb.name)
+            sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
+            self.assertEqual(sampling, samplings[1])
 
         thumb = self.ext_thumbnailer.get_thumbnail(
             {'size': (100, 100), 'subsampling': 0})
-        im = Image.open(thumb.path)
-        self.assertIn('ss0', thumb.name)
-        sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
-        self.assertEqual(sampling, samplings[0])
+        with Image.open(thumb.path) as im:
+            self.assertIn('ss0', thumb.name)
+            sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
+            self.assertEqual(sampling, samplings[0])
 
     def test_default_subsampling(self):
         settings.THUMBNAIL_DEFAULT_OPTIONS = {'subsampling': 1}
         thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
-        im = Image.open(thumb.path)
-        self.assertIn('ss1', thumb.name)
-        sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
-        self.assertEqual(sampling, (2, 1, 1, 1, 1, 1))
+        with Image.open(thumb.path) as im:
+            self.assertIn('ss1', thumb.name)
+            sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
+            self.assertEqual(sampling, (2, 1, 1, 1, 1, 1))
 
     def test_high_resolution_force_off(self):
         self.ext_thumbnailer.thumbnail_high_resolution = True
@@ -234,8 +234,8 @@ class FilesTest(test.BaseTest):
         base, ext = path.splitext(thumb.path)
         hires_thumb_file = ''.join([base + '@2x', ext])
         self.assertTrue(path.isfile(hires_thumb_file))
-        thumb = Image.open(hires_thumb_file)
-        self.assertEqual(thumb.size, (200, 150))
+        with Image.open(hires_thumb_file) as thumb:
+            self.assertEqual(thumb.size, (200, 150))
 
     def test_highres_infix(self):
         self.ext_thumbnailer.thumbnail_high_resolution = True
@@ -244,8 +244,8 @@ class FilesTest(test.BaseTest):
         base, ext = path.splitext(thumb.path)
         hires_thumb_file = ''.join([base + '_2x', ext])
         self.assertTrue(path.isfile(hires_thumb_file))
-        thumb = Image.open(hires_thumb_file)
-        self.assertEqual(thumb.size, (200, 150))
+        with Image.open(hires_thumb_file) as thumb:
+            self.assertEqual(thumb.size, (200, 150))
 
     @unittest.skipIf(
         'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
@@ -427,21 +427,26 @@ class FilesTest(test.BaseTest):
     def test_progressive_encoding(self):
         thumb = self.thumbnailer.generate_thumbnail(
             {'size': (99, 99), 'crop': True})
-        self.assertFalse(utils.is_progressive(Image.open(thumb)))
+        with Image.open(thumb) as thumb_image:
+            self.assertFalse(utils.is_progressive(thumb_image))
 
         thumb = self.thumbnailer.generate_thumbnail(
             {'size': (1, 100), 'crop': True})
-        self.assertTrue(utils.is_progressive(Image.open(thumb)))
+        with Image.open(thumb) as thumb_image:
+            self.assertTrue(utils.is_progressive(thumb_image))
         thumb = self.thumbnailer.generate_thumbnail(
             {'size': (100, 1), 'crop': True})
-        self.assertTrue(utils.is_progressive(Image.open(thumb)))
+        with Image.open(thumb) as thumb_image:
+            self.assertTrue(utils.is_progressive(thumb_image))
         thumb = self.thumbnailer.generate_thumbnail({'size': (200, 200)})
-        self.assertTrue(utils.is_progressive(Image.open(thumb)))
+        with Image.open(thumb) as thumb_image:
+            self.assertTrue(utils.is_progressive(thumb_image))
 
     def test_no_progressive_encoding(self):
         settings.THUMBNAIL_PROGRESSIVE = False
         thumb = self.thumbnailer.generate_thumbnail({'size': (200, 200)})
-        self.assertFalse(utils.is_progressive(Image.open(thumb)))
+        with Image.open(thumb) as thumb_image:
+            self.assertFalse(utils.is_progressive(thumb_image))
 
 
 class FakeSourceGenerator:
