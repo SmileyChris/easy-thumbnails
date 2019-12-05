@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import six
 from easy_thumbnails.conf import settings
 
