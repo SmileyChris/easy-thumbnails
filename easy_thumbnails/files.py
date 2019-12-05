@@ -126,7 +126,7 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
     return dimensions
 
 
-class FakeField(object):
+class FakeField:
     name = 'fake'
 
     def __init__(self, storage=None):
@@ -138,7 +138,7 @@ class FakeField(object):
         return name
 
 
-class FakeInstance(object):
+class FakeInstance:
     def save(self, *args, **kwargs):
         pass
 

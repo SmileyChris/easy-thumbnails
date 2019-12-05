@@ -9,7 +9,7 @@ from easy_thumbnails.conf import settings
 from easy_thumbnails.models import Source
 
 
-class ThumbnailCollectionCleaner(object):
+class ThumbnailCollectionCleaner:
     """
     Remove thumbnails and DB references to non-existing source images.
     """

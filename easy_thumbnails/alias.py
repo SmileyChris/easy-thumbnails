@@ -1,7 +1,7 @@
 from easy_thumbnails.conf import settings
 
 
-class Aliases(object):
+class Aliases:
     """
     A container which stores and retrieves named easy-thumbnail options
     dictionaries.

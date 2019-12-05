@@ -444,7 +444,7 @@ class FilesTest(test.BaseTest):
         self.assertFalse(utils.is_progressive(Image.open(thumb)))
 
 
-class FakeSourceGenerator(object):
+class FakeSourceGenerator:
 
     def __init__(self, fail=False):
         self.fail = fail

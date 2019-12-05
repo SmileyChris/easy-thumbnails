@@ -1,7 +1,7 @@
 from django.conf import settings as django_settings
 
 
-class BaseSettings(object):
+class BaseSettings:
     pass
 
 
