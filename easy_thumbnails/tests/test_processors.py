@@ -1,9 +1,4 @@
-try:
-    from PIL import Image, ImageChops, ImageDraw
-except ImportError:
-    import Image
-    import ImageChops
-    import ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 from easy_thumbnails import processors
 from unittest import TestCase
 

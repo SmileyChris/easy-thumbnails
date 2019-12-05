@@ -10,10 +10,7 @@ from easy_thumbnails import files, utils, signals, exceptions, models, engine
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
 from easy_thumbnails.tests import utils as test
-try:
-    from PIL import Image
-except ImportError:
-    import Image
+from PIL import Image
 try:
     from testfixtures import LogCapture
 except ImportError:

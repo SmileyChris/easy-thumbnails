@@ -4,10 +4,7 @@ try:
 except ImportError:
     from six import BytesIO
 
-try:
-    from PIL import Image
-except ImportError:
-    import Image
+from PIL import Image
 
 from easy_thumbnails import utils
 from easy_thumbnails.conf import settings

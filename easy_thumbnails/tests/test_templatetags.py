@@ -1,11 +1,7 @@
 from os import path
 
 from django.template import Template, Context, TemplateSyntaxError
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-
+from PIL import Image
 from django.core.files import storage as django_storage
 
 from easy_thumbnails import alias, storage

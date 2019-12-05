@@ -1,8 +1,5 @@
 from unittest import TestCase
-try:
-    from PIL import Image
-except ImportError:
-    import Image
+from PIL import Image
 
 from easy_thumbnails import engine
 

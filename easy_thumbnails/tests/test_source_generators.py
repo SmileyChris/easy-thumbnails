@@ -6,12 +6,7 @@ try:
 except ImportError:
     from six import BytesIO
 
-try:
-    from PIL import Image, ImageChops
-except ImportError:
-    import Image
-    import ImageChops
-
+from PIL import Image, ImageChops
 from easy_thumbnails import source_generators
 from easy_thumbnails.tests import utils as test
 

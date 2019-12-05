@@ -2,13 +2,7 @@ import itertools
 import re
 
 import six
-try:
-    from PIL import Image, ImageChops, ImageFilter
-except ImportError:
-    import Image
-    import ImageChops
-    import ImageFilter
-
+from PIL import Image, ImageChops, ImageFilter
 from easy_thumbnails import utils
 
 
