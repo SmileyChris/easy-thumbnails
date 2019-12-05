@@ -55,12 +55,6 @@ class FilesTest(test.BaseTest):
         self.remote_storage.delete_temporary_storage()
         super(FilesTest, self).tearDown()
 
-    def assertRegex(self, *args, **kwargs):
-        func = getattr(super(FilesTest, self), 'assertRegex', None)
-        if func is None:
-            func = self.assertRegexpMatches
-        return func(*args, **kwargs)
-
     def test_tag(self):
         local = self.thumbnailer.get_thumbnail({'size': (100, 100)})
         remote = self.remote_thumbnailer.get_thumbnail({'size': (100, 100)})
