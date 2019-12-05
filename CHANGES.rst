@@ -4,7 +4,7 @@ Changes
 X.Y.Z (YYYY-MM-DD)
 ------------------
 
-* Removed support for Django < 1.11.
+* Removed support for Django < 2.2 and Python 2.
 
 2.6.0 (2019-02-03)
 ------------------
