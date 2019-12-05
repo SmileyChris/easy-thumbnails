@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # easy-thumbnails documentation build configuration file, created by
 # sphinx-quickstart on Sun Aug  9 17:04:20 2009.
 #
