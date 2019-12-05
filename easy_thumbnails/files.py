@@ -1,5 +1,4 @@
 import os
-import six
 
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import (
@@ -56,7 +55,7 @@ def get_thumbnailer(obj, relative_name=None):
 
     source_storage = None
 
-    if isinstance(obj, six.string_types):
+    if isinstance(obj, str):
         relative_name = obj
         obj = None
 
@@ -88,7 +87,7 @@ def generate_all_aliases(fieldfile, include_global):
     all_options = aliases.all(fieldfile, include_global=include_global)
     if all_options:
         thumbnailer = get_thumbnailer(fieldfile)
-        for key, options in six.iteritems(all_options):
+        for key, options in all_options.items():
             options['ALIAS'] = key
             thumbnailer.get_thumbnail(options)
 
@@ -440,7 +439,7 @@ class Thumbnailer(File):
         basedir = self.thumbnail_basedir % data
         subdir = self.thumbnail_subdir % data
 
-        if isinstance(self.thumbnail_namer, six.string_types):
+        if isinstance(self.thumbnail_namer, str):
             namer_func = utils.dynamic_import(self.thumbnail_namer)
         else:
             namer_func = self.thumbnail_namer

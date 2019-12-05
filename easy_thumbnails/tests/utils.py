@@ -1,9 +1,6 @@
 import shutil
 import tempfile
-try:
-    from cStringIO import cStringIO as BytesIO
-except ImportError:
-    from six import BytesIO
+from io import BytesIO
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage

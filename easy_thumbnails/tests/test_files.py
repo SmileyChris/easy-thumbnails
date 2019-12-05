@@ -1,9 +1,5 @@
-try:
-    from cStringIO import cStringIO as BytesIO
-except ImportError:
-    from six import BytesIO
+from io import BytesIO
 from os import path
-import six
 
 from django.test import TestCase
 from easy_thumbnails import files, utils, signals, exceptions, models, engine
@@ -468,7 +464,7 @@ class FakeSourceGenerator(object):
 class EngineTest(TestCase):
 
     def setUp(self):
-        self.source = BytesIO(six.b('file-contents'))
+        self.source = BytesIO(b'file-contents')
 
     def test_single_fail(self):
         source_generators = [FakeSourceGenerator(fail=True)]

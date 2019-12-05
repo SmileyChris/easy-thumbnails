@@ -1,7 +1,4 @@
-try:
-    from cStringIO import cStringIO as BytesIO
-except ImportError:
-    from six import BytesIO
+from io import BytesIO
 
 from PIL import Image
 from easy_thumbnails import utils

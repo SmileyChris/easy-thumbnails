@@ -1,11 +1,6 @@
 import base64
-import six
 
-try:
-    from cStringIO import cStringIO as BytesIO
-except ImportError:
-    from six import BytesIO
-
+from io import BytesIO
 from PIL import Image, ImageChops
 from easy_thumbnails import source_generators
 from easy_thumbnails.tests import utils as test
@@ -45,7 +40,7 @@ class PilImageTest(test.BaseTest):
         """
         self.assertRaises(
             IOError,
-            source_generators.pil_image, BytesIO(six.b('not an image')))
+            source_generators.pil_image, BytesIO(b'not an image'))
 
     def test_nearly_image(self):
         """
@@ -67,7 +62,7 @@ class PilImageTest(test.BaseTest):
         Images with EXIF orientation data are reoriented.
         """
         reference = image_from_b64(EXIF_REFERENCE)
-        for exif_orientation, data in six.iteritems(EXIF_ORIENTATION):
+        for exif_orientation, data in EXIF_ORIENTATION.items():
             im = image_from_b64(data)
             self.assertEqual(exif_orientation, im._getexif().get(0x0112))
             self.assertFalse(near_identical(reference, im))
