@@ -5,7 +5,7 @@ class ThumbnailOptions(dict):
 
     def __init__(self, *args, **kwargs):
         self._prepared_options = None
-        super(ThumbnailOptions, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if settings.THUMBNAIL_DEFAULT_OPTIONS:
             for key, value in settings.THUMBNAIL_DEFAULT_OPTIONS.items():
                 self.setdefault(key, value)

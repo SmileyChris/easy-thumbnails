@@ -153,8 +153,7 @@ class ThumbnailFile(ImageFieldFile):
     def __init__(self, name, file=None, storage=None, thumbnail_options=None,
                  *args, **kwargs):
         fake_field = FakeField(storage=storage)
-        super(ThumbnailFile, self).__init__(
-            FakeInstance(), fake_field, name, *args, **kwargs)
+        super().__init__(FakeInstance(), fake_field, name, *args, **kwargs)
         del self.field
         if file:
             self.file = file
@@ -260,7 +259,7 @@ class ThumbnailFile(ImageFieldFile):
             mode = mode or getattr(self, 'mode', None) or 'rb'
             self.file = self.storage.open(self.name, mode)
         else:
-            return super(ThumbnailFile, self).open(mode, *args, **kwargs)
+            return super().open(mode, *args, **kwargs)
 
     def _get_image_dimensions(self):
         if not hasattr(self, '_dimensions_cache'):
@@ -306,7 +305,7 @@ class Thumbnailer(File):
     def __init__(self, file=None, name=None, source_storage=None,
                  thumbnail_storage=None, remote_source=False, generate=True,
                  *args, **kwargs):
-        super(Thumbnailer, self).__init__(file, name, *args, **kwargs)
+        super().__init__(file, name, *args, **kwargs)
         if source_storage is None:
             source_storage = default_storage
         self.source_storage = source_storage
@@ -654,7 +653,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
     thumbnail images.
     """
     def __init__(self, *args, **kwargs):
-        super(ThumbnailerFieldFile, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.source_storage = self.field.storage
         thumbnail_storage = getattr(self.field, 'thumbnail_storage', None)
         if thumbnail_storage:
@@ -666,7 +665,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         Save the file, also saving a reference to the thumbnail cache Source
         model.
         """
-        super(ThumbnailerFieldFile, self).save(name, content, *args, **kwargs)
+        super().save(name, content, *args, **kwargs)
         self.get_source_cache(create=True, update=True)
 
     def delete(self, *args, **kwargs):
@@ -677,7 +676,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         # First, delete any related thumbnails.
         self.delete_thumbnails(source_cache)
         # Next, delete the source image.
-        super(ThumbnailerFieldFile, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
         # Finally, delete the source cache entry.
         if source_cache and source_cache.pk is not None:
             source_cache.delete()
@@ -726,7 +725,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
                                         storage=self.thumbnail_storage)
 
     def __getstate__(self):
-        state = super(ThumbnailerFieldFile, self).__getstate__()
+        state = super().__getstate__()
         state.update({
             k: v
             for k, v in self.__dict__.items()
@@ -764,5 +763,5 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
             generated_ext = os.path.splitext(content.name)[1]
             if generated_ext.lower() != ext.lower():
                 name = orig_name + generated_ext
-        super(ThumbnailerImageFieldFile, self).save(name, content, *args,
+        super().save(name, content, *args,
                                                     **kwargs)

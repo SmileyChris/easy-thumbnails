@@ -55,7 +55,7 @@ class AppSettings(BaseSettings):
                 except AttributeError:
                     pass
         try:
-            return super(AppSettings, self).__getattribute__(attr)
+            return super().__getattribute__(attr)
         except AttributeError:
             if not self.isolated:
                 raise
@@ -65,7 +65,7 @@ class AppSettings(BaseSettings):
         if attr == attr.upper():
             if self.isolated:
                 try:
-                    super(AppSettings, self).__getattribute__(attr)
+                    super().__getattribute__(attr)
                 except AttributeError:
                     pass
                 else:
@@ -81,7 +81,7 @@ class AppSettings(BaseSettings):
                 except AttributeError:
                     self._added.append(attr)
             return setattr(django_settings, attr, value)
-        return super(AppSettings, self).__setattr__(attr, value)
+        return super().__setattr__(attr, value)
 
 
 class Settings(AppSettings):

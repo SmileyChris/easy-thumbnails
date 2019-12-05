@@ -43,7 +43,7 @@ class ImageClearableFileInput(ClearableFileInput):
         if 'size' not in thumbnail_options:
             thumbnail_options['size'] = (80, 80)
         self.thumbnail_options = thumbnail_options
-        super(ImageClearableFileInput, self).__init__(attrs)
+        super().__init__(attrs)
 
     def thumbnail_id(self, name):
         return '%s_thumb_id' % name
@@ -56,7 +56,7 @@ class ImageClearableFileInput(ClearableFileInput):
         return thumbnailer.get_thumbnail(self.thumbnail_options)
 
     def render(self, name, value, attrs=None, renderer=None):
-        output = super(ImageClearableFileInput, self).render(
+        output = super().render(
             name, value, attrs, renderer)
         if not value or not hasattr(value, 'storage'):
             return output

@@ -13,7 +13,7 @@ from easy_thumbnails.tests import utils as test
 class Base(test.BaseTest):
 
     def setUp(self):
-        super(Base, self).setUp()
+        super().setUp()
         self.storage = test.TemporaryStorage()
         # Save a test image.
         self.filename = self.create_image(self.storage, 'test.jpg')
@@ -23,7 +23,7 @@ class Base(test.BaseTest):
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
-        super(Base, self).tearDown()
+        super().tearDown()
 
     def render_template(self, source, template_tag_library='thumbnail'):
         source_image = get_thumbnailer(self.storage, self.filename)
@@ -231,7 +231,7 @@ class ThumbnailerBase(Base):
     restore_settings = ['THUMBNAIL_ALIASES', 'THUMBNAIL_MEDIA_ROOT']
 
     def setUp(self):
-        super(ThumbnailerBase, self).setUp()
+        super().setUp()
         settings.THUMBNAIL_MEDIA_ROOT = self.storage.path('')
         settings.THUMBNAIL_ALIASES = {
             '': {
@@ -249,7 +249,7 @@ class ThumbnailerBase(Base):
         # Put the default storage back how we found it.
         storage.thumbnail_default_storage = self._old_thumbnail_default_storage
         django_storage.default_storage._wrapped = self._old_default_storage
-        super(ThumbnailerBase, self).tearDown()
+        super().tearDown()
         # Repopulate the aliases (setting reverted by super)
         alias.aliases.populate_from_settings()
 

@@ -17,7 +17,7 @@ import unittest
 class FilesTest(test.BaseTest):
 
     def setUp(self):
-        super(FilesTest, self).setUp()
+        super().setUp()
         self.storage = test.TemporaryStorage()
         self.remote_storage = test.FakeRemoteStorage()
 
@@ -53,7 +53,7 @@ class FilesTest(test.BaseTest):
     def tearDown(self):
         self.storage.delete_temporary_storage()
         self.remote_storage.delete_temporary_storage()
-        super(FilesTest, self).tearDown()
+        super().tearDown()
 
     def test_tag(self):
         local = self.thumbnailer.get_thumbnail({'size': (100, 100)})
