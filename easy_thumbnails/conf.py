@@ -212,7 +212,7 @@ class Settings(AppSettings):
         ``1xedFtqllFo9_100x100_QHCa6G1l.jpg``.
 
     To write a custom namer, always catch all other keyword arguments arguments
-    (with \*\*kwargs). You have access to the following arguments:
+    (with \\*\\*kwargs). You have access to the following arguments:
     ``thumbnailer``, ``source_filename``, ``thumbnail_extension`` (does *not*
     include the ``'.'``), ``thumbnail_options``, ``prepared_options``.
 
