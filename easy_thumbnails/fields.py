@@ -17,7 +17,7 @@ class ThumbnailerField(FileField):
         # positional arguments can be used.
         self.thumbnail_storage = kwargs.pop('thumbnail_storage', None)
 
-        super(ThumbnailerField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class ThumbnailerImageField(ThumbnailerField, ImageField):
@@ -42,4 +42,4 @@ class ThumbnailerImageField(ThumbnailerField, ImageField):
         # positional arguments can be used.
         self.resize_source = kwargs.pop('resize_source', None)
 
-        super(ThumbnailerImageField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)

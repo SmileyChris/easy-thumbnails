@@ -1,19 +1,12 @@
-try:
-    from cStringIO import cStringIO as BytesIO
-except ImportError:
-    from django.utils.six import BytesIO
+from io import BytesIO
 from os import path
 
 from django.test import TestCase
-from django.utils import six
 from easy_thumbnails import files, utils, signals, exceptions, models, engine
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
 from easy_thumbnails.tests import utils as test
-try:
-    from PIL import Image
-except ImportError:
-    import Image
+from PIL import Image
 try:
     from testfixtures import LogCapture
 except ImportError:
@@ -24,7 +17,7 @@ import unittest
 class FilesTest(test.BaseTest):
 
     def setUp(self):
-        super(FilesTest, self).setUp()
+        super().setUp()
         self.storage = test.TemporaryStorage()
         self.remote_storage = test.FakeRemoteStorage()
 
@@ -60,13 +53,7 @@ class FilesTest(test.BaseTest):
     def tearDown(self):
         self.storage.delete_temporary_storage()
         self.remote_storage.delete_temporary_storage()
-        super(FilesTest, self).tearDown()
-
-    def assertRegex(self, *args, **kwargs):
-        func = getattr(super(FilesTest, self), 'assertRegex', None)
-        if func is None:
-            func = self.assertRegexpMatches
-        return func(*args, **kwargs)
+        super().tearDown()
 
     def test_tag(self):
         local = self.thumbnailer.get_thumbnail({'size': (100, 100)})
@@ -457,7 +444,7 @@ class FilesTest(test.BaseTest):
         self.assertFalse(utils.is_progressive(Image.open(thumb)))
 
 
-class FakeSourceGenerator(object):
+class FakeSourceGenerator:
 
     def __init__(self, fail=False):
         self.fail = fail
@@ -471,7 +458,7 @@ class FakeSourceGenerator(object):
 class EngineTest(TestCase):
 
     def setUp(self):
-        self.source = BytesIO(six.b('file-contents'))
+        self.source = BytesIO(b'file-contents')
 
     def test_single_fail(self):
         source_generators = [FakeSourceGenerator(fail=True)]

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # easy-thumbnails documentation build configuration file, created by
 # sphinx-quickstart on Sun Aug  9 17:04:20 2009.
 #
@@ -46,8 +44,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'easy-thumbnails'
-copyright = u'2009, Chris Beaven'
+project = 'easy-thumbnails'
+copyright = '2009, Chris Beaven'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -182,8 +180,8 @@ htmlhelp_basename = 'easy-thumbnailsdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'easy-thumbnails.tex', u'easy-thumbnails Documentation',
-     u'Chris Beaven', 'manual'),
+    ('index', 'easy-thumbnails.tex', 'easy-thumbnails Documentation',
+     'Chris Beaven', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

@@ -10,7 +10,7 @@ class FileManagerTest(test.BaseTest):
     """Test for FileManager"""
 
     def setUp(self):
-        super(FileManagerTest, self).setUp()
+        super().setUp()
 
         self.storage = test.TemporaryStorage()
         self.storage_hash = utils.get_storage_hash(self.storage)
@@ -23,7 +23,7 @@ class FileManagerTest(test.BaseTest):
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
-        super(FileManagerTest, self).tearDown()
+        super().tearDown()
 
     def test_create_file(self):
         """Create a new Thumbnail in the database"""

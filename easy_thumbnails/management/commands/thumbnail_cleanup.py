@@ -2,7 +2,6 @@ import gc
 import os
 import time
 from datetime import datetime, date, timedelta
-from optparse import make_option
 
 from django.core.files.storage import get_storage_class
 from django.core.management.base import BaseCommand
@@ -10,7 +9,7 @@ from easy_thumbnails.conf import settings
 from easy_thumbnails.models import Source
 
 
-class ThumbnailCollectionCleaner(object):
+class ThumbnailCollectionCleaner:
     """
     Remove thumbnails and DB references to non-existing source images.
     """
@@ -120,29 +119,6 @@ def queryset_iterator(queryset, chunksize=1000):
 
 class Command(BaseCommand):
     help = """ Deletes thumbnails that no longer have an original file. """
-
-    # Legacy options, not needed in Django 1.8+
-    option_list = getattr(BaseCommand, 'option_list', ()) + (
-        make_option(
-            '--dry-run',
-            action='store_true',
-            dest='dry_run',
-            default=False,
-            help='Dry run the execution.'),
-        make_option(
-            '--last-n-days',
-            action='store',
-            dest='last_n_days',
-            default=0,
-            type=int,
-            help='The number of days back in time to clean thumbnails for.'),
-        make_option(
-            '--path',
-            action='store',
-            dest='cleanup_path',
-            type=str,
-            help='Specify a path to clean up.'),
-    )
 
     def add_arguments(self, parser):
         parser.add_argument(
