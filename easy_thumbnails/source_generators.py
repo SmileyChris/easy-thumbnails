@@ -1,13 +1,6 @@
-try:
-    from cStringIO import cStringIO as BytesIO
-except ImportError:
-    from django.utils.six import BytesIO
+from io import BytesIO
 
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-
+from PIL import Image, ImageFile
 from easy_thumbnails import utils
 
 
@@ -32,13 +25,10 @@ def pil_image(source, exif_orientation=True, **options):
     image = Image.open(source)
     # Fully load the image now to catch any problems with the image contents.
     try:
-        # An "Image file truncated" exception can occur for some images that
-        # are still mostly valid -- we'll swallow the exception.
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
         image.load()
-    except IOError:
-        pass
-    # Try a second time to catch any other potential exceptions.
-    image.load()
+    finally:
+        ImageFile.LOAD_TRUNCATED_IMAGES = False
 
     if exif_orientation:
         image = utils.exif_orientation(image)

@@ -1,7 +1,7 @@
 from django.conf import settings as django_settings
 
 
-class BaseSettings(object):
+class BaseSettings:
     pass
 
 
@@ -55,7 +55,7 @@ class AppSettings(BaseSettings):
                 except AttributeError:
                     pass
         try:
-            return super(AppSettings, self).__getattribute__(attr)
+            return super().__getattribute__(attr)
         except AttributeError:
             if not self.isolated:
                 raise
@@ -65,7 +65,7 @@ class AppSettings(BaseSettings):
         if attr == attr.upper():
             if self.isolated:
                 try:
-                    super(AppSettings, self).__getattribute__(attr)
+                    super().__getattribute__(attr)
                 except AttributeError:
                     pass
                 else:
@@ -81,7 +81,7 @@ class AppSettings(BaseSettings):
                 except AttributeError:
                     self._added.append(attr)
             return setattr(django_settings, attr, value)
-        return super(AppSettings, self).__setattr__(attr, value)
+        return super().__setattr__(attr, value)
 
 
 class Settings(AppSettings):
@@ -212,7 +212,7 @@ class Settings(AppSettings):
         ``1xedFtqllFo9_100x100_QHCa6G1l.jpg``.
 
     To write a custom namer, always catch all other keyword arguments arguments
-    (with \*\*kwargs). You have access to the following arguments:
+    (with \\*\\*kwargs). You have access to the following arguments:
     ``thumbnailer``, ``source_filename``, ``thumbnail_extension`` (does *not*
     include the ``'.'``), ``thumbnail_options``, ``prepared_options``.
 

@@ -1,7 +1,6 @@
 import re
 from base64 import b64encode
 import mimetypes
-from django.utils import six
 
 from django.template import (
     Library, Node, VariableDoesNotExist, TemplateSyntaxError)
@@ -66,7 +65,7 @@ class ThumbnailNode(Node):
         # Resolve the thumbnail option values.
         try:
             opts = {}
-            for key, value in six.iteritems(self.opts):
+            for key, value in self.opts.items():
                 if hasattr(value, 'resolve'):
                     value = value.resolve(context)
                 opts[str(key)] = value
@@ -77,7 +76,7 @@ class ThumbnailNode(Node):
         # Size variable can be either a tuple/list of two integers or a
         # valid string.
         size = opts['size']
-        if isinstance(size, six.string_types):
+        if isinstance(size, str):
             m = RE_SIZE.match(size)
             if m:
                 opts['size'] = (int(m.group(1)), int(m.group(2)))

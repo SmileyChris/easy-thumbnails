@@ -2,6 +2,9 @@
 Easy Thumbnails
 ===============
 
+.. image:: https://img.shields.io/pypi/v/easy-thumbnails.svg
+    :target: https://pypi.python.org/pypi/easy-thumbnails/
+
 .. image:: https://secure.travis-ci.org/SmileyChris/easy-thumbnails.svg?branch=master
     :alt: Build Status
     :target: http://travis-ci.org/SmileyChris/easy-thumbnails

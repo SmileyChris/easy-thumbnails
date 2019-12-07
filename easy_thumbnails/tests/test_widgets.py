@@ -9,12 +9,12 @@ from easy_thumbnails.tests import utils as test
 class ImageClearableFileInput(test.BaseTest):
 
     def setUp(self):
-        super(ImageClearableFileInput, self).setUp()
+        super().setUp()
         self.storage = test.TemporaryStorage()
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
-        super(ImageClearableFileInput, self).tearDown()
+        super().tearDown()
 
     def test_options_default(self):
         """
@@ -75,8 +75,8 @@ class ImageClearableFileInput(test.BaseTest):
         source_filename = self.create_image(self.storage, 'test.jpg')
         widget = widgets.ImageClearableFileInput()
         widget.template_with_thumbnail = (
-            u'%(template)s<br />'
-            u'<a href="%(source_url)s">%(thumb)s</a> FOO'
+            '%(template)s<br />'
+            '<a href="%(source_url)s">%(thumb)s</a> FOO'
         )
 
         with self.storage.open(source_filename) as source_file:
@@ -97,7 +97,7 @@ class ImageClearableFileInput(test.BaseTest):
         widget = widgets.ImageClearableFileInput()
         class CustomRenderer(DjangoTemplates):
             def render(self, template_name, context, request=None):
-                output = super(DjangoTemplates, self).render(template_name, context, request)
+                output = super().render(template_name, context, request)
                 return output + ' FOOBAR'
 
         with self.storage.open(source_filename) as source_file:

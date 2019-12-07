@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from easy_thumbnails.conf import Settings
 
 

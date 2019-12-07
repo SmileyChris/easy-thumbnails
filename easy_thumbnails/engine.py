@@ -1,13 +1,7 @@
 import os
-try:
-    from cStringIO import cStringIO as BytesIO
-except ImportError:
-    from django.utils.six import BytesIO
+from io import BytesIO
 
-try:
-    from PIL import Image
-except ImportError:
-    import Image
+from PIL import Image
 
 from easy_thumbnails import utils
 from easy_thumbnails.conf import settings

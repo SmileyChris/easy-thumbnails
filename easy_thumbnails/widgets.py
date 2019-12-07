@@ -19,12 +19,12 @@ class ImageClearableFileInput(ClearableFileInput):
     """
 
     template_with_initial = (
-        u'%(clear_template)s<br />'
-        u'%(input_text)s: %(input)s'
+        '%(clear_template)s<br />'
+        '%(input_text)s: %(input)s'
     )
     template_with_thumbnail = (
-        u'%(template)s<br />'
-        u'<a href="%(source_url)s" target="_blank">%(thumb)s</a>'
+        '%(template)s<br />'
+        '<a href="%(source_url)s" target="_blank">%(thumb)s</a>'
     )
 
     def __init__(self, thumbnail_options=None, attrs=None):
@@ -43,7 +43,7 @@ class ImageClearableFileInput(ClearableFileInput):
         if 'size' not in thumbnail_options:
             thumbnail_options['size'] = (80, 80)
         self.thumbnail_options = thumbnail_options
-        super(ImageClearableFileInput, self).__init__(attrs)
+        super().__init__(attrs)
 
     def thumbnail_id(self, name):
         return '%s_thumb_id' % name
@@ -56,8 +56,7 @@ class ImageClearableFileInput(ClearableFileInput):
         return thumbnailer.get_thumbnail(self.thumbnail_options)
 
     def render(self, name, value, attrs=None, renderer=None):
-        output = super(ImageClearableFileInput, self).render(
-            name, value, attrs, renderer)
+        output = super().render(name, value, attrs, renderer)
         if not value or not hasattr(value, 'storage'):
             return output
         thumb = self.get_thumbnail(value)

@@ -12,7 +12,7 @@ class BaseTest(utils.BaseTest):
     create_file = False
 
     def setUp(self):
-        super(BaseTest, self).setUp()
+        super().setUp()
         settings.THUMBNAIL_ALIASES = {
             '': {
                 'large': {'size': (500, 500)},
@@ -48,7 +48,7 @@ class BaseTest(utils.BaseTest):
         aliases._aliases = self.__aliases
         if self.create_file:
             self.storage.delete_temporary_storage()
-        super(BaseTest, self).tearDown()
+        super().tearDown()
 
 
 class AliasTest(BaseTest):
@@ -184,7 +184,7 @@ class GenerationBase(BaseTest):
         return NotImplementedError("Subclasses should return the handler")
 
     def setUp(self):
-        super(GenerationBase, self).setUp()
+        super().setUp()
         signals.saved_file.connect(
             self.get_signal_handler(), sender=models.Profile)
         # Fix the standard storage to use the test's temporary location.
@@ -203,7 +203,7 @@ class GenerationBase(BaseTest):
         settings.MEDIA_ROOT = self._MEDIA_ROOT
         signals.saved_file.disconnect(
             self.get_signal_handler(), sender=models.Profile)
-        super(GenerationBase, self).tearDown()
+        super().tearDown()
 
     def fake_save(self, instance):
         cls = instance.__class__
