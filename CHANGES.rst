@@ -1,7 +1,7 @@
 Changes
 =======
 
-X.Y.Z (YYYY-MM-DD)
+2.7.0 (2019-12-15)
 ------------------
 
 * Add support for Django 3.0
