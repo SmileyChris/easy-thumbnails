@@ -28,10 +28,16 @@ Installation and configuration
 
 Install one or both of the above programs on your operating system.
 
-There is one configuration settings dictionary:
+Then add the full qualified path to the Python dict named ``THUMBNAIL_OPTIMIZE_COMMAND``.
+For example:
 
-.. autoattribute::
-   easy_thumbnails.conf.Settings.THUMBNAIL_OPTIMIZE_COMMAND
+.. code-block:: python
+
+	THUMBNAIL_OPTIMIZE_COMMAND = {
+	    'gif': '/usr/bin/optipng {filename}',
+	    'jpeg': '/user/bin/jpegoptim {filename}',
+	    'png': '/usr/bin/optipng {filename}'
+	}
 
 .. _jpegoptim: http://freecode.com/projects/jpegoptim
 .. _optipng: http://optipng.sourceforge.net/
