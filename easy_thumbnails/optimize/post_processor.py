@@ -33,8 +33,11 @@ except ImportError:
 logger = logging.getLogger('easy_thumbnails.optimize')
 
 
-def optimize_thumbnail(thumbnail):
-    '''Optimize thumbnail images by removing unnecessary data'''
+def optimize_thumbnail(sender, **kwargs):
+    """
+    Optimize thumbnail images by removing unnecessary data.
+    """
+    thumbnail = sender
     try:
         optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[
             determinetype(thumbnail.path)]

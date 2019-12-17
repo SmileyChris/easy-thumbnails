@@ -1,4 +1,5 @@
 VERSION = (2, 7, 0, 'final', 0)
+default_app_config = 'easy_thumbnails.apps.EasyThumbnails'
 
 
 def get_version(*args, **kwargs):
