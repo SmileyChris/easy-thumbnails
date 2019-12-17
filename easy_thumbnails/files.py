@@ -570,6 +570,11 @@ class Thumbnailer(File):
                 dimensions_cache.height = thumbnail.height
                 dimensions_cache.save()
 
+        if any(settings.THUMBNAIL_OPTIMIZE_COMMAND.values()):
+            from easy_thumbnails.optimize.post_processor import optimize_thumbnail
+
+            optimize_thumbnail(thumbnail)
+
         signals.thumbnail_created.send(sender=thumbnail)
 
     def thumbnail_exists(self, thumbnail_name):

@@ -3,7 +3,7 @@ import subprocess
 from imghdr import what as determinetype
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
-from easy_thumbnails.optimize.conf import settings
+from easy_thumbnails.conf import settings
 
 
 try:
@@ -33,11 +33,10 @@ except ImportError:
 logger = logging.getLogger('easy_thumbnails.optimize')
 
 
-def optimize_thumbnail(sender, **kwargs):
+def optimize_thumbnail(thumbnail, **kwargs):
     """
     Optimize thumbnail images by removing unnecessary data.
     """
-    thumbnail = sender
     try:
         optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[
             determinetype(thumbnail.path)]
