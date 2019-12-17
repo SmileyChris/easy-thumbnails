@@ -19,26 +19,19 @@ and thus greenhouse gases by some googolth percent.
 Support for these postprocessors (or other similar ones) is available as an
 optional feature in easy-thumbnails.
 
+.. note:: Starting with version 2.8 there is no need anymore to add
+	`easy_tumbnails.optimize` to `settings.INSTALLED_APPS`.
+
 
 Installation and configuration
 ==============================
 
 Install one or both of the above programs on your operating system.
 
-In your Django project's settings module, add the optimizing postprocessor to
-your configuration settings::
-
-	INSTALLED_APP = (
-	    ...
-	    'easy_thumbnails',
-	    'easy_thumbnails.optimize',
-	    ...
-	)
-
 There is one configuration settings dictionary:
 
 .. autoattribute::
-   easy_thumbnails.optimize.conf.OptimizeSettings.THUMBNAIL_OPTIMIZE_COMMAND
+   easy_thumbnails.conf.Settings.THUMBNAIL_OPTIMIZE_COMMAND
 
 .. _jpegoptim: http://freecode.com/projects/jpegoptim
 .. _optipng: http://optipng.sourceforge.net/
