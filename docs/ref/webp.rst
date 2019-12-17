@@ -25,7 +25,7 @@ element such as:
 	  <img src="/path/to/image.jpg">
 	</picture>
 
-This means that must continue to keep the thumbnailed images in either JPEG or PNG format.
+This means that we must continue to keep the thumbnailed images in either JPEG or PNG format.
 Every time an image is thumbnailed, a corresponding image must be generated using the WebP
 format. We can use this short function:
 
