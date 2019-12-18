@@ -22,13 +22,13 @@ def pil_image(source, exif_orientation=True, **options):
         return
     source = BytesIO(source.read())
 
-    image = Image.open(source)
-    # Fully load the image now to catch any problems with the image contents.
-    try:
-        ImageFile.LOAD_TRUNCATED_IMAGES = True
-        image.load()
-    finally:
-        ImageFile.LOAD_TRUNCATED_IMAGES = False
+    with Image.open(source) as image:
+        # Fully load the image now to catch any problems with the image contents.
+        try:
+            ImageFile.LOAD_TRUNCATED_IMAGES = True
+            image.load()
+        finally:
+            ImageFile.LOAD_TRUNCATED_IMAGES = False
 
     if exif_orientation:
         image = utils.exif_orientation(image)

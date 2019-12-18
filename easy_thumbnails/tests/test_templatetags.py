@@ -56,8 +56,9 @@ class Base(test.BaseTest):
             'Thumbnail file %r not found' % expected_filename)
 
         # Verify the thumbnail has the expected dimensions
-        with Image.open(self.storage.open(expected_filename)) as image:
-            self.assertEqual(image.size, expected_size)
+        with self.storage.open(expected_filename) as expected_file:
+            with Image.open(expected_file) as image:
+                self.assertEqual(image.size, expected_size)
 
         return expected_filename
 
