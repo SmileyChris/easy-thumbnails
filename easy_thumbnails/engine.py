@@ -14,7 +14,7 @@ class NoSourceGenerator(Exception):
     file.
     """
 
-    def __unicode__(self):
+    def __str__(self):
         return "Tried {0} source generators with no success".format(
             len(self.args))
 
