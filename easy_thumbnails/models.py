@@ -61,7 +61,7 @@ class File(models.Model):
         abstract = True
         unique_together = (('storage_hash', 'name'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -85,7 +85,7 @@ class ThumbnailDimensions(models.Model):
     width = models.PositiveIntegerField(null=True)
     height = models.PositiveIntegerField(null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%sx%s" % (self.width, self.height)
 
     @property
