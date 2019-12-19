@@ -9,6 +9,8 @@ Easy Thumbnails
     :alt: Build Status
     :target: http://travis-ci.org/SmileyChris/easy-thumbnails
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
 
 A powerful, yet easy to implement thumbnailing application for Django 1.11+
 

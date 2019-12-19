@@ -1,4 +1,5 @@
 from django.db.models.fields.files import FileField, ImageField
+
 from easy_thumbnails import files
 
 
@@ -10,12 +11,13 @@ class ThumbnailerField(FileField):
     To use a different file storage for thumbnails, provide the
     ``thumbnail_storage`` keyword argument.
     """
+
     attr_class = files.ThumbnailerFieldFile
 
     def __init__(self, *args, **kwargs):
         # Arguments not explicitly defined so that the normal ImageField
         # positional arguments can be used.
-        self.thumbnail_storage = kwargs.pop('thumbnail_storage', None)
+        self.thumbnail_storage = kwargs.pop("thumbnail_storage", None)
 
         super().__init__(*args, **kwargs)
 
@@ -35,11 +37,12 @@ class ThumbnailerImageField(ThumbnailerField, ImageField):
         ThumbnailerImageField(
             ..., resize_source=dict(size=(100, 100), sharpen=True))
     """
+
     attr_class = files.ThumbnailerImageFieldFile
 
     def __init__(self, *args, **kwargs):
         # Arguments not explicitly defined so that the normal ImageField
         # positional arguments can be used.
-        self.resize_source = kwargs.pop('resize_source', None)
+        self.resize_source = kwargs.pop("resize_source", None)
 
         super().__init__(*args, **kwargs)

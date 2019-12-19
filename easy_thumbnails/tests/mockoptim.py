@@ -9,8 +9,8 @@ actually doing it.
 import sys
 
 if len(sys.argv) < 2:
-    raise Exception('Missing filename')
-with open(sys.argv[1], 'rb') as reader:
+    raise Exception("Missing filename")
+with open(sys.argv[1], "rb") as reader:
     buf = reader.read()
-with open(sys.argv[1], 'wb') as writer:
+with open(sys.argv[1], "wb") as writer:
     writer.write(buf)

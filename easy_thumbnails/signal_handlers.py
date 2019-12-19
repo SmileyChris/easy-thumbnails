@@ -12,8 +12,8 @@ def find_uncommitted_filefields(sender, instance, **kwargs):
     uncommitted = instance._uncommitted_filefields = []
 
     fields = sender._meta.fields
-    if kwargs.get('update_fields', None):
-        update_fields = set(kwargs['update_fields'])
+    if kwargs.get("update_fields", None):
+        update_fields = set(kwargs["update_fields"])
         fields = update_fields.intersection(fields)
     for field in fields:
         if isinstance(field, FileField):
@@ -27,7 +27,7 @@ def signal_committed_filefields(sender, instance, **kwargs):
     A post_save signal handler which sends a signal for each ``FileField`` that
     was committed this save.
     """
-    for field_name in getattr(instance, '_uncommitted_filefields', ()):
+    for field_name in getattr(instance, "_uncommitted_filefields", ()):
         fieldfile = getattr(instance, field_name)
         # Don't send the signal for deleted files.
         if fieldfile:
@@ -41,6 +41,7 @@ def generate_aliases(fieldfile, **kwargs):
     """
     # Avoids circular import.
     from easy_thumbnails.files import generate_all_aliases
+
     generate_all_aliases(fieldfile, include_global=False)
 
 
@@ -52,4 +53,5 @@ def generate_aliases_global(fieldfile, **kwargs):
     """
     # Avoids circular import.
     from easy_thumbnails.files import generate_all_aliases
+
     generate_all_aliases(fieldfile, include_global=True)

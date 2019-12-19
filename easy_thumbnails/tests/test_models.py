@@ -2,7 +2,7 @@
 """
 
 from easy_thumbnails import utils
-from easy_thumbnails.models import Thumbnail, Source
+from easy_thumbnails.models import Source, Thumbnail
 from easy_thumbnails.tests import utils as test
 
 
@@ -15,11 +15,11 @@ class FileManagerTest(test.BaseTest):
         self.storage = test.TemporaryStorage()
         self.storage_hash = utils.get_storage_hash(self.storage)
         self.source = Source.objects.create(
-            name='Test source',
-            storage_hash=self.storage_hash)
+            name="Test source", storage_hash=self.storage_hash
+        )
 
         # Generate a test image, save it.
-        self.filename = self.create_image(self.storage, 'test.jpg')
+        self.filename = self.create_image(self.storage, "test.jpg")
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
@@ -28,24 +28,18 @@ class FileManagerTest(test.BaseTest):
     def test_create_file(self):
         """Create a new Thumbnail in the database"""
         img = Thumbnail.objects.get_file(
-            self.storage,
-            self.filename,
-            create=True,
-            source=self.source)
+            self.storage, self.filename, create=True, source=self.source
+        )
 
         self.assertEqual(img.name, self.filename)
 
     def test_get_file(self):
         """Fetch an existing thumb from database"""
         created = Thumbnail.objects.create(
-            storage_hash=self.storage_hash,
-            name=self.filename,
-            source=self.source)
+            storage_hash=self.storage_hash, name=self.filename, source=self.source
+        )
 
-        fetched = Thumbnail.objects.get_file(
-            self.storage,
-            self.filename,
-            create=False)
+        fetched = Thumbnail.objects.get_file(self.storage, self.filename, create=False)
 
         self.assertTrue(fetched)
         self.assertEqual(created, fetched)
@@ -56,18 +50,16 @@ class FileManagerTest(test.BaseTest):
         # It's not in the database yet
         try:
             Thumbnail.objects.get(name=self.filename)
-            self.fail('Thumb should not exist yet')
+            self.fail("Thumb should not exist yet")
         except Thumbnail.DoesNotExist:
             pass
 
         Thumbnail.objects.get_file(
-            self.storage,
-            self.filename,
-            source=self.source,
-            check_cache_miss=True)
+            self.storage, self.filename, source=self.source, check_cache_miss=True
+        )
 
         # Now it is
         try:
             Thumbnail.objects.get(name=self.filename)
         except Thumbnail.DoesNotExist:
-            self.fail('Thumb should exist now')
+            self.fail("Thumb should exist now")

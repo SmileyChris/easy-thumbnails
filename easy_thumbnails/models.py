@@ -1,24 +1,29 @@
 from django.db import models
 from django.utils import timezone
 
-from easy_thumbnails import utils, signal_handlers
+from easy_thumbnails import signal_handlers, utils
 from easy_thumbnails.conf import settings
 
 
 class FileManager(models.Manager):
-
-    def get_file(self, storage, name, create=False, update_modified=None,
-                 check_cache_miss=False, **kwargs):
-        kwargs.update(dict(storage_hash=utils.get_storage_hash(storage),
-                           name=name))
+    def get_file(
+        self,
+        storage,
+        name,
+        create=False,
+        update_modified=None,
+        check_cache_miss=False,
+        **kwargs
+    ):
+        kwargs.update(dict(storage_hash=utils.get_storage_hash(storage), name=name))
         if create:
             if update_modified:
-                defaults = kwargs.setdefault('defaults', {})
-                defaults['modified'] = update_modified
+                defaults = kwargs.setdefault("defaults", {})
+                defaults["modified"] = update_modified
             obj, created = self.get_or_create(**kwargs)
         else:
             created = False
-            kwargs.pop('defaults', None)
+            kwargs.pop("defaults", None)
             try:
                 manager = self._get_thumbnail_manager()
                 obj = manager.get(**kwargs)
@@ -43,7 +48,6 @@ class FileManager(models.Manager):
 
 
 class ThumbnailManager(FileManager):
-
     def _get_thumbnail_manager(self):
         if settings.THUMBNAIL_CACHE_DIMENSIONS:
             return self.select_related("dimensions")
@@ -59,7 +63,7 @@ class File(models.Model):
 
     class Meta:
         abstract = True
-        unique_together = (('storage_hash', 'name'),)
+        unique_together = (("storage_hash", "name"),)
 
     def __str__(self):
         return self.name
@@ -70,18 +74,20 @@ class Source(File):
 
 
 class Thumbnail(File):
-    source = models.ForeignKey(Source, related_name='thumbnails',
-                               on_delete=models.CASCADE)
+    source = models.ForeignKey(
+        Source, related_name="thumbnails", on_delete=models.CASCADE
+    )
 
     objects = ThumbnailManager()
 
     class Meta:
-        unique_together = (('storage_hash', 'name', 'source'),)
+        unique_together = (("storage_hash", "name", "source"),)
 
 
 class ThumbnailDimensions(models.Model):
-    thumbnail = models.OneToOneField(Thumbnail, related_name="dimensions",
-                                     on_delete=models.CASCADE)
+    thumbnail = models.OneToOneField(
+        Thumbnail, related_name="dimensions", on_delete=models.CASCADE
+    )
     width = models.PositiveIntegerField(null=True)
     height = models.PositiveIntegerField(null=True)
 

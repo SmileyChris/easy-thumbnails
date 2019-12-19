@@ -1,4 +1,5 @@
 from django.dispatch import receiver
+
 from easy_thumbnails.optimize.post_processor import optimize_thumbnail
 
 try:
@@ -7,5 +8,7 @@ try:
     @receiver(thumbnail_created)
     def thumbnail_created_callback(sender, **kwargs):
         optimize_thumbnail(sender)
+
+
 except ImportError:
     pass

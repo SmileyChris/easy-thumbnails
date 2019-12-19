@@ -14,6 +14,7 @@ class ThumbnailFileSystemStorage(FileSystemStorage):
     ``THUMBNAIL_MEDIA_ROOT`` and ``THUMBNAIL_MEDIA_URL``, falling back to the
     standard ``MEDIA_ROOT`` and ``MEDIA_URL`` if the custom settings are blank.
     """
+
     def __init__(self, location=None, base_url=None, *args, **kwargs):
         if location is None:
             location = settings.THUMBNAIL_MEDIA_ROOT or None
@@ -24,8 +25,7 @@ class ThumbnailFileSystemStorage(FileSystemStorage):
 
 class ThumbnailDefaultStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(
-            settings.THUMBNAIL_DEFAULT_STORAGE)()
+        self._wrapped = get_storage_class(settings.THUMBNAIL_DEFAULT_STORAGE)()
 
 
 thumbnail_default_storage = ThumbnailDefaultStorage()

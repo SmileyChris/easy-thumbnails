@@ -1,23 +1,25 @@
-from PIL import Image, ImageChops, ImageDraw
-from easy_thumbnails import processors
 from unittest import TestCase
 
+from PIL import Image, ImageChops, ImageDraw
 
-def create_image(mode='RGB', size=(800, 600)):
+from easy_thumbnails import processors
+
+
+def create_image(mode="RGB", size=(800, 600)):
     image = Image.new(mode, size, (255, 255, 255))
     draw = ImageDraw.Draw(image)
     x_bit, y_bit = size[0] // 10, size[1] // 10
-    draw.rectangle((x_bit, y_bit * 2, x_bit * 7, y_bit * 3), 'red')
-    draw.rectangle((x_bit * 2, y_bit, x_bit * 3, y_bit * 8), 'red')
+    draw.rectangle((x_bit, y_bit * 2, x_bit * 7, y_bit * 3), "red")
+    draw.rectangle((x_bit * 2, y_bit, x_bit * 3, y_bit * 8), "red")
     return image
 
 
 class ScaleAndCropTest(TestCase):
     def assertImagesEqual(self, im1, im2, msg=None):
         if im1.size != im2.size or (
-                ImageChops.difference(im1, im2).getbbox() is not None):
-            raise self.failureException(
-                msg or 'The two images were not identical')
+            ImageChops.difference(im1, im2).getbbox() is not None
+        ):
+            raise self.failureException(msg or "The two images were not identical")
 
     def test_scale(self):
         image = create_image()
@@ -51,50 +53,49 @@ class ScaleAndCropTest(TestCase):
     def test_crop_corner(self):
         image = create_image()
 
-        tl_crop = processors.scale_and_crop(image, (100, 600), crop='0,0')
+        tl_crop = processors.scale_and_crop(image, (100, 600), crop="0,0")
         expected = image.crop([0, 0, 100, 600])
         self.assertImagesEqual(tl_crop, expected)
 
-        br_crop = processors.scale_and_crop(image, (100, 600), crop='-0,-0')
+        br_crop = processors.scale_and_crop(image, (100, 600), crop="-0,-0")
         expected = image.crop([700, 0, 800, 600])
         self.assertImagesEqual(br_crop, expected)
 
-        x_offset_crop = processors.scale_and_crop(
-            image, (150, 600), crop='10,-10')
+        x_offset_crop = processors.scale_and_crop(image, (150, 600), crop="10,-10")
         expected = image.crop([15, 0, 165, 600])
 
         self.assertImagesEqual(x_offset_crop, expected)
 
-        y_offset_crop = processors.scale_and_crop(image, (800, 150),
-                                                  crop='10,-10')
+        y_offset_crop = processors.scale_and_crop(image, (800, 150), crop="10,-10")
         expected = image.crop([0, 435, 800, 585])
         self.assertImagesEqual(y_offset_crop, expected)
 
-        only_x_crop = processors.scale_and_crop(image, (100, 600), crop='0,')
+        only_x_crop = processors.scale_and_crop(image, (100, 600), crop="0,")
         expected = image.crop([0, 0, 100, 600])
         self.assertImagesEqual(only_x_crop, expected)
 
-        only_y_crop = processors.scale_and_crop(image, (800, 100), crop=',0')
+        only_y_crop = processors.scale_and_crop(image, (800, 100), crop=",0")
         expected = image.crop([0, 0, 800, 100])
         self.assertImagesEqual(only_y_crop, expected)
 
     def test_crop_smart(self):
         image = create_image()
 
-        smart_crop = processors.scale_and_crop(image, (600, 600), crop='smart')
+        smart_crop = processors.scale_and_crop(image, (600, 600), crop="smart")
         expected = image.crop([78, 0, 678, 600])
         self.assertImagesEqual(smart_crop, expected)
 
     def test_crop_scale(self):
         image = create_image(size=(200, 400))
 
-        scaled = processors.scale_and_crop(image, (100, 100), crop='scale')
+        scaled = processors.scale_and_crop(image, (100, 100), crop="scale")
         self.assertEqual(scaled.size, (100, 200))
 
-        scaled = processors.scale_and_crop(image, (600, 600), crop='scale')
+        scaled = processors.scale_and_crop(image, (600, 600), crop="scale")
         self.assertEqual(scaled.size, (200, 400))
-        scaled = processors.scale_and_crop(image, (600, 600), crop='scale',
-                                           upscale=True)
+        scaled = processors.scale_and_crop(
+            image, (600, 600), crop="scale", upscale=True
+        )
         self.assertEqual(scaled.size, (600, 1200))
 
     def test_one_dimension_scale(self):
@@ -141,12 +142,14 @@ class ScaleAndCropTest(TestCase):
         target = (95, 100)
 
         tl_crop = processors.scale_and_crop(
-            image, size=(100, 600), crop=True, target=target)
+            image, size=(100, 600), crop=True, target=target
+        )
         expected = image.crop([700, 0, 800, 600])
         self.assertImagesEqual(tl_crop, expected)
 
         tl_crop = processors.scale_and_crop(
-            image, size=(800, 100), crop=True, target=target)
+            image, size=(800, 100), crop=True, target=target
+        )
         expected = image.crop([0, 500, 800, 600])
         self.assertImagesEqual(tl_crop, expected)
 
@@ -154,113 +157,110 @@ class ScaleAndCropTest(TestCase):
         target = (0, 5)
 
         tl_crop = processors.scale_and_crop(
-            image, size=(100, 600), crop=True, target=target)
+            image, size=(100, 600), crop=True, target=target
+        )
         expected = image.crop([0, 0, 100, 600])
         self.assertImagesEqual(tl_crop, expected)
 
         tl_crop = processors.scale_and_crop(
-            image, size=(800, 100), crop=True, target=target)
+            image, size=(800, 100), crop=True, target=target
+        )
         expected = image.crop([0, 0, 800, 100])
         self.assertImagesEqual(tl_crop, expected)
 
     def test_crop_target_text(self):
         image = create_image()
         # Near centre target.
-        target = '45,55'
+        target = "45,55"
 
         tl_crop = processors.scale_and_crop(
-            image, size=(100, 600), crop=True, target=target)
+            image, size=(100, 600), crop=True, target=target
+        )
         expected = image.crop([310, 0, 410, 600])
         self.assertImagesEqual(tl_crop, expected)
 
         tl_crop = processors.scale_and_crop(
-            image, size=(800, 100), crop=True, target=target)
+            image, size=(800, 100), crop=True, target=target
+        )
         expected = image.crop([0, 280, 800, 380])
         self.assertImagesEqual(tl_crop, expected)
 
 
 class ColorspaceTest(TestCase):
-
     def test_standard(self):
-        image = Image.new('RGB', (800, 600))
+        image = Image.new("RGB", (800, 600))
         processed = processors.colorspace(image)
-        self.assertEqual(processed.mode, 'RGB')
+        self.assertEqual(processed.mode, "RGB")
 
-        image = Image.new('L', (800, 600))
+        image = Image.new("L", (800, 600))
         processed = processors.colorspace(image)
-        self.assertEqual(processed.mode, 'L')
+        self.assertEqual(processed.mode, "L")
 
     def test_transparent(self):
-        image = Image.new('RGBA', (800, 600))
+        image = Image.new("RGBA", (800, 600))
         processed = processors.colorspace(image)
-        self.assertEqual(processed.mode, 'RGBA')
+        self.assertEqual(processed.mode, "RGBA")
 
-        image = Image.new('LA', (800, 600))
+        image = Image.new("LA", (800, 600))
         processed = processors.colorspace(image)
-        self.assertEqual(processed.mode, 'LA')
+        self.assertEqual(processed.mode, "LA")
 
     def test_replace_alpha(self):
-        image = Image.new('RGBA', (800, 600))
+        image = Image.new("RGBA", (800, 600))
         self.assertEqual(image.load()[0, 0], (0, 0, 0, 0))
-        processed = processors.colorspace(image, replace_alpha='#fefdfc')
-        self.assertEqual(processed.mode, 'RGB')
+        processed = processors.colorspace(image, replace_alpha="#fefdfc")
+        self.assertEqual(processed.mode, "RGB")
         self.assertEqual(processed.load()[0, 0], (254, 253, 252))
 
-        image = Image.new('LA', (800, 600))
+        image = Image.new("LA", (800, 600))
         self.assertEqual(image.load()[0, 0], (0, 0))
-        processed = processors.colorspace(image, replace_alpha='#fefdfc')
-        self.assertEqual(processed.mode, 'L')
+        processed = processors.colorspace(image, replace_alpha="#fefdfc")
+        self.assertEqual(processed.mode, "L")
         self.assertEqual(processed.load()[0, 0], 253)
 
     def test_bw(self):
-        image = Image.new('RGB', (800, 600))
+        image = Image.new("RGB", (800, 600))
         processed = processors.colorspace(image, bw=True)
-        self.assertEqual(processed.mode, 'L')
+        self.assertEqual(processed.mode, "L")
 
-        image = Image.new('RGBA', (800, 600))
+        image = Image.new("RGBA", (800, 600))
         processed = processors.colorspace(image, bw=True)
-        self.assertEqual(processed.mode, 'LA')
+        self.assertEqual(processed.mode, "LA")
 
-        image = Image.new('L', (800, 600))
+        image = Image.new("L", (800, 600))
         processed = processors.colorspace(image, bw=True)
-        self.assertEqual(processed.mode, 'L')
+        self.assertEqual(processed.mode, "L")
 
-        image = Image.new('LA', (800, 600))
+        image = Image.new("LA", (800, 600))
         processed = processors.colorspace(image, bw=True)
-        self.assertEqual(processed.mode, 'LA')
+        self.assertEqual(processed.mode, "LA")
 
 
 class AutocropTest(TestCase):
-
     def test_standard(self):
         processed = processors.autocrop(create_image(), autocrop=True)
         self.assertEqual(processed.size, (481, 421))
 
 
 class BackgroundTest(TestCase):
-
     def test_basic(self):
         image = create_image()
-        processed = processors.background(
-            image, background='#fff', size=(800, 800))
+        processed = processors.background(image, background="#fff", size=(800, 800))
         self.assertEqual(processed.size, (800, 800))
 
     def test_grayscale(self):
-        image = create_image().convert('L')
-        processed = processors.background(
-            image, background='#fff', size=(800, 800))
+        image = create_image().convert("L")
+        processed = processors.background(image, background="#fff", size=(800, 800))
         self.assertEqual(processed.size, (800, 800))
-        self.assertEqual(processed.mode, 'L')
+        self.assertEqual(processed.mode, "L")
 
     def test_mode_alpha(self):
-        image = create_image().convert('RGBA')
-        processed = processors.background(
-            image, background='#fff', size=(800, 800))
+        image = create_image().convert("RGBA")
+        processed = processors.background(image, background="#fff", size=(800, 800))
         self.assertEqual(processed.size, (800, 800))
-        self.assertEqual(processed.mode, 'RGB')
+        self.assertEqual(processed.mode, "RGB")
 
-        image = create_image().convert('LA')
-        processed = processors.background(
-            image, background='#fff', size=(800, 800))
+        image = create_image().convert("LA")
+        processed = processors.background(image, background="#fff", size=(800, 800))
         self.assertEqual(processed.size, (800, 800))
-        self.assertEqual(processed.mode, 'L')
+        self.assertEqual(processed.mode, "L")

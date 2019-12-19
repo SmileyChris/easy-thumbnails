@@ -76,8 +76,7 @@ class AppSettings(BaseSettings):
             # reverted.
             if attr not in self._added:
                 try:
-                    self._changed.setdefault(
-                        attr, getattr(django_settings, attr))
+                    self._changed.setdefault(attr, getattr(django_settings, attr))
                 except AttributeError:
                     self._added.append(attr)
             return setattr(django_settings, attr, value)
@@ -96,19 +95,18 @@ class Settings(AppSettings):
     thumbnail when using the :ref:`thumbnail_tag` rather than failing silently.
     """
 
-    THUMBNAIL_DEFAULT_STORAGE = (
-        'easy_thumbnails.storage.ThumbnailFileSystemStorage')
+    THUMBNAIL_DEFAULT_STORAGE = "easy_thumbnails.storage.ThumbnailFileSystemStorage"
     """
     The default Django storage for *saving* generated thumbnails.
     """
-    THUMBNAIL_MEDIA_ROOT = ''
+    THUMBNAIL_MEDIA_ROOT = ""
     """
     Used by easy-thumbnail's default storage to locate where thumbnails are
     stored on the file system.
 
     If not provided, Django's standard ``MEDIA_ROOT`` setting is used.
     """
-    THUMBNAIL_MEDIA_URL = ''
+    THUMBNAIL_MEDIA_URL = ""
     """
     Used by easy-thumbnail's default storage to build the absolute URL for a
     generated thumbnail.
@@ -116,7 +114,7 @@ class Settings(AppSettings):
     If not provided, Django's standard ``MEDIA_URL`` setting is used.
     """
 
-    THUMBNAIL_BASEDIR = ''
+    THUMBNAIL_BASEDIR = ""
     """
     Save thumbnail images to a directory directly off ``MEDIA_ROOT``, still
     keeping the relative directory structure of the source image.
@@ -127,7 +125,7 @@ class Settings(AppSettings):
 
         MEDIA_ROOT + 'thumbs/photos/1_jpg_150x150_q85.jpg'
     """
-    THUMBNAIL_SUBDIR = ''
+    THUMBNAIL_SUBDIR = ""
     """
     Save thumbnail images to a sub-directory relative to the source image.
 
@@ -137,7 +135,7 @@ class Settings(AppSettings):
 
         MEDIA_ROOT + 'photos/thumbs/1_jpg_150x150_q85.jpg'
     """
-    THUMBNAIL_PREFIX = ''
+    THUMBNAIL_PREFIX = ""
     """
     Prepend thumbnail filenames with the specified prefix.
 
@@ -166,7 +164,7 @@ class Settings(AppSettings):
     Set to ``False`` to never use progressive encoding.
     """
 
-    THUMBNAIL_EXTENSION = 'jpg'
+    THUMBNAIL_EXTENSION = "jpg"
     """
     The type of image to save thumbnails with no transparency layer as.
 
@@ -186,12 +184,12 @@ class Settings(AppSettings):
     Instead of a tuple, you can also set this to ``True`` in order to always
     preserve the original extension.
     """
-    THUMBNAIL_TRANSPARENCY_EXTENSION = 'png'
+    THUMBNAIL_TRANSPARENCY_EXTENSION = "png"
     """
     The type of image to save thumbnails with a transparency layer (e.g. GIFs
     or transparent PNGs).
     """
-    THUMBNAIL_NAMER = 'easy_thumbnails.namers.default'
+    THUMBNAIL_NAMER = "easy_thumbnails.namers.default"
     """
     The function used to generate the filename for thumbnail images.
 
@@ -205,7 +203,8 @@ class Settings(AppSettings):
         Short hashed filename like ``1xedFtqllFo9.jpg``.
 
     ``easy_thumbnails.namers.alias``
-        Filename based on ``THUMBNAIL_ALIASES`` dictionary key like ``source.jpg.medium_large.jpg``.
+        Filename based on ``THUMBNAIL_ALIASES`` dictionary key like
+        ``source.jpg.medium_large.jpg``.
 
     ``easy_thumbnails.namers.source_hashed``
         Filename with source hashed, size, then options hashed like
@@ -222,11 +221,11 @@ class Settings(AppSettings):
     """
 
     THUMBNAIL_PROCESSORS = (
-        'easy_thumbnails.processors.colorspace',
-        'easy_thumbnails.processors.autocrop',
-        'easy_thumbnails.processors.scale_and_crop',
-        'easy_thumbnails.processors.filters',
-        'easy_thumbnails.processors.background',
+        "easy_thumbnails.processors.colorspace",
+        "easy_thumbnails.processors.autocrop",
+        "easy_thumbnails.processors.scale_and_crop",
+        "easy_thumbnails.processors.filters",
+        "easy_thumbnails.processors.background",
     )
     """
     Defaults to::
@@ -245,9 +244,7 @@ class Settings(AppSettings):
     The order of the processors is the order in which they are sequentially
     called to process the image.
     """
-    THUMBNAIL_SOURCE_GENERATORS = (
-        'easy_thumbnails.source_generators.pil_image',
-    )
+    THUMBNAIL_SOURCE_GENERATORS = ("easy_thumbnails.source_generators.pil_image",)
     """
     The :doc:`source_generators` through which the base image is created from
     the source file.
@@ -302,7 +299,7 @@ class Settings(AppSettings):
         {% thumbnail obj.image 50x50 crop HIGH_RESOLUTION %}  {# force hires #}
     """
 
-    THUMBNAIL_HIGHRES_INFIX = '@2x'
+    THUMBNAIL_HIGHRES_INFIX = "@2x"
     """
     Sets the infix used to distinguish thumbnail images for retina displays.
 
@@ -324,10 +321,11 @@ class Settings(AppSettings):
     still works as a fall back.
     """
 
-    THUMBNAIL_WIDGET_OPTIONS = {'size': (80, 80)}
+    THUMBNAIL_WIDGET_OPTIONS = {"size": (80, 80)}
     """
     Default options for the
     :class:`easy_thumbnails.widgets.ImageClearableFileInput` widget.
     """
+
 
 settings = Settings()

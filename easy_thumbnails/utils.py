@@ -2,9 +2,10 @@ import hashlib
 import inspect
 import math
 
-from django.utils.functional import LazyObject
 from django.utils import timezone
+from django.utils.functional import LazyObject
 from PIL import Image
+
 from easy_thumbnails.conf import settings
 
 
@@ -26,10 +27,10 @@ def dynamic_import(import_string):
     Dynamically import a module or object.
     """
     # Use rfind rather than rsplit for Python 2.3 compatibility.
-    lastdot = import_string.rfind('.')
+    lastdot = import_string.rfind(".")
     if lastdot == -1:
         return __import__(import_string, {}, {}, [])
-    module_name, attr = import_string[:lastdot], import_string[lastdot + 1:]
+    module_name, attr = import_string[:lastdot], import_string[lastdot + 1 :]
     parent_module = __import__(module_name, {}, {}, [attr])
     return getattr(parent_module, attr)
 
@@ -41,10 +42,11 @@ def valid_processor_options(processors=None):
     """
     if processors is None:
         processors = [
-            dynamic_import(p) for p in
-            tuple(settings.THUMBNAIL_PROCESSORS) +
-            tuple(settings.THUMBNAIL_SOURCE_GENERATORS)]
-    valid_options = set(['size', 'quality', 'subsampling'])
+            dynamic_import(p)
+            for p in tuple(settings.THUMBNAIL_PROCESSORS)
+            + tuple(settings.THUMBNAIL_SOURCE_GENERATORS)
+        ]
+    valid_options = set(["size", "quality", "subsampling"])
     for processor in processors:
         args = inspect.getfullargspec(processor)[0]
         # Add all arguments apart from the first (the source image).
@@ -57,7 +59,7 @@ def is_storage_local(storage):
     Check to see if a file storage is local.
     """
     try:
-        storage.path('test')
+        storage.path("test")
     except NotImplementedError:
         return False
     return True
@@ -75,8 +77,8 @@ def get_storage_hash(storage):
         storage = storage._wrapped
     if not isinstance(storage, str):
         storage_cls = storage.__class__
-        storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
-    return hashlib.md5(storage.encode('utf8')).hexdigest()
+        storage = "%s.%s" % (storage_cls.__module__, storage_cls.__name__)
+    return hashlib.md5(storage.encode("utf8")).hexdigest()
 
 
 def is_transparent(image):
@@ -87,8 +89,9 @@ def is_transparent(image):
         # Can only deal with PIL images, fall back to the assumption that that
         # it's not transparent.
         return False
-    return (image.mode in ('RGBA', 'LA') or
-            (image.mode == 'P' and 'transparency' in image.info))
+    return image.mode in ("RGBA", "LA") or (
+        image.mode == "P" and "transparency" in image.info
+    )
 
 
 def is_progressive(image):
@@ -98,7 +101,7 @@ def is_progressive(image):
     if not isinstance(image, Image.Image):
         # Can only check PIL images for progressive encoding.
         return False
-    return ('progressive' in image.info) or ('progression' in image.info)
+    return ("progressive" in image.info) or ("progression" in image.info)
 
 
 def exif_orientation(im):
@@ -142,7 +145,7 @@ def get_modified_time(storage, name):
     except NotImplementedError:
         return None
     if modified_time and timezone.is_naive(modified_time):
-        if getattr(settings, 'USE_TZ', False):
+        if getattr(settings, "USE_TZ", False):
             default_timezone = timezone.get_default_timezone()
             return timezone.make_aware(modified_time, default_timezone)
     return modified_time

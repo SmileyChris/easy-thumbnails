@@ -1,16 +1,14 @@
 import os
 
-from django.core.files.base import File, ContentFile
-from django.core.files.storage import (
-    default_storage, Storage)
-from django.db.models.fields.files import ImageFieldFile, FieldFile
+from django.core.files.base import ContentFile, File
 from django.core.files.images import get_image_dimensions
-
-from django.utils.safestring import mark_safe
-from django.utils.html import escape
+from django.core.files.storage import Storage, default_storage
+from django.db.models.fields.files import FieldFile, ImageFieldFile
 from django.utils import timezone
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
-from easy_thumbnails import engine, exceptions, models, utils, signals, storage
+from easy_thumbnails import engine, exceptions, models, signals, storage, utils
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
@@ -44,7 +42,7 @@ def get_thumbnailer(obj, relative_name=None):
     an object with an ``easy_thumbnails_thumbnailer`` then the attribute is
     simply returned under the assumption it is a Thumbnailer instance)
     """
-    if hasattr(obj, 'easy_thumbnails_thumbnailer'):
+    if hasattr(obj, "easy_thumbnails_thumbnailer"):
         return obj.easy_thumbnails_thumbnailer
     if isinstance(obj, Thumbnailer):
         return obj
@@ -62,7 +60,8 @@ def get_thumbnailer(obj, relative_name=None):
     if not relative_name:
         raise ValueError(
             "If object is not a FieldFile or Thumbnailer instance, the "
-            "relative name must be provided")
+            "relative name must be provided"
+        )
 
     if isinstance(obj, File):
         obj = obj.file
@@ -71,8 +70,11 @@ def get_thumbnailer(obj, relative_name=None):
         obj = None
 
     return Thumbnailer(
-        file=obj, name=relative_name, source_storage=source_storage,
-        remote_source=obj is not None)
+        file=obj,
+        name=relative_name,
+        source_storage=source_storage,
+        remote_source=obj is not None,
+    )
 
 
 def generate_all_aliases(fieldfile, include_global):
@@ -88,7 +90,7 @@ def generate_all_aliases(fieldfile, include_global):
     if all_options:
         thumbnailer = get_thumbnailer(fieldfile)
         for key, options in all_options.items():
-            options['ALIAS'] = key
+            options["ALIAS"] = key
             thumbnailer.get_thumbnail(options)
 
 
@@ -105,8 +107,9 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
     dimensions = None
     dimensions_cache = None
     try:
-        thumbnail = models.Thumbnail.objects.select_related('dimensions').get(
-            storage_hash=storage_hash, name=file.name)
+        thumbnail = models.Thumbnail.objects.select_related("dimensions").get(
+            storage_hash=storage_hash, name=file.name
+        )
     except models.Thumbnail.DoesNotExist:
         thumbnail = None
     else:
@@ -122,12 +125,13 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
         # while running get_image_dimensions.
         models.ThumbnailDimensions.objects.get_or_create(
             thumbnail=thumbnail,
-            defaults={'width': dimensions[0], 'height': dimensions[1]})
+            defaults={"width": dimensions[0], "height": dimensions[1]},
+        )
     return dimensions
 
 
 class FakeField:
-    name = 'fake'
+    name = "fake"
 
     def __init__(self, storage=None):
         if storage is None:
@@ -150,8 +154,10 @@ class ThumbnailFile(ImageFieldFile):
     This can be used just like a Django model instance's property for a file
     field (i.e. an ``ImageFieldFile`` object).
     """
-    def __init__(self, name, file=None, storage=None, thumbnail_options=None,
-                 *args, **kwargs):
+
+    def __init__(
+        self, name, file=None, storage=None, thumbnail_options=None, *args, **kwargs
+    ):
         fake_field = FakeField(storage=storage)
         super().__init__(FakeInstance(), fake_field, name, *args, **kwargs)
         del self.field
@@ -185,8 +191,9 @@ class ThumbnailFile(ImageFieldFile):
         The image is cached to avoid the file needing to be read again if the
         function is called again.
         """
-        if not hasattr(self, '_image_cache'):
+        if not hasattr(self, "_image_cache"):
             from easy_thumbnails.source_generators import pil_image
+
             self.image = pil_image(self)
         return self._image_cache
 
@@ -200,14 +207,14 @@ class ThumbnailFile(ImageFieldFile):
             self._image_cache = image
             self._dimensions_cache = image.size
         else:
-            if hasattr(self, '_image_cache'):
+            if hasattr(self, "_image_cache"):
                 del self._cached_image
-            if hasattr(self, '_dimensions_cache'):
+            if hasattr(self, "_dimensions_cache"):
                 del self._dimensions_cache
 
     image = property(_get_image, _set_image)
 
-    def tag(self, alt='', use_size=None, **attrs):
+    def tag(self, alt="", use_size=None, **attrs):
         """
         Return a standard XHTML ``<img ... />`` tag for this field.
 
@@ -221,7 +228,7 @@ class ThumbnailFile(ImageFieldFile):
         attributes to the `img` tag.
         """
         if use_size is None:
-            if getattr(self, '_dimensions_cache', None):
+            if getattr(self, "_dimensions_cache", None):
                 use_size = True
             else:
                 try:
@@ -229,18 +236,19 @@ class ThumbnailFile(ImageFieldFile):
                     use_size = True
                 except NotImplementedError:
                     use_size = False
-        attrs['alt'] = alt
-        attrs['src'] = self.url
+        attrs["alt"] = alt
+        attrs["src"] = self.url
         if use_size:
             attrs.update(dict(width=self.width, height=self.height))
-        attrs = ' '.join(['%s="%s"' % (key, escape(value))
-                          for key, value in sorted(attrs.items())])
-        return mark_safe('<img %s />' % attrs)
+        attrs = " ".join(
+            ['%s="%s"' % (key, escape(value)) for key, value in sorted(attrs.items())]
+        )
+        return mark_safe("<img %s />" % attrs)
 
     def _get_file(self):
         self._require_file()
-        if not hasattr(self, '_file') or self._file is None:
-            self._file = self.storage.open(self.name, 'rb')
+        if not hasattr(self, "_file") or self._file is None:
+            self._file = self.storage.open(self.name, "rb")
         return self._file
 
     def _set_file(self, value):
@@ -256,17 +264,16 @@ class ThumbnailFile(ImageFieldFile):
 
     def open(self, mode=None, *args, **kwargs):
         if self.closed and self.name:
-            mode = mode or getattr(self, 'mode', None) or 'rb'
+            mode = mode or getattr(self, "mode", None) or "rb"
             self.file = self.storage.open(self.name, mode)
         else:
             return super().open(mode, *args, **kwargs)
 
     def _get_image_dimensions(self):
-        if not hasattr(self, '_dimensions_cache'):
+        if not hasattr(self, "_dimensions_cache"):
             close = self.closed
             self.open()
-            self._dimensions_cache = database_get_image_dimensions(
-                self, close=close)
+            self._dimensions_cache = database_get_image_dimensions(self, close=close)
         return self._dimensions_cache
 
     def set_image_dimensions(self, thumbnail):
@@ -275,7 +282,7 @@ class ThumbnailFile(ImageFieldFile):
         model instance.
         """
         try:
-            dimensions = getattr(thumbnail, 'dimensions', None)
+            dimensions = getattr(thumbnail, "dimensions", None)
         except models.ThumbnailDimensions.DoesNotExist:
             dimensions = None
         if not dimensions:
@@ -295,6 +302,7 @@ class Thumbnailer(File):
         * source_generators
         * thumbnail_processors
     """
+
     #: A list of source generators to use. If ``None``, will use the default
     #: generators defined in settings.
     source_generators = None
@@ -302,9 +310,17 @@ class Thumbnailer(File):
     #: processors defined in settings.
     thumbnail_processors = None
 
-    def __init__(self, file=None, name=None, source_storage=None,
-                 thumbnail_storage=None, remote_source=False, generate=True,
-                 *args, **kwargs):
+    def __init__(
+        self,
+        file=None,
+        name=None,
+        source_storage=None,
+        thumbnail_storage=None,
+        remote_source=False,
+        generate=True,
+        *args,
+        **kwargs
+    ):
         super().__init__(file, name, *args, **kwargs)
         if source_storage is None:
             source_storage = default_storage
@@ -320,11 +336,19 @@ class Thumbnailer(File):
         # if the attribute exists already (it could be set as a class property
         # on a subclass) before getting it from settings.
         for default in (
-                'basedir', 'subdir', 'prefix', 'quality', 'extension',
-                'preserve_extensions', 'transparency_extension',
-                'check_cache_miss', 'high_resolution', 'highres_infix',
-                'namer'):
-            attr_name = 'thumbnail_%s' % default
+            "basedir",
+            "subdir",
+            "prefix",
+            "quality",
+            "extension",
+            "preserve_extensions",
+            "transparency_extension",
+            "check_cache_miss",
+            "high_resolution",
+            "highres_infix",
+            "namer",
+        ):
+            attr_name = "thumbnail_%s" % default
             if getattr(self, attr_name, None) is None:
                 value = getattr(settings, attr_name.upper())
                 setattr(self, attr_name, value)
@@ -350,12 +374,13 @@ class Thumbnailer(File):
         if thumbnail_options is not None:
             args.append(thumbnail_options)
         opts = ThumbnailOptions(*args, **kwargs)
-        if 'quality' not in thumbnail_options:
-            opts['quality'] = self.thumbnail_quality
+        if "quality" not in thumbnail_options:
+            opts["quality"] = self.thumbnail_quality
         return opts
 
-    def generate_thumbnail(self, thumbnail_options, high_resolution=False,
-                           silent_template_exception=False):
+    def generate_thumbnail(
+        self, thumbnail_options, high_resolution=False, silent_template_exception=False
+    ):
         """
         Return an unsaved ``ThumbnailFile`` containing a thumbnail image.
 
@@ -363,7 +388,7 @@ class Thumbnailer(File):
         dictionary.
         """
         thumbnail_options = self.get_options(thumbnail_options)
-        orig_size = thumbnail_options['size']  # remember original size
+        orig_size = thumbnail_options["size"]  # remember original size
         # Size sanity check.
         min_dim, max_dim = 0, 0
         for dim in orig_size:
@@ -374,44 +399,55 @@ class Thumbnailer(File):
             min_dim, max_dim = min(min_dim, dim), max(max_dim, dim)
         if max_dim == 0 or min_dim < 0:
             raise exceptions.EasyThumbnailsError(
-                "The source image is an invalid size (%sx%s)" % orig_size)
+                "The source image is an invalid size (%sx%s)" % orig_size
+            )
 
         if high_resolution:
-            thumbnail_options['size'] = (orig_size[0] * 2, orig_size[1] * 2)
+            thumbnail_options["size"] = (orig_size[0] * 2, orig_size[1] * 2)
         image = engine.generate_source_image(
-            self, thumbnail_options, self.source_generators,
-            fail_silently=silent_template_exception)
+            self,
+            thumbnail_options,
+            self.source_generators,
+            fail_silently=silent_template_exception,
+        )
         if image is None:
             raise exceptions.InvalidImageFormatError(
-                "The source file does not appear to be an image")
+                "The source file does not appear to be an image"
+            )
 
-        thumbnail_image = engine.process_image(image, thumbnail_options,
-                                               self.thumbnail_processors)
+        thumbnail_image = engine.process_image(
+            image, thumbnail_options, self.thumbnail_processors
+        )
         if high_resolution:
-            thumbnail_options['size'] = orig_size  # restore original size
+            thumbnail_options["size"] = orig_size  # restore original size
 
         filename = self.get_thumbnail_name(
             thumbnail_options,
             transparent=utils.is_transparent(thumbnail_image),
-            high_resolution=high_resolution)
-        quality = thumbnail_options['quality']
-        subsampling = thumbnail_options['subsampling']
+            high_resolution=high_resolution,
+        )
+        quality = thumbnail_options["quality"]
+        subsampling = thumbnail_options["subsampling"]
 
         img = engine.save_image(
-            thumbnail_image, filename=filename, quality=quality,
-            subsampling=subsampling)
+            thumbnail_image, filename=filename, quality=quality, subsampling=subsampling
+        )
         data = img.read()
 
         thumbnail = ThumbnailFile(
-            filename, file=ContentFile(data), storage=self.thumbnail_storage,
-            thumbnail_options=thumbnail_options)
+            filename,
+            file=ContentFile(data),
+            storage=self.thumbnail_storage,
+            thumbnail_options=thumbnail_options,
+        )
         thumbnail.image = thumbnail_image
         thumbnail._committed = False
 
         return thumbnail
 
-    def get_thumbnail_name(self, thumbnail_options, transparent=False,
-                           high_resolution=False):
+    def get_thumbnail_name(
+        self, thumbnail_options, transparent=False, high_resolution=False
+    ):
         """
         Return a thumbnail filename for the given ``thumbnail_options``
         dictionary and ``source_name`` (which defaults to the File's ``name``
@@ -422,19 +458,20 @@ class Thumbnailer(File):
         source_extension = os.path.splitext(source_filename)[1][1:]
         preserve_extensions = self.thumbnail_preserve_extensions
         if preserve_extensions and (
-                preserve_extensions is True or
-                source_extension.lower() in preserve_extensions):
+            preserve_extensions is True
+            or source_extension.lower() in preserve_extensions
+        ):
             extension = source_extension
         elif transparent:
             extension = self.thumbnail_transparency_extension
         else:
             extension = self.thumbnail_extension
-        extension = extension or 'jpg'
+        extension = extension or "jpg"
 
         prepared_opts = thumbnail_options.prepared_options()
-        opts_text = '_'.join(prepared_opts)
+        opts_text = "_".join(prepared_opts)
 
-        data = {'opts': opts_text}
+        data = {"opts": opts_text}
         basedir = self.thumbnail_basedir % data
         subdir = self.thumbnail_subdir % data
 
@@ -450,9 +487,8 @@ class Thumbnailer(File):
             prepared_options=prepared_opts,
         )
         if high_resolution:
-            filename = self.thumbnail_highres_infix.join(
-                os.path.splitext(filename))
-        filename = '%s%s' % (self.thumbnail_prefix, filename)
+            filename = self.thumbnail_highres_infix.join(os.path.splitext(filename))
+        filename = "%s%s" % (self.thumbnail_prefix, filename)
 
         return os.path.join(basedir, path, subdir, filename)
 
@@ -464,11 +500,12 @@ class Thumbnailer(File):
         thumbnail_options = self.get_options(thumbnail_options)
         names = [
             self.get_thumbnail_name(
-                thumbnail_options, transparent=False,
-                high_resolution=high_resolution)]
+                thumbnail_options, transparent=False, high_resolution=high_resolution
+            )
+        ]
         transparent_name = self.get_thumbnail_name(
-            thumbnail_options, transparent=True,
-            high_resolution=high_resolution)
+            thumbnail_options, transparent=True, high_resolution=high_resolution
+        )
         if transparent_name not in names:
             names.append(transparent_name)
 
@@ -476,8 +513,10 @@ class Thumbnailer(File):
             exists = self.thumbnail_exists(filename)
             if exists:
                 thumbnail_file = ThumbnailFile(
-                    name=filename, storage=self.thumbnail_storage,
-                    thumbnail_options=thumbnail_options)
+                    name=filename,
+                    storage=self.thumbnail_storage,
+                    thumbnail_options=thumbnail_options,
+                )
                 if settings.THUMBNAIL_CACHE_DIMENSIONS:
                     # If this wasn't local storage, exists will be a thumbnail
                     # instance so we can store the image dimensions now to save
@@ -485,8 +524,13 @@ class Thumbnailer(File):
                     thumbnail_file.set_image_dimensions(exists)
                 return thumbnail_file
 
-    def get_thumbnail(self, thumbnail_options, save=True, generate=None,
-                      silent_template_exception=False):
+    def get_thumbnail(
+        self,
+        thumbnail_options,
+        save=True,
+        generate=None,
+        silent_template_exception=False,
+    ):
         """
         Return a ``ThumbnailFile`` containing a thumbnail.
 
@@ -512,32 +556,36 @@ class Thumbnailer(File):
             if generate:
                 thumbnail = self.generate_thumbnail(
                     thumbnail_options,
-                    silent_template_exception=silent_template_exception)
+                    silent_template_exception=silent_template_exception,
+                )
                 if save:
                     self.save_thumbnail(thumbnail)
             else:
                 signals.thumbnail_missed.send(
-                    sender=self, options=thumbnail_options,
-                    high_resolution=False)
+                    sender=self, options=thumbnail_options, high_resolution=False
+                )
 
-        if 'HIGH_RESOLUTION' in thumbnail_options:
-            generate_high_resolution = thumbnail_options.get('HIGH_RESOLUTION')
+        if "HIGH_RESOLUTION" in thumbnail_options:
+            generate_high_resolution = thumbnail_options.get("HIGH_RESOLUTION")
         else:
             generate_high_resolution = self.thumbnail_high_resolution
         if generate_high_resolution:
             thumbnail.high_resolution = self.get_existing_thumbnail(
-                thumbnail_options, high_resolution=True)
+                thumbnail_options, high_resolution=True
+            )
             if not thumbnail.high_resolution:
                 if generate:
                     thumbnail.high_resolution = self.generate_thumbnail(
-                        thumbnail_options, high_resolution=True,
-                        silent_template_exception=silent_template_exception)
+                        thumbnail_options,
+                        high_resolution=True,
+                        silent_template_exception=silent_template_exception,
+                    )
                     if save:
                         self.save_thumbnail(thumbnail.high_resolution)
                 else:
                     signals.thumbnail_missed.send(
-                        sender=self, options=thumbnail_options,
-                        high_resolution=False)
+                        sender=self, options=thumbnail_options, high_resolution=False
+                    )
 
         return thumbnail
 
@@ -555,16 +603,17 @@ class Thumbnailer(File):
             pass
         self.thumbnail_storage.save(filename, thumbnail)
 
-        thumb_cache = self.get_thumbnail_cache(
-            thumbnail.name, create=True, update=True)
+        thumb_cache = self.get_thumbnail_cache(thumbnail.name, create=True, update=True)
 
         # Cache thumbnail dimensions.
         if settings.THUMBNAIL_CACHE_DIMENSIONS:
-            dimensions_cache, created = (
-                models.ThumbnailDimensions.objects.get_or_create(
-                    thumbnail=thumb_cache,
-                    defaults={'width': thumbnail.width,
-                              'height': thumbnail.height}))
+            (
+                dimensions_cache,
+                created,
+            ) = models.ThumbnailDimensions.objects.get_or_create(
+                thumbnail=thumb_cache,
+                defaults={"width": thumbnail.width, "height": thumbnail.height},
+            )
             if not created:
                 dimensions_cache.width = thumbnail.width
                 dimensions_cache.height = thumbnail.height
@@ -585,8 +634,7 @@ class Thumbnailer(File):
             return False
 
         if utils.is_storage_local(self.source_storage):
-            source_modtime = utils.get_modified_time(
-                self.source_storage, self.name)
+            source_modtime = utils.get_modified_time(self.source_storage, self.name)
         else:
             source = self.get_source_cache()
             if not source:
@@ -599,7 +647,8 @@ class Thumbnailer(File):
         local_thumbnails = utils.is_storage_local(self.thumbnail_storage)
         if local_thumbnails:
             thumbnail_modtime = utils.get_modified_time(
-                self.thumbnail_storage, thumbnail_name)
+                self.thumbnail_storage, thumbnail_name
+            )
             if not thumbnail_modtime:
                 return False
             return source_modtime <= thumbnail_modtime
@@ -616,14 +665,17 @@ class Thumbnailer(File):
     def get_source_cache(self, create=False, update=False):
         if self.remote_source:
             return None
-        if hasattr(self, '_source_cache') and not update:
+        if hasattr(self, "_source_cache") and not update:
             if self._source_cache or not create:
                 return self._source_cache
         update_modified = (update or create) and timezone.now()
         self._source_cache = models.Source.objects.get_file(
-            create=create, update_modified=update_modified,
-            storage=self.source_storage, name=self.name,
-            check_cache_miss=self.thumbnail_check_cache_miss)
+            create=create,
+            update_modified=update_modified,
+            storage=self.source_storage,
+            name=self.name,
+            check_cache_miss=self.thumbnail_check_cache_miss,
+        )
         return self._source_cache
 
     def get_thumbnail_cache(self, thumbnail_name, create=False, update=False):
@@ -632,13 +684,17 @@ class Thumbnailer(File):
         source = self.get_source_cache(create=True)
         update_modified = (update or create) and timezone.now()
         return models.Thumbnail.objects.get_file(
-            create=create, update_modified=update_modified,
-            storage=self.thumbnail_storage, source=source, name=thumbnail_name,
-            check_cache_miss=self.thumbnail_check_cache_miss)
+            create=create,
+            update_modified=update_modified,
+            storage=self.thumbnail_storage,
+            source=source,
+            name=thumbnail_name,
+            check_cache_miss=self.thumbnail_check_cache_miss,
+        )
 
     def open(self, mode=None):
         if self.closed:
-            mode = mode or getattr(self, 'mode', None) or 'rb'
+            mode = mode or getattr(self, "mode", None) or "rb"
             self.file = self.source_storage.open(self.name, mode)
         else:
             self.seek(0)
@@ -652,10 +708,11 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
     A field file which provides some methods for generating (and returning)
     thumbnail images.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.source_storage = self.field.storage
-        thumbnail_storage = getattr(self.field, 'thumbnail_storage', None)
+        thumbnail_storage = getattr(self.field, "thumbnail_storage", None)
         if thumbnail_storage:
             self.thumbnail_storage = thumbnail_storage
         self.alias_target = self
@@ -694,8 +751,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         source_cache = self.get_source_cache()
         deleted = 0
         if source_cache:
-            thumbnail_storage_hash = utils.get_storage_hash(
-                self.thumbnail_storage)
+            thumbnail_storage_hash = utils.get_storage_hash(self.thumbnail_storage)
             for thumbnail_cache in source_cache.thumbnails.all():
                 # Only attempt to delete the file if it was stored using the
                 # same storage as is currently used.
@@ -715,27 +771,30 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         # First, delete any related thumbnails.
         source_cache = self.get_source_cache()
         if source_cache:
-            thumbnail_storage_hash = utils.get_storage_hash(
-                self.thumbnail_storage)
+            thumbnail_storage_hash = utils.get_storage_hash(self.thumbnail_storage)
             for thumbnail_cache in source_cache.thumbnails.all():
                 # Only iterate files which are stored using the current
                 # thumbnail storage.
                 if thumbnail_cache.storage_hash == thumbnail_storage_hash:
-                    yield ThumbnailFile(name=thumbnail_cache.name,
-                                        storage=self.thumbnail_storage)
+                    yield ThumbnailFile(
+                        name=thumbnail_cache.name, storage=self.thumbnail_storage
+                    )
 
     def __getstate__(self):
         state = super().__getstate__()
-        state.update({
-            k: v
-            for k, v in self.__dict__.items()
-            if k.startswith('thumbnail') or k in ['generate', 'remote_source', 'source_storage']
-        })
+        state.update(
+            {
+                k: v
+                for k, v in self.__dict__.items()
+                if k.startswith("thumbnail")
+                or k in ["generate", "remote_source", "source_storage"]
+            }
+        )
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.__dict__['alias_target'] = self
+        self.__dict__["alias_target"] = self
 
 
 class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
@@ -752,10 +811,10 @@ class ThumbnailerImageFieldFile(ImageFieldFile, ThumbnailerFieldFile):
         ``resize_source`` (a dictionary of thumbnail options) is provided by
         the field.
         """
-        options = getattr(self.field, 'resize_source', None)
+        options = getattr(self.field, "resize_source", None)
         if options:
-            if 'quality' not in options:
-                options['quality'] = self.thumbnail_quality
+            if "quality" not in options:
+                options["quality"] = self.thumbnail_quality
             content = Thumbnailer(content, name).generate_thumbnail(options)
             # If the generated extension differs from the original, use it
             # instead.

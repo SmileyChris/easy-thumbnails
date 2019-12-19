@@ -7,6 +7,7 @@ from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from django.utils.deconstruct import deconstructible
 from PIL import Image
+
 from easy_thumbnails.conf import settings
 
 
@@ -33,7 +34,7 @@ class TemporaryStorage(FileSystemStorage):
         This storage class should not be used again after this method is
         called.
         """
-        temporary_location = getattr(self, 'temporary_location', None)
+        temporary_location = getattr(self, "temporary_location", None)
         if temporary_location:
             shutil.rmtree(temporary_location)
 
@@ -45,6 +46,7 @@ class FakeRemoteStorage(TemporaryStorage):
 
     It's not thread safe.
     """
+
     remote_mode = False
 
     def path(self, *args, **kwargs):
@@ -109,8 +111,9 @@ class BaseTest(TestCase):
         settings.revert()
         return super().tearDown()
 
-    def create_image(self, storage, filename, size=(800, 600),
-                     image_mode='RGB', image_format='JPEG'):
+    def create_image(
+        self, storage, filename, size=(800, 600), image_mode="RGB", image_format="JPEG"
+    ):
         """
         Generate a test image, returning the filename that it was saved as.
 

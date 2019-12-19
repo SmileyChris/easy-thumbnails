@@ -1,6 +1,7 @@
 from io import BytesIO
 
 from PIL import Image, ImageFile
+
 from easy_thumbnails import utils
 
 

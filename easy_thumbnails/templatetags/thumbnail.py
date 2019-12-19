@@ -1,9 +1,8 @@
+import mimetypes
 import re
 from base64 import b64encode
-import mimetypes
 
-from django.template import (
-    Library, Node, VariableDoesNotExist, TemplateSyntaxError)
+from django.template import Library, Node, TemplateSyntaxError, VariableDoesNotExist
 from django.utils.html import escape
 
 from easy_thumbnails import utils
@@ -13,11 +12,11 @@ from easy_thumbnails.files import get_thumbnailer
 
 register = Library()
 
-RE_SIZE = re.compile(r'(\d+)x(\d+)$')
+RE_SIZE = re.compile(r"(\d+)x(\d+)$")
 
 VALID_OPTIONS = utils.valid_processor_options()
-VALID_OPTIONS.remove('size')
-VALID_OPTIONS.append('HIGH_RESOLUTION')
+VALID_OPTIONS.remove("size")
+VALID_OPTIONS.append("HIGH_RESOLUTION")
 
 
 def split_args(args):
@@ -30,7 +29,7 @@ def split_args(args):
     """
     args_dict = {}
     for arg in args:
-        split_arg = arg.split('=', 1)
+        split_arg = arg.split("=", 1)
         if len(split_arg) > 1:
             value = split_arg[1]
         else:
@@ -55,18 +54,20 @@ class ThumbnailNode(Node):
         except VariableDoesNotExist:
             if raise_errors:
                 raise VariableDoesNotExist(
-                    "Variable '%s' does not exist." % self.source_var)
+                    "Variable '%s' does not exist." % self.source_var
+                )
             return self.bail_out(context)
         if not source:
             if raise_errors:
                 raise TemplateSyntaxError(
-                    "Variable '%s' is an invalid source." % self.source_var)
+                    "Variable '%s' is an invalid source." % self.source_var
+                )
             return self.bail_out(context)
         # Resolve the thumbnail option values.
         try:
             opts = {}
             for key, value in self.opts.items():
-                if hasattr(value, 'resolve'):
+                if hasattr(value, "resolve"):
                     value = value.resolve(context)
                 opts[str(key)] = value
         except Exception:
@@ -75,40 +76,40 @@ class ThumbnailNode(Node):
             return self.bail_out(context)
         # Size variable can be either a tuple/list of two integers or a
         # valid string.
-        size = opts['size']
+        size = opts["size"]
         if isinstance(size, str):
             m = RE_SIZE.match(size)
             if m:
-                opts['size'] = (int(m.group(1)), int(m.group(2)))
+                opts["size"] = (int(m.group(1)), int(m.group(2)))
             else:
                 # Size variable may alternatively be referencing an alias.
                 alias = aliases.get(size, target=source)
                 if alias:
-                    del opts['size']
+                    del opts["size"]
                     opts = dict(alias, **opts)
                 else:
                     if raise_errors:
-                        raise TemplateSyntaxError(
-                            "%r is not a valid size." % size)
+                        raise TemplateSyntaxError("%r is not a valid size." % size)
                     return self.bail_out(context)
         # Ensure the quality is an integer.
-        if 'quality' in opts:
+        if "quality" in opts:
             try:
-                opts['quality'] = int(opts['quality'])
+                opts["quality"] = int(opts["quality"])
             except (TypeError, ValueError):
                 if raise_errors:
                     raise TemplateSyntaxError(
-                        "%r is an invalid quality." % opts['quality'])
+                        "%r is an invalid quality." % opts["quality"]
+                    )
                 return self.bail_out(context)
         # Ensure the subsampling level is an integer.
-        if 'subsampling' in opts:
+        if "subsampling" in opts:
             try:
-                opts['subsampling'] = int(opts['subsampling'])
+                opts["subsampling"] = int(opts["subsampling"])
             except (TypeError, ValueError):
                 if raise_errors:
                     raise TemplateSyntaxError(
-                        "%r is an invalid subsampling level." %
-                        opts['subsampling'])
+                        "%r is an invalid subsampling level." % opts["subsampling"]
+                    )
                 return self.bail_out(context)
 
         try:
@@ -122,12 +123,12 @@ class ThumbnailNode(Node):
             return escape(thumbnail.url)
         else:
             context[self.context_name] = thumbnail
-            return ''
+            return ""
 
     def bail_out(self, context):
         if self.context_name:
-            context[self.context_name] = ''
-        return ''
+            context[self.context_name] = ""
+        return ""
 
 
 @register.tag
@@ -192,7 +193,7 @@ def thumbnail(parser, token):
     tag = args[0]
 
     # Check to see if we're setting to a context variable.
-    if len(args) > 4 and args[-2] == 'as':
+    if len(args) > 4 and args[-2] == "as":
         context_name = args[-1]
         args = args[:-2]
     else:
@@ -202,8 +203,8 @@ def thumbnail(parser, token):
         raise TemplateSyntaxError(
             "Invalid syntax. Expected "
             "'{%% %s source size [option1 option2 ...] %%}' or "
-            "'{%% %s source size [option1 option2 ...] as variable %%}'" %
-            (tag, tag))
+            "'{%% %s source size [option1 option2 ...] as variable %%}'" % (tag, tag)
+        )
 
     opts = {}
 
@@ -216,7 +217,7 @@ def thumbnail(parser, token):
     match = RE_SIZE.match(size)
     if match:
         size = '"%s"' % size
-    opts['size'] = parser.compile_filter(size)
+    opts["size"] = parser.compile_filter(size)
 
     # All further arguments are options.
     args_list = split_args(args[3:]).items()
@@ -226,8 +227,9 @@ def thumbnail(parser, token):
                 value = parser.compile_filter(value)
             opts[arg] = value
         else:
-            raise TemplateSyntaxError("'%s' tag received a bad argument: "
-                                      "'%s'" % (tag, arg))
+            raise TemplateSyntaxError(
+                "'%s' tag received a bad argument: " "'%s'" % (tag, arg)
+            )
     return ThumbnailNode(source_var, opts=opts, context_name=context_name)
 
 
@@ -297,7 +299,7 @@ def thumbnail_url(source, alias):
     try:
         thumb = get_thumbnailer(source)[alias]
     except Exception:
-        return ''
+        return ""
     return thumb.url
 
 
@@ -316,10 +318,12 @@ def data_uri(thumbnail):
         <img src="data:image/png;base64,iVBORw0KGgo...">
     """
     try:
-        thumbnail.open('rb')
+        thumbnail.open("rb")
         data = thumbnail.read()
     finally:
         thumbnail.close()
-    mime_type = mimetypes.guess_type(str(thumbnail.file))[0] or 'application/octet-stream'
-    data = b64encode(data).decode('utf-8')
-    return 'data:{0};base64,{1}'.format(mime_type, data)
+    mime_type = (
+        mimetypes.guess_type(str(thumbnail.file))[0] or "application/octet-stream"
+    )
+    data = b64encode(data).decode("utf-8")
+    return "data:{0};base64,{1}".format(mime_type, data)

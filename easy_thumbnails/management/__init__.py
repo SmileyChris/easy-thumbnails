@@ -3,9 +3,11 @@ import re
 
 from easy_thumbnails.conf import settings
 
-re_thumbnail_file = re.compile(r'(?P<source_filename>.+)_(?P<x>\d+)x(?P<y>\d+)'
-                               r'(?:_(?P<options>\w+))?_q(?P<quality>\d+)'
-                               r'(?:.[^.]+)?$')
+re_thumbnail_file = re.compile(
+    r"(?P<source_filename>.+)_(?P<x>\d+)x(?P<y>\d+)"
+    r"(?:_(?P<options>\w+))?_q(?P<quality>\d+)"
+    r"(?:.[^.]+)?$"
+)
 
 
 def all_thumbnails(path, recursive=True, prefix=None, subdir=None):
@@ -20,8 +22,8 @@ def all_thumbnails(path, recursive=True, prefix=None, subdir=None):
     if subdir is None:
         subdir = settings.THUMBNAIL_SUBDIR
     thumbnail_files = {}
-    if not path.endswith('/'):
-        path = '%s/' % path
+    if not path.endswith("/"):
+        path = "%s/" % path
     len_path = len(path)
     if recursive:
         all = os.walk(path)
@@ -38,31 +40,33 @@ def all_thumbnails(path, recursive=True, prefix=None, subdir=None):
             if not thumb:
                 continue
             d = thumb.groupdict()
-            source_filename = d.pop('source_filename')
+            source_filename = d.pop("source_filename")
             if prefix:
                 source_path, source_filename = os.path.split(source_filename)
                 if not source_filename.startswith(prefix):
                     continue
                 source_filename = os.path.join(
-                    source_path, source_filename[len(prefix):])
-            d['options'] = d['options'] and d['options'].split('_') or []
+                    source_path, source_filename[len(prefix) :]
+                )
+            d["options"] = d["options"] and d["options"].split("_") or []
             if subdir and rel_dir.endswith(subdir):
-                rel_dir = rel_dir[:-len(subdir)]
+                rel_dir = rel_dir[: -len(subdir)]
             # Corner-case bug: if the filename didn't have an extension but did
             # have an underscore, the last underscore will get converted to a
             # '.'.
-            m = re.match(r'(.*)_(.*)', source_filename)
+            m = re.match(r"(.*)_(.*)", source_filename)
             if m:
-                source_filename = '%s.%s' % m.groups()
+                source_filename = "%s.%s" % m.groups()
             filename = os.path.join(rel_dir, source_filename)
             thumbnail_file = thumbnail_files.setdefault(filename, [])
-            d['filename'] = os.path.join(dir_, file)
+            d["filename"] = os.path.join(dir_, file)
             thumbnail_file.append(d)
     return thumbnail_files
 
 
-def thumbnails_for_file(relative_source_path, root=None, basedir=None,
-                        subdir=None, prefix=None):
+def thumbnails_for_file(
+    relative_source_path, root=None, basedir=None, subdir=None, prefix=None
+):
     """
     Return a list of dictionaries, one for each thumbnail belonging to the
     source image.
@@ -86,28 +90,27 @@ def thumbnails_for_file(relative_source_path, root=None, basedir=None,
     thumbs_path = os.path.join(root, basedir, source_dir, subdir)
     if not os.path.isdir(thumbs_path):
         return []
-    files = all_thumbnails(thumbs_path, recursive=False, prefix=prefix,
-                           subdir='')
+    files = all_thumbnails(thumbs_path, recursive=False, prefix=prefix, subdir="")
     return files.get(filename, [])
 
 
-def delete_thumbnails(relative_source_path, root=None, basedir=None,
-                      subdir=None, prefix=None):
+def delete_thumbnails(
+    relative_source_path, root=None, basedir=None, subdir=None, prefix=None
+):
     """
     Delete all thumbnails for a source image.
     """
-    thumbs = thumbnails_for_file(relative_source_path, root, basedir, subdir,
-                                 prefix)
+    thumbs = thumbnails_for_file(relative_source_path, root, basedir, subdir, prefix)
     return _delete_using_thumbs_list(thumbs)
 
 
 def _delete_using_thumbs_list(thumbs):
     deleted = 0
     for thumb_dict in thumbs:
-        filename = thumb_dict['filename']
+        filename = thumb_dict["filename"]
         try:
             os.remove(filename)
-        except:
+        except OSError:
             pass
         else:
             deleted += 1

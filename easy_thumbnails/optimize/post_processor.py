@@ -1,14 +1,16 @@
 import logging
 import subprocess
 from imghdr import what as determinetype
+
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
-from easy_thumbnails.optimize.conf import settings
 
+from easy_thumbnails.optimize.conf import settings
 
 try:
     from subprocess import check_output
 except ImportError:
+
     def check_output(*popenargs, **kwargs):
         """
         Run command with arguments and return its output as a byte string.
@@ -16,8 +18,7 @@ except ImportError:
         Backported from Python 2.7 as it's implemented as pure python on
         stdlib.
         """
-        process = subprocess.Popen(
-            stdout=subprocess.PIPE, *popenargs, **kwargs)
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
         output, unused_err = process.communicate()
         retcode = process.poll()
         if retcode:
@@ -30,14 +31,15 @@ except ImportError:
         return output
 
 
-logger = logging.getLogger('easy_thumbnails.optimize')
+logger = logging.getLogger("easy_thumbnails.optimize")
 
 
 def optimize_thumbnail(thumbnail):
-    '''Optimize thumbnail images by removing unnecessary data'''
+    """Optimize thumbnail images by removing unnecessary data"""
     try:
         optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[
-            determinetype(thumbnail.path)]
+            determinetype(thumbnail.path)
+        ]
         if not optimize_command:
             return
     except (TypeError, KeyError, NotImplementedError):
@@ -50,13 +52,13 @@ def optimize_thumbnail(thumbnail):
             temp_file.flush()
             optimize_command = optimize_command.format(filename=temp_file.name)
             output = check_output(
-                optimize_command, stderr=subprocess.STDOUT, shell=True)
+                optimize_command, stderr=subprocess.STDOUT, shell=True
+            )
             if output:
-                logger.warning(
-                    '{0} returned {1}'.format(optimize_command, output))
+                logger.warning("{0} returned {1}".format(optimize_command, output))
             else:
-                logger.info('{0} returned nothing'.format(optimize_command))
-            with open(temp_file.name, 'rb') as f:
+                logger.info("{0} returned nothing".format(optimize_command))
+            with open(temp_file.name, "rb") as f:
                 thumbnail.file = ContentFile(f.read())
                 storage.delete(thumbnail.path)
                 storage.save(thumbnail.path, thumbnail)

@@ -38,7 +38,7 @@ class Aliases:
         :param target: A field, model, or app to limit this alias to
             (optional).
         """
-        target = self._coerce_target(target) or ''
+        target = self._coerce_target(target) or ""
         target_aliases = self._aliases.setdefault(target, {})
         target_aliases[alias] = options
 
@@ -95,12 +95,12 @@ class Aliases:
         """
         target = self._coerce_target(target)
         if include_global:
-            yield ''
+            yield ""
         if not target:
             return
-        target_bits = target.split('.')
+        target_bits = target.split(".")
         for i in range(len(target_bits)):
-            yield '.'.join(target_bits[:i + 1])
+            yield ".".join(target_bits[: i + 1])
 
     def _coerce_target(self, target):
         """
@@ -111,14 +111,10 @@ class Aliases:
         """
         if not target or isinstance(target, str):
             return target
-        if not hasattr(target, 'instance'):
+        if not hasattr(target, "instance"):
             return None
         model = target.instance.__class__
-        return '%s.%s.%s' % (
-            model._meta.app_label,
-            model.__name__,
-            target.field.name,
-        )
+        return "%s.%s.%s" % (model._meta.app_label, model.__name__, target.field.name,)
 
 
 aliases = Aliases()

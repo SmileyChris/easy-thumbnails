@@ -2,7 +2,7 @@ from easy_thumbnails.conf import Settings
 
 
 class OptimizeSettings(Settings):
-    THUMBNAIL_OPTIMIZE_COMMAND = {'png': None, 'jpeg': None, 'gif': None}
+    THUMBNAIL_OPTIMIZE_COMMAND = {"png": None, "jpeg": None, "gif": None}
     """
     Postprocess thumbnails of type PNG, GIF or JPEG after transformation but
     before storage.
@@ -22,5 +22,6 @@ class OptimizeSettings(Settings):
 
     Note that ``optipng`` can also optimize images of type GIF.
     """
+
 
 settings = OptimizeSettings()

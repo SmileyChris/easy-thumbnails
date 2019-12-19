@@ -1,10 +1,11 @@
 import gc
 import os
 import time
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 
 from django.core.files.storage import get_storage_class
 from django.core.management.base import BaseCommand
+
 from easy_thumbnails.conf import settings
 from easy_thumbnails.models import Source
 
@@ -13,6 +14,7 @@ class ThumbnailCollectionCleaner:
     """
     Remove thumbnails and DB references to non-existing source images.
     """
+
     sources = 0
     thumbnails = 0
     thumbnails_deleted = 0
@@ -35,15 +37,16 @@ class ThumbnailCollectionCleaner:
     def _delete_sources_by_id(self, ids):
         Source.objects.all().filter(id__in=ids).delete()
 
-    def clean_up(self, dry_run=False, verbosity=1, last_n_days=0,
-                 cleanup_path=None, storage=None):
+    def clean_up(
+        self, dry_run=False, verbosity=1, last_n_days=0, cleanup_path=None, storage=None
+    ):
         """
         Iterate through sources. Delete database references to sources
         not existing, including its corresponding thumbnails (files and
         database references).
         """
         if dry_run:
-            print ("Dry run...")
+            print("Dry run...")
 
         if not storage:
             storage = get_storage_class(settings.THUMBNAIL_DEFAULT_STORAGE)()
@@ -55,7 +58,8 @@ class ThumbnailCollectionCleaner:
         if last_n_days > 0:
             today = date.today()
             query = query.filter(
-                modified__range=(today - timedelta(days=last_n_days), today))
+                modified__range=(today - timedelta(days=last_n_days), today)
+            )
         if cleanup_path:
             query = query.filter(name__startswith=cleanup_path)
 
@@ -65,7 +69,7 @@ class ThumbnailCollectionCleaner:
 
             if not self._check_if_exists(storage, abs_source_path):
                 if verbosity > 0:
-                    print ("Source not present:", abs_source_path)
+                    print("Source not present:", abs_source_path)
                 self.source_refs_deleted += 1
                 sources_to_delete.append(source.id)
 
@@ -77,7 +81,7 @@ class ThumbnailCollectionCleaner:
                         if not dry_run:
                             storage.delete(abs_thumbnail_path)
                         if verbosity > 0:
-                            print ("Deleting thumbnail:", abs_thumbnail_path)
+                            print("Deleting thumbnail:", abs_thumbnail_path)
 
             if len(sources_to_delete) >= 1000 and not dry_run:
                 self._delete_sources_by_id(sources_to_delete)
@@ -91,13 +95,18 @@ class ThumbnailCollectionCleaner:
         """
         Print statistics about the cleanup performed.
         """
-        print(
-            "{0:-<48}".format(str(datetime.now().strftime('%Y-%m-%d %H:%M '))))
+        print("{0:-<48}".format(str(datetime.now().strftime("%Y-%m-%d %H:%M "))))
         print("{0:<40} {1:>7}".format("Sources checked:", self.sources))
-        print("{0:<40} {1:>7}".format(
-            "Source references deleted from DB:", self.source_refs_deleted))
-        print("{0:<40} {1:>7}".format("Thumbnails deleted from disk:",
-                                    self.thumbnails_deleted))
+        print(
+            "{0:<40} {1:>7}".format(
+                "Source references deleted from DB:", self.source_refs_deleted
+            )
+        )
+        print(
+            "{0:<40} {1:>7}".format(
+                "Thumbnails deleted from disk:", self.thumbnails_deleted
+            )
+        )
         print("(Completed in %s seconds)\n" % self.execution_time)
 
 
@@ -108,8 +117,8 @@ def queryset_iterator(queryset, chunksize=1000):
     """
     if queryset.exists():
         primary_key = 0
-        last_pk = queryset.order_by('-pk')[0].pk
-        queryset = queryset.order_by('pk')
+        last_pk = queryset.order_by("-pk")[0].pk
+        queryset = queryset.order_by("pk")
         while primary_key < last_pk:
             for row in queryset.filter(pk__gt=primary_key)[:chunksize]:
                 primary_key = row.pk
@@ -122,30 +131,34 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--dry-run',
-            action='store_true',
-            dest='dry_run',
+            "--dry-run",
+            action="store_true",
+            dest="dry_run",
             default=False,
-            help='Dry run the execution.')
+            help="Dry run the execution.",
+        )
         parser.add_argument(
-            '--last-n-days',
-            action='store',
-            dest='last_n_days',
+            "--last-n-days",
+            action="store",
+            dest="last_n_days",
             default=0,
             type=int,
-            help='The number of days back in time to clean thumbnails for.')
+            help="The number of days back in time to clean thumbnails for.",
+        )
         parser.add_argument(
-            '--path',
-            action='store',
-            dest='cleanup_path',
+            "--path",
+            action="store",
+            dest="cleanup_path",
             type=str,
-            help='Specify a path to clean up.')
+            help="Specify a path to clean up.",
+        )
 
     def handle(self, *args, **options):
         tcc = ThumbnailCollectionCleaner()
         tcc.clean_up(
-            dry_run=options.get('dry_run', False),
-            verbosity=int(options.get('verbosity', 1)),
-            last_n_days=int(options.get('last_n_days', 0)),
-            cleanup_path=options.get('cleanup_path'))
+            dry_run=options.get("dry_run", False),
+            verbosity=int(options.get("verbosity", 1)),
+            last_n_days=int(options.get("last_n_days", 0)),
+            cleanup_path=options.get("cleanup_path"),
+        )
         tcc.print_stats()
