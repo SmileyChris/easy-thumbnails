@@ -68,7 +68,7 @@ def valid_processor_options(processors=None):
             tuple(settings.THUMBNAIL_SOURCE_GENERATORS)]
     valid_options = set(['size', 'quality', 'subsampling'])
     for processor in processors:
-        args = inspect.getfullargspec(processor)[0] if six.PY3 else inspect.getargspec(processor)[0]
+        args = inspect.getfullargspec(processor)[0]
         # Add all arguments apart from the first (the source image).
         valid_options.update(args[1:])
     return list(valid_options)
@@ -95,7 +95,7 @@ def get_storage_hash(storage):
         if storage._wrapped is None:
             storage._setup()
         storage = storage._wrapped
-    if not isinstance(storage, six.string_types):
+    if not isinstance(storage, str):
         storage_cls = storage.__class__
         storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
     return hashlib.md5(storage.encode('utf8')).hexdigest()
@@ -158,11 +158,7 @@ def get_modified_time(storage, name):
     datetime.
     """
     try:
-        try:
-            # Prefer Django 1.10 API and fall back to old one
-            modified_time = storage.get_modified_time(name)
-        except AttributeError:
-            modified_time = storage.modified_time(name)
+        modified_time = storage.get_modified_time(name)
     except OSError:
         return 0
     except NotImplementedError:

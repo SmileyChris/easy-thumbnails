@@ -1,21 +1,16 @@
 import shutil
 import tempfile
-try:
-    from cStringIO import cStringIO as BytesIO
-except ImportError:
-    from django.utils.six import BytesIO
+from io import BytesIO
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-
+from django.utils.deconstruct import deconstructible
+from PIL import Image
 from easy_thumbnails.conf import settings
 
 
+@deconstructible
 class TemporaryStorage(FileSystemStorage):
     """
     A storage class useful for tests that uses a temporary location to store
@@ -30,8 +25,7 @@ class TemporaryStorage(FileSystemStorage):
         if location is None:
             location = tempfile.mkdtemp()
             self.temporary_location = location
-        super(TemporaryStorage, self).__init__(location=location, *args,
-                                               **kwargs)
+        super().__init__(location=location, *args, **kwargs)
 
     def delete_temporary_storage(self):
         """
@@ -44,6 +38,7 @@ class TemporaryStorage(FileSystemStorage):
             shutil.rmtree(temporary_location)
 
 
+@deconstructible
 class FakeRemoteStorage(TemporaryStorage):
     """
     A temporary storage class that acts similar to remote storage.
@@ -59,34 +54,34 @@ class FakeRemoteStorage(TemporaryStorage):
         """
         if self.remote_mode:
             raise NotImplementedError
-        return super(FakeRemoteStorage, self).path(*args, **kwargs)
+        return super().path(*args, **kwargs)
 
     def exists(self, *args, **kwargs):
         original_remote_mode = self.remote_mode
         self.remote_mode = False
         try:
-            return super(FakeRemoteStorage, self).exists(*args, **kwargs)
+            return super().exists(*args, **kwargs)
         finally:
             self.remote_mode = original_remote_mode
 
     def save(self, *args, **kwargs):
         self.remote_mode = False
         try:
-            return super(FakeRemoteStorage, self).save(*args, **kwargs)
+            return super().save(*args, **kwargs)
         finally:
             self.remote_mode = True
 
     def open(self, *args, **kwargs):
         self.remote_mode = False
         try:
-            return super(FakeRemoteStorage, self).open(*args, **kwargs)
+            return super().open(*args, **kwargs)
         finally:
             self.remote_mode = True
 
     def delete(self, *args, **kwargs):
         self.remote_mode = False
         try:
-            return super(FakeRemoteStorage, self).delete(*args, **kwargs)
+            return super().delete(*args, **kwargs)
         finally:
             self.remote_mode = True
 
@@ -102,7 +97,7 @@ class BaseTest(TestCase):
         """
         Isolate all settings.
         """
-        output = super(BaseTest, self).setUp()
+        output = super().setUp()
         settings.isolated = True
         return output
 
@@ -112,7 +107,7 @@ class BaseTest(TestCase):
         """
         settings.isolated = False
         settings.revert()
-        return super(BaseTest, self).tearDown()
+        return super().tearDown()
 
     def create_image(self, storage, filename, size=(800, 600),
                      image_mode='RGB', image_format='JPEG'):
@@ -123,9 +118,11 @@ class BaseTest(TestCase):
         will be passed instead.
         """
         data = BytesIO()
-        Image.new(image_mode, size).save(data, image_format)
+        with Image.new(image_mode, size) as img:
+            img.save(data, image_format)
         data.seek(0)
         if not storage:
             return data
         image_file = ContentFile(data.read())
-        return storage.save(filename, image_file)
+        storage_file = storage.save(filename, image_file)
+        return storage_file

@@ -3,7 +3,7 @@ from django.test import TestCase
 from easy_thumbnails import namers
 
 
-class FakeThumbnailer(object):
+class FakeThumbnailer:
 
     def __init__(self, basedir='', subdir=''):
         self.thumbnail_basedir = basedir

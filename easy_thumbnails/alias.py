@@ -1,9 +1,7 @@
-from django.utils import six
-
 from easy_thumbnails.conf import settings
 
 
-class Aliases(object):
+class Aliases:
     """
     A container which stores and retrieves named easy-thumbnail options
     dictionaries.
@@ -111,16 +109,11 @@ class Aliases(object):
         The assumption is that if it is not ``None`` and not a string, it is
         a Django ``FieldFile`` object.
         """
-        if not target or isinstance(target, six.string_types):
+        if not target or isinstance(target, str):
             return target
         if not hasattr(target, 'instance'):
             return None
-
-        if getattr(target.instance, '_deferred', False):
-            model = target.instance._meta.proxy_for_model
-        else:
-            model = target.instance.__class__
-
+        model = target.instance.__class__
         return '%s.%s.%s' % (
             model._meta.app_label,
             model.__name__,

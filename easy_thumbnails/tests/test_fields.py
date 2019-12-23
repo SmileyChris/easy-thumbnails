@@ -12,7 +12,7 @@ from easy_thumbnails.exceptions import (
 
 class ThumbnailerFieldTest(AliasBaseTest):
     def setUp(self):
-        super(ThumbnailerFieldTest, self).setUp()
+        super().setUp()
         self.storage = utils.TemporaryStorage()
         # Save a test image.
         self.create_image(self.storage, 'avatars/avatar.jpg')
@@ -24,7 +24,7 @@ class ThumbnailerFieldTest(AliasBaseTest):
 
     def tearDown(self):
         self.storage.delete_temporary_storage()
-        super(ThumbnailerFieldTest, self).tearDown()
+        super().tearDown()
 
     def test_generate_thumbnail(self):
         instance = models.TestModel(avatar='avatars/avatar.jpg')
