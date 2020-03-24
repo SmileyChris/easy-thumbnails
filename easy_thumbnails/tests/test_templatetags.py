@@ -109,7 +109,7 @@ class ThumbnailTagTest(Base):
         self.assertRaises(TemplateSyntaxError, self.render_template,
                           src_on_context)
 
-        # Non-existant source
+        # Non-existent source
         src = '{% thumbnail non_existant_source 80x80 %}'
         src_on_context = '{% thumbnail non_existant_source 80x80 as thumb %}'
         # ...with THUMBNAIL_DEBUG = False
@@ -136,7 +136,7 @@ class ThumbnailTagTest(Base):
         settings.THUMBNAIL_DEBUG = True
         self.assertRaises(TemplateSyntaxError, self.render_template, src)
 
-        # Non-existant size
+        # Non-existent size
         src = '{% thumbnail source non_existant_size %}'
         # ...with THUMBNAIL_DEBUG = False
         settings.THUMBNAIL_DEBUG = False
