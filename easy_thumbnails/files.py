@@ -337,6 +337,7 @@ class Thumbnailer(File):
         options = aliases.get(alias, target=self.alias_target)
         if not options:
             raise KeyError(alias)
+        options['ALIAS'] = alias
         return self.get_thumbnail(options, silent_template_exception=True)
 
     def get_options(self, thumbnail_options, **kwargs):
