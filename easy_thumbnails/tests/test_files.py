@@ -24,16 +24,30 @@ class FilesTest(test.BaseTest):
         # Save a test image in both storages.
         filename = self.create_image(self.storage, 'test.jpg')
         self.thumbnailer = files.get_thumbnailer(self.storage, filename)
+        # Save a test image with a really long name in both storages
+        long_filename = self.create_image(self.storage, '%s.jpg' % ('*' * 251))
+        self.longname_thumbnailer = files.get_thumbnailer(self.storage, long_filename)
+
+        self.longname_thumbnailer.thumbnail_storage = self.storage
         self.thumbnailer.thumbnail_storage = self.storage
 
         filename = self.create_image(self.remote_storage, 'test.jpg')
         self.remote_thumbnailer = files.get_thumbnailer(
             self.remote_storage, filename)
+        long_filename = self.create_image(self.remote_storage, '%s.jpg' % ('*' * 251))
+        self.longname_remote_thumbnailer = files.get_thumbnailer(
+            self.remote_storage, long_filename)
+
         self.remote_thumbnailer.thumbnail_storage = self.remote_storage
+        self.longname_remote_thumbnailer.thumbnail_storage = self.remote_storage
 
         # Create another thumbnailer for extension test.
         self.ext_thumbnailer = files.get_thumbnailer(self.storage, filename)
         self.ext_thumbnailer.thumbnail_storage = self.storage
+
+        # Create another thumbnailer with long filename for extension test.
+        self.longname_ext_thumbnailer = files.get_thumbnailer(self.storage, long_filename)
+        self.longname_ext_thumbnailer.thumbnail_storage = self.storage
 
         # Generate test transparent images.
         filename = self.create_image(
@@ -79,6 +93,43 @@ class FilesTest(test.BaseTest):
         # Future requests to thumbnails on remote storage don't get
         # dimensions...
         remote = self.remote_thumbnailer.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(
+            remote.tag(), '<img alt="" src="%s" />' % remote.url)
+        # ...unless explicitly requested.
+        self.assertEqual(
+            remote.tag(use_size=True),
+            '<img alt="" height="75" src="%s" width="100" />' % remote.url)
+
+        # All other arguments are passed through as attributes.
+        self.assertEqual(
+            local.tag(**{'rel': 'A&B', 'class': 'fish'}),
+            '<img alt="" class="fish" height="75" rel="A&amp;B" '
+            'src="%s" width="100" />' % local.url)
+
+    def test_tag_long_filename(self):
+        local = self.longname_thumbnailer.get_thumbnail({'size': (100, 100)})
+        remote = self.longname_remote_thumbnailer.get_thumbnail({'size': (100, 100)})
+
+        self.assertEqual(
+            local.tag(), '<img alt="" height="75" src="%s" width="100" '
+                         '/>' % local.url)
+        self.assertEqual(
+            local.tag(alt='A & B'), '<img alt="A &amp; B" height="75" '
+                                    'src="%s" width="100" />' % local.url)
+
+        # Can turn off dimensions.
+        self.assertEqual(
+            remote.tag(use_size=False), '<img alt="" src="%s" />' % remote.url)
+
+        # Even a remotely generated thumbnail has the dimensions cached if it
+        # was just created.
+        self.assertEqual(
+            remote.tag(),
+            '<img alt="" height="75" src="%s" width="100" />' % remote.url)
+
+        # Future requests to thumbnails on remote storage don't get
+        # dimensions...
+        remote = self.longname_remote_thumbnailer.get_thumbnail({'size': (100, 100)})
         self.assertEqual(
             remote.tag(), '<img alt="" src="%s" />' % remote.url)
         # ...unless explicitly requested.
@@ -237,10 +288,37 @@ class FilesTest(test.BaseTest):
         with Image.open(hires_thumb_file) as thumb:
             self.assertEqual(thumb.size, (200, 150))
 
+    def test_high_resolution_force_off_with_longname(self):
+        self.longname_ext_thumbnailer.thumbnail_high_resolution = True
+        thumb = self.longname_ext_thumbnailer.get_thumbnail(
+            {'size': (100, 100), 'HIGH_RESOLUTION': False})
+        base, ext = path.splitext(thumb.path)
+        hires_thumb_file = ''.join([base + '@2x', ext])
+        self.assertFalse(path.exists(hires_thumb_file))
+
+    def test_high_resolution_force_with_longname(self):
+        thumb = self.longname_ext_thumbnailer.get_thumbnail(
+            {'size': (100, 100), 'HIGH_RESOLUTION': True})
+        base, ext = path.splitext(thumb.path)
+        hires_thumb_file = ''.join([base + '@2x', ext])
+        self.assertTrue(path.isfile(hires_thumb_file))
+        with Image.open(hires_thumb_file) as thumb:
+            self.assertEqual(thumb.size, (200, 150))
+
     def test_highres_infix(self):
         self.ext_thumbnailer.thumbnail_high_resolution = True
         self.ext_thumbnailer.thumbnail_highres_infix = '_2x'
         thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
+        base, ext = path.splitext(thumb.path)
+        hires_thumb_file = ''.join([base + '_2x', ext])
+        self.assertTrue(path.isfile(hires_thumb_file))
+        with Image.open(hires_thumb_file) as thumb:
+            self.assertEqual(thumb.size, (200, 150))
+
+    def test_highres_infix_with_longname(self):
+        self.longname_ext_thumbnailer.thumbnail_high_resolution = True
+        self.longname_ext_thumbnailer.thumbnail_highres_infix = '_2x'
+        thumb = self.longname_ext_thumbnailer.get_thumbnail({'size': (100, 100)})
         base, ext = path.splitext(thumb.path)
         hires_thumb_file = ''.join([base + '_2x', ext])
         self.assertTrue(path.isfile(hires_thumb_file))

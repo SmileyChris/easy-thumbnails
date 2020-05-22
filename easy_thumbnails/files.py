@@ -450,6 +450,16 @@ class Thumbnailer(File):
             thumbnail_options=thumbnail_options,
             prepared_options=prepared_opts,
         )
+        max_length = models.File._meta.get_field('name').max_length
+        if len(filename) > max_length:
+            additional_length = len(filename) - max_length
+            filename = namer_func(
+                thumbnailer=self,
+                source_filename=source_filename[::additional_length],
+                thumbnail_extension=extension,
+                thumbnail_options=thumbnail_options,
+                prepared_options=prepared_opts,
+            )
         if high_resolution:
             filename = self.thumbnail_highres_infix.join(
                 os.path.splitext(filename))
