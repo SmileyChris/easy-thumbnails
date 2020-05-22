@@ -106,6 +106,26 @@ class FilesTest(test.BaseTest):
             '<img alt="" class="fish" height="75" rel="A&amp;B" '
             'src="%s" width="100" />' % local.url)
 
+    def test_tag_long_filename_multiple_same_names(self):
+        local = self.longname_thumbnailer.get_thumbnail({'size': (100, 100)})
+        long_filename_2 = self.create_image(self.storage, '%s.jpg' % ('*' * 250))
+        longname_thumbnailer_2 = files.get_thumbnailer(self.storage, long_filename_2)
+        longname_thumbnailer_2.thumbnail_storage = self.storage
+        local_2 = longname_thumbnailer_2.get_thumbnail({'size': (100, 100)})
+        self.assertEqual(
+            local.tag(), '<img alt="" height="75" src="%s" width="100" '
+                         '/>' % local.url)
+        self.assertEqual(
+            local.tag(alt='A & B'), '<img alt="A &amp; B" height="75" '
+                                    'src="%s" width="100" />' % local.url)
+        self.assertEqual(
+            local_2.tag(), '<img alt="" height="75" src="%s" width="100" '
+                           '/>' % local_2.url)
+        self.assertEqual(
+            local_2.tag(alt='A & B'), '<img alt="A &amp; B" height="75" '
+                                      'src="%s" width="100" />' % local_2.url)
+        self.assertNotEqual(local_2.url, local.url)
+
     def test_tag_long_filename(self):
         local = self.longname_thumbnailer.get_thumbnail({'size': (100, 100)})
         remote = self.longname_remote_thumbnailer.get_thumbnail({'size': (100, 100)})

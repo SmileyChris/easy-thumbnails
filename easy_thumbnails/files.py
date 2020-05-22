@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 from django.core.files.base import File, ContentFile
@@ -453,10 +454,11 @@ class Thumbnailer(File):
         max_length = models.File._meta.get_field('name').max_length
         if len(filename) > max_length:
             length_total = len(filename) + len(self.thumbnail_highres_infix) + len(self.thumbnail_prefix)
-            additional_length = length_total - max_length
+            additional_length = length_total + 32 - max_length
             filename = namer_func(
                 thumbnailer=self,
-                source_filename=source_filename[:-additional_length],
+                source_filename='%s%s' % (source_filename[:-additional_length],
+                                          hashlib.md5(source_filename.encode('utf-8')).hexdigest()),
                 thumbnail_extension=extension,
                 thumbnail_options=thumbnail_options,
                 prepared_options=prepared_opts,
