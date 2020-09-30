@@ -30,7 +30,8 @@ Add ``easy_thumbnails`` to your ``INSTALLED_APPS`` setting::
         'easy_thumbnails',
     )
 
-Run ``manage.py migrate easy_thumbnails``.
+Run ``manage.py makemigrations easy_thumbnails`` 
+    ``manage.py migrate easy_thumbnails``.
 
 
 Example usage
