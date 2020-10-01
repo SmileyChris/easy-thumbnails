@@ -1,4 +1,5 @@
 import os
+
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
@@ -41,10 +42,14 @@ def process_image(source, processor_options, processors=None):
     return image
 
 
-def save_image(image, destination=None, filename=None, **options):
+def save_image(image, thumbnail_options, destination=None, filename=None):
     """
     Save a PIL image.
     """
+    options = {
+        'quality': thumbnail_options.get('quality', 100),
+        'subsampling': thumbnail_options.get('subsampling', 2)
+    }
     if destination is None:
         destination = BytesIO()
     filename = filename or ''
@@ -63,6 +68,9 @@ def save_image(image, destination=None, filename=None, **options):
                 max(image.size) >= settings.THUMBNAIL_PROGRESSIVE):
             options['progressive'] = True
         try:
+            icc_profile = image.info.get('icc_profile')
+            if icc_profile and 'keep_icc_profile' in thumbnail_options:
+                options['icc_profile'] = icc_profile
             image.save(destination, format=format, optimize=1, **options)
             saved = True
         except IOError:
