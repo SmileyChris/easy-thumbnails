@@ -134,7 +134,14 @@ during scaling.
 Changes the quality of the output JPEG thumbnail. Defaults to ``85``.
 
 In Python code, this is given as a separate option to the ``get_thumbnail``
-method rather than just alter the other
+method rather than just alter the other.
+
+``keep_icc_profile``
+--------------------
+
+If `True`, when saving a thumbnail with the alias that defines this option, the
+ICC profile of the image will be preserved in the thumbnail, if present in the first place.
+
 
 Other options
 -------------

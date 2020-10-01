@@ -150,6 +150,7 @@ class ThumbnailFile(ImageFieldFile):
     This can be used just like a Django model instance's property for a file
     field (i.e. an ``ImageFieldFile`` object).
     """
+
     def __init__(self, name, file=None, storage=None, thumbnail_options=None,
                  *args, **kwargs):
         fake_field = FakeField(storage=storage)
@@ -400,7 +401,7 @@ class Thumbnailer(File):
 
         img = engine.save_image(
             thumbnail_image, filename=filename, quality=quality,
-            subsampling=subsampling)
+            subsampling=subsampling, keep_icc_profile=thumbnail_options.get('keep_icc_profile', False))
         data = img.read()
 
         thumbnail = ThumbnailFile(
@@ -653,6 +654,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
     A field file which provides some methods for generating (and returning)
     thumbnail images.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.source_storage = self.field.storage

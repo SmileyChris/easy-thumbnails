@@ -1,4 +1,5 @@
 import os
+
 from io import BytesIO
 
 from PIL import Image
@@ -57,6 +58,8 @@ def save_image(image, destination=None, filename=None, **options):
                 max(image.size) >= settings.THUMBNAIL_PROGRESSIVE):
             options['progressive'] = True
         try:
+            if options.pop('keep_icc_profile', False):
+                options['icc_profile'] = image.info.get('icc_profile')
             image.save(destination, format=format, optimize=1, **options)
             saved = True
         except IOError:
