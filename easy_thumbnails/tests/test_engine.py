@@ -31,4 +31,4 @@ class SaveTest(TestCase):
         data = engine.save_image(source, {'keep_icc_profile': True}, filename='test.jpg')
         img = Image.open(data)
 
-        self.assertNotEqual(img.info.get('icc_profile', None))
+        self.assertNotEqual(img.info.get('icc_profile'), None)
