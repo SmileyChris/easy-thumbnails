@@ -42,14 +42,10 @@ def process_image(source, processor_options, processors=None):
     return image
 
 
-def save_image(image, thumbnail_options, destination=None, filename=None):
+def save_image(image, destination=None, filename=None, **options):
     """
     Save a PIL image.
     """
-    options = {
-        'quality': thumbnail_options.get('quality', 100),
-        'subsampling': thumbnail_options.get('subsampling', 2)
-    }
     if destination is None:
         destination = BytesIO()
     filename = filename or ''
@@ -68,7 +64,7 @@ def save_image(image, thumbnail_options, destination=None, filename=None):
                 max(image.size) >= settings.THUMBNAIL_PROGRESSIVE):
             options['progressive'] = True
         try:
-            if 'keep_icc_profile' in thumbnail_options:
+            if options.pop('keep_icc_profile', False):
                 options['icc_profile'] = image.info.get('icc_profile')
             image.save(destination, format=format, optimize=1, **options)
             saved = True

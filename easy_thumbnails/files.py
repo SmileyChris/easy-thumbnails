@@ -400,7 +400,9 @@ class Thumbnailer(File):
         quality = thumbnail_options['quality']
         subsampling = thumbnail_options['subsampling']
 
-        img = engine.save_image(thumbnail_image, thumbnail_options, filename=filename)
+        img = engine.save_image(
+            thumbnail_image, filename=filename, quality=quality,
+            subsampling=subsampling, keep_icc_profile=thumbnail_options.get('keep_icc_profile', False))
         data = img.read()
 
         thumbnail = ThumbnailFile(
