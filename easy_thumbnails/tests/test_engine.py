@@ -25,7 +25,7 @@ class SaveTest(TestCase):
     def test_save_with_icc_profile(self):
         source = Image.new('RGB', (100, 100), (255, 255, 255))
         profile = ImageCms.createProfile('sRGB')
-        source.save('source.jpg', icc_profile=profile.tobytes())
+        source.save('source.jpg', icc_profile=ImageCms.ImageCmsProfile(profile))
         source = Image.open('source.jpg')
 
         data = engine.save_image(source, {'keep_icc_profile': True}, filename='test.jpg')
