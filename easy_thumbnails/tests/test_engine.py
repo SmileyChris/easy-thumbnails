@@ -21,7 +21,6 @@ class SaveTest(TestCase):
         img = Image.open(data)
         self.assertEqual(img.mode, 'L')
 
-
     def test_save_with_icc_profile(self):
         source = Image.new('RGB', (100, 100), (255, 255, 255))
         profile = ImageCms.createProfile('sRGB')
