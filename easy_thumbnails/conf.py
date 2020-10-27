@@ -247,6 +247,7 @@ class Settings(AppSettings):
     """
     THUMBNAIL_SOURCE_GENERATORS = (
         'easy_thumbnails.source_generators.pil_image',
+        'easy_thumbnails.source_generators.vil_image',
     )
     """
     The :doc:`source_generators` through which the base image is created from

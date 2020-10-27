@@ -1,3 +1,7 @@
+import builtins
+import io
+from pathlib import Path
+
 from reportlab.graphics import renderSVG
 from reportlab.lib.colors import Color
 
@@ -9,10 +13,12 @@ class Image:
     Attempting to be compatible with PIL's Image, but suitable for reportlab's SVGCanvas.
     """
     def __init__(self, size=(300, 300)):
+        assert (isinstance(size, (list, tuple)) and len(size) == 2
+            and isinstance(size[0], (int, float)) and isinstance(size[1], (int, float)),
+            "Expected `size` as tuple with two elements")
         self.canvas = renderSVG.SVGCanvas(size=size, useClip=True)
-        assert isinstance(size, (list, tuple)) and len(size) == 2, \
-            "Expected `size` as tuple with two elements"
         self.size = tuple(size)
+        self.mode = None
 
     @property
     def width(self):
@@ -33,8 +39,7 @@ class Image:
 
     def resize(self, size, resample=None, box=None, reducing_gap=None):
         """
-        :param size: The requested size in pixels, as a 2-tuple:
-           (width, height).
+        :param size: The requested size in pixels, as a 2-tuple: (width, height).
         :param resample: Does not apply to SVG images.
         :param box: An optional 4-tuple of floats providing
            the source image region to be scaled.
@@ -43,9 +48,19 @@ class Image:
         :param reducing_gap: Does not apply to SVG images.
         :returns: An :py:class:`easy_thumbnails.VIL.Image.Image` object.
         """
-        copy = Image()
+        copy = Image(size=size)
         copy.canvas.svg = self.canvas.svg.cloneNode(True)
-        copy.size = tuple(size)
+        # if box is None:
+        #     copy.canvas.svg.setAttribute('viewBox', '0 0 {0} {1}'.format(*size))
+        #     copy.canvas.svg.setAttribute('width', str(size[0]))
+        #     copy.canvas.svg.setAttribute('height', str(size[1]))
+        # else:
+        #     raise NotImplemented("Not implemented yet")
+        return copy
+
+    def convert(self, mode=None, matrix=None, dither=None, palette=None, colors=256):
+        copy = Image(size=self.size)
+        copy.canvas.svg = self.canvas.svg.cloneNode(True)
         return copy
 
     def crop(self, box=None):
@@ -71,13 +86,133 @@ class Image:
                 new_height = bbox[2] / wanted_aspect_ratio
                 bbox[1] += (bbox[3] - new_height) / 2
                 bbox[3] = new_height
-            copy.canvas.svg.setAttribute('viewBox', '{0} {1} {2} {3}'.format(*bbox))
             copy.size = box[2] - box[0], box[3] - box[1]
+            copy.canvas.svg.setAttribute('viewBox', '{0} {1} {2} {3}'.format(*bbox))
+            copy.canvas.svg.setAttribute('width', '{0}'.format(*copy.size))
+            copy.canvas.svg.setAttribute('height', '{1}'.format(*copy.size))
         return copy
+
+    def filter(self, *args):
+        copy = Image(size=self.size)
+        copy.canvas.svg = self.canvas.svg.cloneNode(True)
+        return copy
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        if hasattr(self, "fp") and getattr(self, "_exclusive_fp", False):
+            if hasattr(self, "_close__fp"):
+                self._close__fp()
+            if self.fp:
+                self.fp.close()
+        self.fp = None
+
+    def close(self):
+        """
+        Closes the file pointer, if possible.
+
+        This operation will destroy the image core and release its memory.
+        The image data will be unusable afterward.
+
+        This function is only required to close images that have not
+        had their file read and closed by the
+        :py:meth:`~PIL.Image.Image.load` method. See
+        :ref:`file-handling` for more information.
+        """
+        try:
+            if hasattr(self, "_close__fp"):
+                self._close__fp()
+            self.fp.close()
+            self.fp = None
+        except Exception as msg:
+            pass
+
+        self.map = None
+        self.im = None
+
+    def save(self, fp, format=None, **params):
+        """
+        Saves this image under the given filename.  If no format is
+        specified, the format to use is determined from the filename
+        extension, if possible.
+
+        You can use a file object instead of a filename. In this case,
+        you must always specify the format. The file object must
+        implement the ``seek``, ``tell``, and ``write``
+        methods, and be opened in binary mode.
+
+        :param fp: A filename (string), pathlib.Path object or file object.
+        :param format: Must be None or 'SVG'.
+        :param params: Unused extra parameters.
+        :returns: None
+        :exception ValueError: If the output format could not be determined
+           from the file name.  Use the format option to solve this.
+        :exception OSError: If the file could not be written.  The file
+           may have been created, and may contain partial data.
+        """
+
+        filename = ""
+        open_fp = False
+        if isinstance(fp, (bytes, str)):
+            filename = fp
+            open_fp = True
+        elif isinstance(fp, Path):
+            filename = str(fp)
+            open_fp = True
+        if not filename and hasattr(fp, "name") and isinstance(fp.name, (bytes, str)):
+            # only set the name for metadata purposes
+            filename = fp.name
+
+        suffix = Path(filename).suffix.lower()
+        if format != 'SVG' and suffix != '.svg':
+            raise ValueError("Image format is expected to be 'SVG' and file suffix to be '.svg'")
+
+        if open_fp:
+            fp = builtins.open(filename, "w+b")
+
+        self.canvas.svg.writexml(fp)
 
 
 def new(self, size, color=None):
     im = Image(size)
     if color:
         im.canvas.setFillColor(Color(*color))
+    return im
+
+
+def load(fp, mode='r'):
+    """
+    Opens and identifies the given SVG image file.
+
+    :param fp: A filename (string), pathlib.Path object or a file object.
+       The file object must implement :py:meth:`~file.read`,
+       :py:meth:`~file.seek`, and :py:meth:`~file.tell` methods,
+       and be opened in binary mode.
+    :param mode: The mode.  If given, this argument must be "r".
+    :returns: An :py:class:`easy_thumbnails.VIL.Image.Image` object.
+    :exception FileNotFoundError: If the file cannot be found.
+    :exception ValueError: If the ``mode`` is not "r", or if a ``StringIO``
+       instance is used for ``fp``.
+    """
+
+    if mode != 'r':
+        raise ValueError("bad mode %r" % mode)
+    elif isinstance(fp, io.StringIO):
+        raise ValueError(
+            "StringIO cannot be used to open an image. "
+            "Binary data must be used instead."
+        )
+    if isinstance(fp, Path):
+        filename = str(fp.resolve())
+    elif isinstance(fp, str):
+        filename = fp
+    else:
+        raise RuntimeError("Can not open file.")
+    drawing = svg2rlg(filename)
+    if drawing is None:
+        return
+        # raise ValueError("cannot decode SVG image")
+    im = Image(size=(drawing.width, drawing.height))
+    renderSVG.draw(drawing, im.canvas)
     return im

@@ -1,5 +1,5 @@
 import os
-from io import BytesIO
+from io import BytesIO, StringIO
 
 from PIL import Image
 
@@ -35,7 +35,7 @@ def process_image(source, processor_options, processors=None):
     return image
 
 
-def save_image(image, destination=None, filename=None, **options):
+def save_pil_image(image, destination=None, filename=None, **options):
     """
     Save a PIL image.
     """
@@ -126,3 +126,17 @@ def generate_source_image(source_file, processor_options, generators=None,
                 pass
     if exceptions and not fail_silently:
         raise NoSourceGenerator(*exceptions)
+
+
+def save_svg_image(image, destination=None, filename=None, **options):
+    """
+    Save a SVG image.
+    """
+    from easy_thumbnails.VIL import Image
+
+    if destination is None:
+        destination = StringIO()
+    image.save(destination, format='SVG', **options)
+    if hasattr(destination, 'seek'):
+        destination.seek(0)
+    return destination

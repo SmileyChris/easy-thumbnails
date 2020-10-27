@@ -1,12 +1,13 @@
 import shutil
 import tempfile
-from io import BytesIO
+from io import StringIO
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from django.utils.deconstruct import deconstructible
-from PIL import Image
+from django.utils.module_loading import import_string
+
 from easy_thumbnails.conf import settings
 
 
@@ -117,7 +118,11 @@ class BaseTest(TestCase):
         If ``storage`` is ``None``, the BytesIO containing the image data
         will be passed instead.
         """
-        data = BytesIO()
+        data = StringIO()
+        if image_format == 'SVG':
+            Image = import_string('easy_thumbnails.VIL.Image')
+        else:
+            Image = import_string('PIL.Image')
         with Image.new(image_mode, size) as img:
             img.save(data, image_format)
         data.seek(0)

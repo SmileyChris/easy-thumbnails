@@ -14,6 +14,7 @@ from easy_thumbnails import engine, exceptions, models, utils, signals, storage
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
+from easy_thumbnails.VIL.Image import load
 
 
 def get_thumbnailer(obj, relative_name=None):
@@ -116,7 +117,10 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
             dimensions_cache = None
         if dimensions_cache:
             return dimensions_cache.width, dimensions_cache.height
-    dimensions = get_image_dimensions(file, close=close)
+    if os.path.splitext(file.path)[1] == '.svg' or True:
+        dimensions = load(file.path).size
+    else:
+        dimensions = get_image_dimensions(file, close=close)
     if settings.THUMBNAIL_CACHE_DIMENSIONS and thumbnail:
         # Using get_or_create in case dimensions were created
         # while running get_image_dimensions.
@@ -398,9 +402,12 @@ class Thumbnailer(File):
         quality = thumbnail_options['quality']
         subsampling = thumbnail_options['subsampling']
 
-        img = engine.save_image(
-            thumbnail_image, filename=filename, quality=quality,
-            subsampling=subsampling)
+        if os.path.splitext(self.name)[1] == '.svg':
+            img = engine.save_svg_image(thumbnail_image, filename=filename)
+        else:
+            img = engine.save_pil_image(
+                thumbnail_image, filename=filename, quality=quality,
+                subsampling=subsampling)
         data = img.read()
 
         thumbnail = ThumbnailFile(

@@ -1,7 +1,6 @@
 from os import path
 
 from django.template import Template, Context, TemplateSyntaxError
-from PIL import Image
 from django.core.files import storage as django_storage
 
 from easy_thumbnails import alias, storage
@@ -43,6 +42,8 @@ class Base(test.BaseTest):
 
     def verify_thumbnail(self, expected_size, options, source_filename=None,
                          transparent=False):
+        from PIL import Image
+
         if source_filename is None:
             source_filename = self.filename
         self.assertTrue(isinstance(options, dict))
@@ -371,3 +372,112 @@ class ThumbnailerDataUriTest(ThumbnailerBase):
         output = self.render_template(src)[:64]
         startswith = 'data:application/octet-stream;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
         self.assertEqual(output, startswith)
+
+
+class ThumbnailSVGImage(test.BaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.storage = test.TemporaryStorage()
+        # Save a test image.
+        self.filename = self.create_image(self.storage, 'test.svg', image_format='SVG')
+
+        # Required so that IOError's get wrapped as TemplateSyntaxError
+        settings.TEMPLATE_DEBUG = True
+
+    def tearDown(self):
+        self.storage.delete_temporary_storage()
+        super().tearDown()
+
+    def render_template(self, source, template_tag_library='thumbnail'):
+        source_image = get_thumbnailer(self.storage, self.filename)
+        source_image.thumbnail_storage = self.storage
+        source_image.thumbnail_preserve_extensions = True
+        context = Context({
+            'source': source_image,
+            'storage': self.storage,
+            'filename': self.filename,
+            'invalid_filename': 'not%s' % self.filename,
+            'size': (90, 100),
+            'invalid_size': (90, 'fish'),
+            'strsize': '80x90',
+            'invalid_strsize': ('1notasize2'),
+            'invalid_q': 'notanumber'})
+        source = '{% load ' + template_tag_library + ' %}' + source
+        return Template(source).render(context)
+
+    def testTag(self):
+        # Set THUMBNAIL_DEBUG = True to make it easier to trace any failures
+        settings.THUMBNAIL_DEBUG = True
+
+        # Basic
+        output = self.render_template('src="{% thumbnail source 240x240 %}"')
+        expected = self.verify_thumbnail((240, 180), {'size': (240, 240)})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="%s"' % expected_url)
+
+        # Size from context variable
+        # as a tuple:
+        output = self.render_template(
+            'src="{% thumbnail source size %}"')
+        expected = self.verify_thumbnail((90, 68), {'size': (90, 100)})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="%s"' % expected_url)
+        # as a string:
+        output = self.render_template(
+            'src="{% thumbnail source strsize %}"')
+        expected = self.verify_thumbnail((80, 60), {'size': (80, 90)})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="%s"' % expected_url)
+
+        # On context
+        output = self.render_template(
+            'height:{% thumbnail source 240x240 as thumb %}{{ thumb.height }}')
+        self.assertEqual(output, 'height:180.0')
+
+        # With options and quality
+        output = self.render_template(
+            'src="{% thumbnail source 240x240 sharpen crop quality=95 %}"')
+        # Note that the opts are sorted to ensure a consistent filename.
+        expected = self.verify_thumbnail(
+            (240, 240),
+            {'size': (240, 240), 'crop': True, 'sharpen': True, 'quality': 95})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="{}"'.format(expected_url))
+
+        # With option and quality on context (also using its unicode method to
+        # display the url)
+        output = self.render_template(
+            '{% thumbnail source 240x240 sharpen crop quality=95 as thumb %}'
+            'width:{{ thumb.width }}, url:{{ thumb.url }}')
+        self.assertEqual(output, 'width:240.0, url:{}'.format(expected_url))
+
+        # One dimensional resize
+        output = self.render_template('src="{% thumbnail source 100x0 %}"')
+        expected = self.verify_thumbnail((100, 75), {'size': (100, 0)})
+        expected_url = ''.join((settings.MEDIA_URL, expected))
+        self.assertEqual(output, 'src="{}"'.format(expected_url))
+
+    def verify_thumbnail(self, expected_size, options, source_filename=None,
+                         transparent=False):
+        from easy_thumbnails.VIL import Image
+
+        if source_filename is None:
+            source_filename = self.filename
+        self.assertTrue(isinstance(options, dict))
+        # Verify that the thumbnail file exists
+        thumbnailer = get_thumbnailer(self.storage, source_filename)
+        thumbnailer.thumbnail_preserve_extensions = True
+        expected_filename = thumbnailer.get_thumbnail_name(
+            options, transparent=transparent)
+
+        self.assertTrue(
+            self.storage.exists(expected_filename),
+            'Thumbnail file %r not found' % expected_filename)
+
+        # Verify the thumbnail has the expected dimensions
+        with self.storage.open(expected_filename) as expected_file:
+            with Image.load(expected_file.name) as image:
+                self.assertEqual(image.size, expected_size)
+
+        return expected_filename
