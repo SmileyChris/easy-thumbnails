@@ -1,10 +1,9 @@
 import os
 
 from django.core.files.base import File, ContentFile
-from django.core.files.storage import (
-    default_storage, Storage)
-from django.db.models.fields.files import ImageFieldFile, FieldFile
+from django.core.files.storage import default_storage, Storage
 from django.core.files.images import get_image_dimensions
+from django.db.models.fields.files import ImageFieldFile, FieldFile
 
 from django.utils import timezone
 from django.utils.safestring import mark_safe
@@ -118,7 +117,7 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
             dimensions_cache = None
         if dimensions_cache:
             return dimensions_cache.width, dimensions_cache.height
-    if os.path.splitext(file.path)[1] == '.svg' or True:
+    if os.path.splitext(file.file.name)[1] == '.svg':
         dimensions = load(file.path).size
     else:
         dimensions = get_image_dimensions(file, close=close)
@@ -449,7 +448,7 @@ class Thumbnailer(File):
             thumbnail_options=thumbnail_options,
             prepared_options=prepared_opts,
         )
-        filename = '%s%s' % (self.thumbnail_prefix, filename)
+        filename = '{}{}'.format(self.thumbnail_prefix, filename)
 
         return os.path.join(basedir, path, subdir, filename)
 
