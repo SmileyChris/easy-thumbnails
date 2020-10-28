@@ -6,9 +6,10 @@ from django.core.files.storage import (
 from django.db.models.fields.files import ImageFieldFile, FieldFile
 from django.core.files.images import get_image_dimensions
 
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
-from django.utils import timezone
+from django.utils.module_loading import import_string
 
 from easy_thumbnails import engine, exceptions, models, utils, signals, storage
 from easy_thumbnails.alias import aliases
@@ -438,7 +439,7 @@ class Thumbnailer(File):
         subdir = self.thumbnail_subdir % data
 
         if isinstance(self.thumbnail_namer, str):
-            namer_func = utils.dynamic_import(self.thumbnail_namer)
+            namer_func = import_string(self.thumbnail_namer)
         else:
             namer_func = self.thumbnail_namer
         filename = namer_func(
