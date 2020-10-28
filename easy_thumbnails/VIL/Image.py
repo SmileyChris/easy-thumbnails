@@ -13,9 +13,9 @@ class Image:
     Attempting to be compatible with PIL's Image, but suitable for reportlab's SVGCanvas.
     """
     def __init__(self, size=(300, 300)):
-        assert (isinstance(size, (list, tuple)) and len(size) == 2
-            and isinstance(size[0], (int, float)) and isinstance(size[1], (int, float)),
-            "Expected `size` as tuple with two elements")
+        assert isinstance(size, (list, tuple)) and len(size) == 2 \
+            and isinstance(size[0], (int, float)) and isinstance(size[1], (int, float)), \
+            "Expected `size` as tuple with two elements"
         self.canvas = renderSVG.SVGCanvas(size=size, useClip=True)
         self.size = tuple(size)
         self.mode = None
@@ -37,31 +37,21 @@ class Image:
         """
         return tuple(float(b) for b in self.canvas.svg.getAttribute('viewBox').split())
 
-    def resize(self, size, resample=None, box=None, reducing_gap=None):
+    def resize(self, size, **kwargs):
         """
         :param size: The requested size in pixels, as a 2-tuple: (width, height).
-        :param resample: Does not apply to SVG images.
-        :param box: An optional 4-tuple of floats providing
-           the source image region to be scaled.
-           The values must be within (0, 0, width, height) rectangle.
-           If omitted or None, the entire source is used.
-        :param reducing_gap: Does not apply to SVG images.
         :returns: An :py:class:`easy_thumbnails.VIL.Image.Image` object.
         """
         copy = Image(size=size)
         copy.canvas.svg = self.canvas.svg.cloneNode(True)
-        # if box is None:
-        #     copy.canvas.svg.setAttribute('viewBox', '0 0 {0} {1}'.format(*size))
-        #     copy.canvas.svg.setAttribute('width', str(size[0]))
-        #     copy.canvas.svg.setAttribute('height', str(size[1]))
-        # else:
-        #     raise NotImplemented("Not implemented yet")
         return copy
 
-    def convert(self, mode=None, matrix=None, dither=None, palette=None, colors=256):
-        copy = Image(size=self.size)
-        copy.canvas.svg = self.canvas.svg.cloneNode(True)
-        return copy
+    def convert(self, *args):
+        """
+        Does nothing, just for compatibility with PIL.
+        :returns: An :py:class:`easy_thumbnails.VIL.Image.Image` object.
+        """
+        return self
 
     def crop(self, box=None):
         """
@@ -93,9 +83,11 @@ class Image:
         return copy
 
     def filter(self, *args):
-        copy = Image(size=self.size)
-        copy.canvas.svg = self.canvas.svg.cloneNode(True)
-        return copy
+        """
+        Does nothing, just for compatibility with PIL.
+        :returns: An :py:class:`easy_thumbnails.VIL.Image.Image` object.
+        """
+        return self
 
     def __enter__(self):
         return self
