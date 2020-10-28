@@ -326,8 +326,7 @@ class Thumbnailer(File):
         for default in (
                 'basedir', 'subdir', 'prefix', 'quality', 'extension',
                 'preserve_extensions', 'transparency_extension',
-                'check_cache_miss', 'high_resolution', 'highres_infix',
-                'namer'):
+                'check_cache_miss', 'namer'):
             attr_name = 'thumbnail_%s' % default
             if getattr(self, attr_name, None) is None:
                 value = getattr(settings, attr_name.upper())
@@ -359,8 +358,7 @@ class Thumbnailer(File):
             opts['quality'] = self.thumbnail_quality
         return opts
 
-    def generate_thumbnail(self, thumbnail_options, high_resolution=False,
-                           silent_template_exception=False):
+    def generate_thumbnail(self, thumbnail_options, silent_template_exception=False):
         """
         Return an unsaved ``ThumbnailFile`` containing a thumbnail image.
 
@@ -381,8 +379,6 @@ class Thumbnailer(File):
             raise exceptions.EasyThumbnailsError(
                 "The source image is an invalid size (%sx%s)" % orig_size)
 
-        if high_resolution:
-            thumbnail_options['size'] = (orig_size[0] * 2, orig_size[1] * 2)
         image = engine.generate_source_image(
             self, thumbnail_options, self.source_generators,
             fail_silently=silent_template_exception)
@@ -392,13 +388,9 @@ class Thumbnailer(File):
 
         thumbnail_image = engine.process_image(image, thumbnail_options,
                                                self.thumbnail_processors)
-        if high_resolution:
-            thumbnail_options['size'] = orig_size  # restore original size
-
         filename = self.get_thumbnail_name(
             thumbnail_options,
-            transparent=utils.is_transparent(thumbnail_image),
-            high_resolution=high_resolution)
+            transparent=utils.is_transparent(thumbnail_image))
         quality = thumbnail_options['quality']
         subsampling = thumbnail_options['subsampling']
 
@@ -418,8 +410,7 @@ class Thumbnailer(File):
 
         return thumbnail
 
-    def get_thumbnail_name(self, thumbnail_options, transparent=False,
-                           high_resolution=False):
+    def get_thumbnail_name(self, thumbnail_options, transparent=False):
         """
         Return a thumbnail filename for the given ``thumbnail_options``
         dictionary and ``source_name`` (which defaults to the File's ``name``
@@ -457,26 +448,19 @@ class Thumbnailer(File):
             thumbnail_options=thumbnail_options,
             prepared_options=prepared_opts,
         )
-        if high_resolution:
-            filename = self.thumbnail_highres_infix.join(
-                os.path.splitext(filename))
         filename = '%s%s' % (self.thumbnail_prefix, filename)
 
         return os.path.join(basedir, path, subdir, filename)
 
-    def get_existing_thumbnail(self, thumbnail_options, high_resolution=False):
+    def get_existing_thumbnail(self, thumbnail_options):
         """
         Return a ``ThumbnailFile`` containing an existing thumbnail for a set
         of thumbnail options, or ``None`` if not found.
         """
         thumbnail_options = self.get_options(thumbnail_options)
-        names = [
-            self.get_thumbnail_name(
-                thumbnail_options, transparent=False,
-                high_resolution=high_resolution)]
+        names = [self.get_thumbnail_name(thumbnail_options, transparent=False)]
         transparent_name = self.get_thumbnail_name(
-            thumbnail_options, transparent=True,
-            high_resolution=high_resolution)
+            thumbnail_options, transparent=True)
         if transparent_name not in names:
             names.append(transparent_name)
 
@@ -525,27 +509,7 @@ class Thumbnailer(File):
                     self.save_thumbnail(thumbnail)
             else:
                 signals.thumbnail_missed.send(
-                    sender=self, options=thumbnail_options,
-                    high_resolution=False)
-
-        if 'HIGH_RESOLUTION' in thumbnail_options:
-            generate_high_resolution = thumbnail_options.get('HIGH_RESOLUTION')
-        else:
-            generate_high_resolution = self.thumbnail_high_resolution
-        if generate_high_resolution:
-            thumbnail.high_resolution = self.get_existing_thumbnail(
-                thumbnail_options, high_resolution=True)
-            if not thumbnail.high_resolution:
-                if generate:
-                    thumbnail.high_resolution = self.generate_thumbnail(
-                        thumbnail_options, high_resolution=True,
-                        silent_template_exception=silent_template_exception)
-                    if save:
-                        self.save_thumbnail(thumbnail.high_resolution)
-                else:
-                    signals.thumbnail_missed.send(
-                        sender=self, options=thumbnail_options,
-                        high_resolution=False)
+                    sender=self, options=thumbnail_options)
 
         return thumbnail
 

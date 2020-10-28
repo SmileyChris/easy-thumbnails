@@ -17,13 +17,11 @@ A signal that gets sent every time a new thumbnail is created.
 """
 
 thumbnail_missed = django.dispatch.Signal(
-    providing_args=['options', 'high_resolution'])
+    providing_args=['options'])
 """
 A signal that gets sent whenever a thumbnail is passively requested (i.e. when
 no render-time generation is wanted, via the ``generate=False`` argument).
 
 * The ``sender`` argument is the ``Thumbnailer``
 * The ``options`` are the thumbnail options requested.
-* The ``high_resolution`` boolean argument is set to ``True`` if this is the 2x
-  resolution thumbnail that was missed.
 """
