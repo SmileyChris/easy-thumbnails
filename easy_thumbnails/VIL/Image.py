@@ -2,6 +2,9 @@ import builtins
 import io
 from pathlib import Path
 
+from django.core.files import File
+from django.utils.functional import cached_property
+
 from reportlab.graphics import renderSVG
 from reportlab.lib.colors import Color
 
@@ -17,16 +20,25 @@ class Image:
             and isinstance(size[0], (int, float)) and isinstance(size[1], (int, float)), \
             "Expected `size` as tuple with two elements"
         self.canvas = renderSVG.SVGCanvas(size=size, useClip=True)
-        self.size = tuple(size)
         self.mode = None
 
     @property
-    def width(self):
-        return self.size[0]
+    def size(self):
+        return self.width, self.height
 
-    @property
+    @cached_property
+    def width(self):
+        try:
+            return float(self.canvas.svg.getAttribute('width'))
+        except ValueError:
+            return self.getbbox()[2]
+
+    @cached_property
     def height(self):
-        return self.size[1]
+        try:
+            return float(self.canvas.svg.getAttribute('height'))
+        except ValueError:
+            return self.getbbox()[3]
 
     def getbbox(self):
         """
@@ -42,8 +54,10 @@ class Image:
         :param size: The requested size in pixels, as a 2-tuple: (width, height).
         :returns: An :py:class:`easy_thumbnails.VIL.Image.Image` object.
         """
-        copy = Image(size=size)
+        copy = Image()
         copy.canvas.svg = self.canvas.svg.cloneNode(True)
+        copy.canvas.svg.setAttribute('width', '{0}'.format(*size))
+        copy.canvas.svg.setAttribute('height', '{1}'.format(*size))
         return copy
 
     def convert(self, *args):
@@ -76,10 +90,10 @@ class Image:
                 new_height = bbox[2] / wanted_aspect_ratio
                 bbox[1] += (bbox[3] - new_height) / 2
                 bbox[3] = new_height
-            copy.size = box[2] - box[0], box[3] - box[1]
+            size = box[2] - box[0], box[3] - box[1]
             copy.canvas.svg.setAttribute('viewBox', '{0} {1} {2} {3}'.format(*bbox))
-            copy.canvas.svg.setAttribute('width', '{0}'.format(*copy.size))
-            copy.canvas.svg.setAttribute('height', '{1}'.format(*copy.size))
+            copy.canvas.svg.setAttribute('width', '{0}'.format(*size))
+            copy.canvas.svg.setAttribute('height', '{1}'.format(*size))
         return copy
 
     def filter(self, *args):
@@ -144,7 +158,7 @@ class Image:
            may have been created, and may contain partial data.
         """
 
-        filename = ""
+        filename = ''
         open_fp = False
         if isinstance(fp, (bytes, str)):
             filename = fp
@@ -152,7 +166,7 @@ class Image:
         elif isinstance(fp, Path):
             filename = str(fp)
             open_fp = True
-        if not filename and hasattr(fp, "name") and isinstance(fp.name, (bytes, str)):
+        if not filename and hasattr(fp, 'name') and isinstance(fp.name, (bytes, str)):
             # only set the name for metadata purposes
             filename = fp.name
 
@@ -161,7 +175,7 @@ class Image:
             raise ValueError("Image format is expected to be 'SVG' and file suffix to be '.svg'")
 
         if open_fp:
-            fp = builtins.open(filename, "w+b")
+            fp = builtins.open(filename, 'w+b')
 
         self.canvas.svg.writexml(fp)
 
@@ -197,7 +211,7 @@ def load(fp, mode='r'):
         )
     if isinstance(fp, Path):
         filename = str(fp.resolve())
-    elif isinstance(fp, str):
+    elif isinstance(fp, (File, str)):
         filename = fp
     else:
         raise RuntimeError("Can not open file.")
