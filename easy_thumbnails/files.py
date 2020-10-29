@@ -371,7 +371,7 @@ class Thumbnailer(File):
         min_dim, max_dim = 0, 0
         for dim in orig_size:
             try:
-                dim = int(dim)
+                dim = float(dim)
             except (TypeError, ValueError):
                 continue
             min_dim, max_dim = min(min_dim, dim), max(max_dim, dim)
@@ -394,7 +394,7 @@ class Thumbnailer(File):
         quality = thumbnail_options['quality']
         subsampling = thumbnail_options['subsampling']
 
-        if os.path.splitext(self.name)[1] == '.svg':
+        if os.path.splitext(self.name)[1][1:].lower() == 'svg':
             img = engine.save_svg_image(thumbnail_image, filename=filename)
         else:
             img = engine.save_pil_image(
@@ -418,11 +418,10 @@ class Thumbnailer(File):
         """
         thumbnail_options = self.get_options(thumbnail_options)
         path, source_filename = os.path.split(self.name)
-        source_extension = os.path.splitext(source_filename)[1][1:]
+        source_extension = os.path.splitext(source_filename)[1][1:].lower()
         preserve_extensions = self.thumbnail_preserve_extensions
-        if preserve_extensions and (
-                preserve_extensions is True or
-                source_extension.lower() in preserve_extensions):
+        if preserve_extensions is True or isinstance(preserve_extensions, (list, tuple)) and \
+                source_extension in preserve_extensions:
             extension = source_extension
         elif transparent:
             extension = self.thumbnail_transparency_extension

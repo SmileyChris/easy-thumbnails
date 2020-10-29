@@ -403,7 +403,7 @@ class ThumbnailSVGImage(test.BaseTest):
         output = self.render_template('src="{% thumbnail source 240x240 %}"')
         expected = self.verify_thumbnail((240, 180), {'size': (240, 240)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
-        self.assertEqual(output, 'src="%s"' % expected_url)
+        self.assertEqual(output, 'src="{}"'.format(expected_url))
 
         # Size from context variable
         # as a tuple:
@@ -411,13 +411,13 @@ class ThumbnailSVGImage(test.BaseTest):
             'src="{% thumbnail source size %}"')
         expected = self.verify_thumbnail((90, 68), {'size': (90, 100)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
-        self.assertEqual(output, 'src="%s"' % expected_url)
+        self.assertEqual(output, 'src="{}"'.format(expected_url))
         # as a string:
         output = self.render_template(
             'src="{% thumbnail source strsize %}"')
         expected = self.verify_thumbnail((80, 60), {'size': (80, 90)})
         expected_url = ''.join((settings.MEDIA_URL, expected))
-        self.assertEqual(output, 'src="%s"' % expected_url)
+        self.assertEqual(output, 'src="{}"'.format(expected_url))
 
         # On context
         output = self.render_template(
@@ -462,7 +462,7 @@ class ThumbnailSVGImage(test.BaseTest):
 
         self.assertTrue(
             self.storage.exists(expected_filename),
-            'Thumbnail file %r not found' % expected_filename)
+            "Thumbnail file %r not found" % expected_filename)
 
         # Verify the thumbnail has the expected dimensions
         with self.storage.open(expected_filename) as expected_file:
