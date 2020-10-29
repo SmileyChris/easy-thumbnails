@@ -203,12 +203,7 @@ def load(fp, mode='r'):
     """
 
     if mode != 'r':
-        raise ValueError("bad mode %r" % mode)
-    elif isinstance(fp, io.StringIO):
-        raise ValueError(
-            "StringIO cannot be used to open an image. "
-            "Binary data must be used instead."
-        )
+        raise ValueError("bad mode {}".format(mode))
     if isinstance(fp, Path):
         filename = str(fp.resolve())
     elif isinstance(fp, (File, str)):

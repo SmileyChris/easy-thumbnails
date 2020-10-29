@@ -44,7 +44,8 @@ def vil_image(source, **options):
 
     if not source:
         return
+    filename = source.source_storage.path(source.file.name)
     try:
-        return Image.load(source.file.name)
+        return Image.load(filename)
     except Exception as exc:
         raise exc
