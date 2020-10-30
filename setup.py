@@ -51,7 +51,7 @@ setup(
         'django>=1.11,<4.0',
         'pillow',
         'svglib',
-        'reportlabs',
+        'reportlab',
     ],
     python_requires='>=3.5',
     cmdclass={'test': DjangoTests},
