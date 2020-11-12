@@ -2,8 +2,10 @@ import hashlib
 import inspect
 import math
 
-from django.utils.functional import LazyObject
 from django.utils import timezone
+from django.utils.functional import LazyObject
+from django.utils.module_loading import import_string
+
 from PIL import Image
 from easy_thumbnails.conf import settings
 
@@ -21,19 +23,6 @@ def image_entropy(im):
     return -sum([p * math.log(p, 2) for p in hist if p != 0])
 
 
-def dynamic_import(import_string):
-    """
-    Dynamically import a module or object.
-    """
-    # Use rfind rather than rsplit for Python 2.3 compatibility.
-    lastdot = import_string.rfind('.')
-    if lastdot == -1:
-        return __import__(import_string, {}, {}, [])
-    module_name, attr = import_string[:lastdot], import_string[lastdot + 1:]
-    parent_module = __import__(module_name, {}, {}, [attr])
-    return getattr(parent_module, attr)
-
-
 def valid_processor_options(processors=None):
     """
     Return a list of unique valid options for a list of image processors
@@ -41,7 +30,7 @@ def valid_processor_options(processors=None):
     """
     if processors is None:
         processors = [
-            dynamic_import(p) for p in
+            import_string(p) for p in
             tuple(settings.THUMBNAIL_PROCESSORS) +
             tuple(settings.THUMBNAIL_SOURCE_GENERATORS)]
     valid_options = set(['size', 'quality', 'subsampling'])
