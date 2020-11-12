@@ -1,6 +1,12 @@
 Changes
 =======
 
+2.8.0 (unreleased)
+------------------
+
+* Add support for SVG images. This is done by adding an emulation layer compatible to PIL.
+
+
 2.7.0 (2019-12-15)
 ------------------
 
@@ -9,10 +15,12 @@ Changes
 * Drop support for Django < 1.11
 * Drop support for Django 2.0, 2.1
 
+
 2.6.0 (2019-02-03)
 ------------------
 
 * Added testing for Django 2.2 (no code changes required).
+
 
 2.5.0 (2017-10-31)
 ------------------
