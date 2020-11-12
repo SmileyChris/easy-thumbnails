@@ -1,5 +1,4 @@
 import builtins
-import io
 from pathlib import Path
 
 from django.core.files import File
