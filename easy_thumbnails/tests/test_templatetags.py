@@ -1,7 +1,9 @@
-from os import path
+import tempfile
+from pathlib import Path
 
 from django.template import Template, Context, TemplateSyntaxError
 from django.core.files import storage as django_storage
+from django.utils.module_loading import import_string
 
 from easy_thumbnails import alias, storage
 from easy_thumbnails.conf import settings
@@ -470,3 +472,17 @@ class ThumbnailSVGImage(test.BaseTest):
                 self.assertEqual(image.size, expected_size)
 
         return expected_filename
+
+    def test_named_file(self):
+        Image = import_string('easy_thumbnails.VIL.Image')
+        expected = '<svg width="30" height="30" preserveAspectRatio="xMinYMin meet" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink"><title>...</title><desc>...</desc><g id="group" transform="scale(1,-1) translate(0,-30)" clip="0 0 30 30"/></svg>'
+        with Image.new('rgb', (30, 30)) as img:
+            with tempfile.NamedTemporaryFile() as namedtmpfile:
+                img.save(namedtmpfile.name, 'SVG')
+                xml = namedtmpfile.read().decode()
+                self.assertEqual(xml, expected)
+            with tempfile.NamedTemporaryFile() as namedtmpfile:
+                path = Path(namedtmpfile.name)
+                img.save(path, 'SVG')
+                xml = path.read_text()
+                self.assertEqual(xml, expected)

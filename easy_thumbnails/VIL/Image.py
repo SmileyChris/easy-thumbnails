@@ -17,7 +17,7 @@ class Image:
     def __init__(self, size=(300, 300)):
         assert isinstance(size, (list, tuple)) and len(size) == 2 \
             and isinstance(size[0], (int, float)) and isinstance(size[1], (int, float)), \
-            "Expected `size` as tuple with two elements"
+            "Expected `size` as tuple with two floats or integers"
         self.canvas = renderSVG.SVGCanvas(size=size, useClip=True)
         self.mode = None
 
@@ -51,7 +51,7 @@ class Image:
     def resize(self, size, **kwargs):
         """
         :param size: The requested size in pixels, as a 2-tuple: (width, height).
-        :returns: An :py:class:`easy_thumbnails.VIL.Image.Image` object.
+        :returns: The resized :py:class:`easy_thumbnails.VIL.Image.Image` object.
         """
         copy = Image()
         copy.canvas.svg = self.canvas.svg.cloneNode(True)
@@ -70,10 +70,10 @@ class Image:
         """
         Returns a rectangular region from this image. The box is a
         4-tuple defining the left, upper, right, and lower pixel
-        coordinate. See :ref:`coordinate-system`.
+        coordinate.
 
         :param box: The crop rectangle, as a (left, upper, right, lower)-tuple.
-        :returns: An :py:class:`easy_thumbnails.VIL.Image.Image` object.
+        :returns: The cropped :py:class:`easy_thumbnails.VIL.Image.Image` object.
         """
         copy = Image(size=self.size)
         copy.canvas.svg = self.canvas.svg.cloneNode(True)
@@ -105,36 +105,8 @@ class Image:
     def __enter__(self):
         return self
 
-    def __exit__(self, *args):
-        if hasattr(self, "fp") and getattr(self, "_exclusive_fp", False):
-            if hasattr(self, "_close__fp"):
-                self._close__fp()
-            if self.fp:
-                self.fp.close()
-        self.fp = None
-
-    def close(self):
-        """
-        Closes the file pointer, if possible.
-
-        This operation will destroy the image core and release its memory.
-        The image data will be unusable afterward.
-
-        This function is only required to close images that have not
-        had their file read and closed by the
-        :py:meth:`~PIL.Image.Image.load` method. See
-        :ref:`file-handling` for more information.
-        """
-        try:
-            if hasattr(self, "_close__fp"):
-                self._close__fp()
-            self.fp.close()
-            self.fp = None
-        except Exception as msg:
-            pass
-
-        self.map = None
-        self.im = None
+    def __exit__(self, type, value, traceback):
+        pass
 
     def save(self, fp, format=None, **params):
         """
@@ -165,18 +137,16 @@ class Image:
         elif isinstance(fp, Path):
             filename = str(fp)
             open_fp = True
-        if not filename and hasattr(fp, 'name') and isinstance(fp.name, (bytes, str)):
-            # only set the name for metadata purposes
-            filename = fp.name
 
         suffix = Path(filename).suffix.lower()
         if format != 'SVG' and suffix != '.svg':
             raise ValueError("Image format is expected to be 'SVG' and file suffix to be '.svg'")
 
         if open_fp:
-            fp = builtins.open(filename, 'w+b')
-
+            fp = builtins.open(filename, 'w')
         self.canvas.svg.writexml(fp)
+        if open_fp:
+            fp.flush()
 
 
 def new(self, size, color=None):
