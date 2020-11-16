@@ -4,7 +4,9 @@ Changes
 2.8.0 (unreleased)
 ------------------
 
-* Add support for SVG images. This is done by adding an emulation layer compatible to PIL.
+* Add support for SVG images. This is done by adding an emulation layer named VIL, which aims to be
+  compatible with PIL. All thumbnailing operations, such as scaling and cropping behave like pixel
+  images.
 
 
 2.7.1 (unreleased)
