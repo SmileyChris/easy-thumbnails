@@ -479,10 +479,12 @@ class ThumbnailSVGImage(test.BaseTest):
         with Image.new('rgb', (30, 30)) as img:
             with tempfile.NamedTemporaryFile() as namedtmpfile:
                 img.save(namedtmpfile.name, 'SVG')
+                namedtmpfile.seek(0)
                 xml = namedtmpfile.read().decode()
-                self.assertEqual(xml, expected)
+                self.assertHTMLEqual(xml, expected)
             with tempfile.NamedTemporaryFile() as namedtmpfile:
                 path = Path(namedtmpfile.name)
                 img.save(path, 'SVG')
+                namedtmpfile.seek(0)
                 xml = path.read_text()
-                self.assertEqual(xml, expected)
+                self.assertHTMLEqual(xml, expected)
