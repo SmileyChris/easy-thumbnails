@@ -7,11 +7,6 @@ from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
 from easy_thumbnails.tests import utils as test
 from PIL import Image
-try:
-    from testfixtures import LogCapture
-except ImportError:
-    LogCapture = None
-import unittest
 
 
 class FilesTest(test.BaseTest):
@@ -210,41 +205,6 @@ class FilesTest(test.BaseTest):
             self.assertIn('ss1', thumb.name)
             sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
             self.assertEqual(sampling, (2, 1, 1, 1, 1, 1))
-
-    @unittest.skipIf(
-        'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
-        'optimize app not installed')
-    @unittest.skipIf(LogCapture is None, 'testfixtures not installed')
-    def test_postprocessor(self):
-        """use a mock image optimizing post processor doing nothing"""
-        settings.THUMBNAIL_OPTIMIZE_COMMAND = {
-            'png': 'easy_thumbnails/tests/mockoptim.py {filename}'}
-        with LogCapture() as logcap:
-            self.ext_thumbnailer.thumbnail_extension = 'png'
-            self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
-            actual = tuple(logcap.actual())[0]
-            self.assertEqual(actual[0], 'easy_thumbnails.optimize')
-            self.assertEqual(actual[1], 'INFO')
-            self.assertRegex(
-                actual[2],
-                '^easy_thumbnails/tests/mockoptim.py [^ ]+ returned nothing$')
-
-    @unittest.skipIf(
-        'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
-        'optimize app not installed')
-    @unittest.skipIf(LogCapture is None, 'testfixtures not installed')
-    def test_postprocessor_fail(self):
-        """use a mock image optimizing post processor doing nothing"""
-        settings.THUMBNAIL_OPTIMIZE_COMMAND = {
-            'png': 'easy_thumbnails/tests/mockoptim_fail.py {filename}'}
-        with LogCapture() as logcap:
-            self.ext_thumbnailer.thumbnail_extension = 'png'
-            self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
-            actual = tuple(logcap.actual())[0]
-            self.assertEqual(actual[0], 'easy_thumbnails.optimize')
-            self.assertEqual(actual[1], 'ERROR')
-            self.assertRegex(
-                actual[2], r'^Command\ .+returned non-zero exit status 1.?$')
 
     def test_USE_TZ(self):
         settings.USE_TZ = True

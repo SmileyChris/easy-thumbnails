@@ -1,12 +1,14 @@
 Changes
 =======
 
-2.8.0 (unreleased)
-------------------
+3.0 (unreleased)
+----------------
 
 * Add support for SVG images. This is done by adding an emulation layer named VIL, which aims to be
   compatible with PIL. All thumbnailing operations, such as scaling and cropping behave like pixel
   images.
+* Remove the built-in post-processor ``easy-thumbnails.optimize``, because newer versions of PIL
+  handle image optimization by themselves anyway.
 
 
 2.7.1 (unreleased)

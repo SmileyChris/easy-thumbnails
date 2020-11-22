@@ -53,7 +53,7 @@ setup(
         'svglib',
         'reportlab',
     ],
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     cmdclass={'test': DjangoTests},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -69,7 +69,6 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',

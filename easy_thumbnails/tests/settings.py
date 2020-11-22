@@ -22,7 +22,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sessions',
     'easy_thumbnails',
-    'easy_thumbnails.optimize',
     'easy_thumbnails.tests.apps.EasyThumbnailsTestConfig',
 ]
 
