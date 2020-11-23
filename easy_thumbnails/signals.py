@@ -1,6 +1,6 @@
 import django.dispatch
 
-saved_file = django.dispatch.Signal(providing_args=['fieldfile'])
+saved_file = django.dispatch.Signal()
 """
 A signal sent for each ``FileField`` saved when a model is saved.
 
@@ -16,8 +16,7 @@ A signal that gets sent every time a new thumbnail is created.
 * The ``sender`` argument is the created ``ThumbnailFile``
 """
 
-thumbnail_missed = django.dispatch.Signal(
-    providing_args=['options', 'high_resolution'])
+thumbnail_missed = django.dispatch.Signal()
 """
 A signal that gets sent whenever a thumbnail is passively requested (i.e. when
 no render-time generation is wanted, via the ``generate=False`` argument).
