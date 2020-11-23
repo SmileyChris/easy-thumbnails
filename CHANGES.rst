@@ -1,7 +1,7 @@
 Changes
 =======
 
-2.8.0.rc0 (unreleased)
+2.8.0.rc0 (2020-11-23)
 ----------------------
 
 * Add support for thumbnailing SVG images. This is done by adding an emulation layer named VIL,
