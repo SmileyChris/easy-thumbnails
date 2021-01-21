@@ -735,7 +735,7 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         return state
 
     def __setstate__(self, state):
-        self.__dict__.update(state)
+        super().__setstate__(state)
         self.__dict__['alias_target'] = self
 
 
