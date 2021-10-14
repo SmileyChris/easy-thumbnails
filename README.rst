@@ -5,9 +5,9 @@ Easy Thumbnails
 .. image:: https://img.shields.io/pypi/v/easy-thumbnails.svg
     :target: https://pypi.python.org/pypi/easy-thumbnails/
 
-.. image:: https://secure.travis-ci.org/SmileyChris/easy-thumbnails.svg?branch=master
+.. image:: https://github.com/SmileyChris/easy-thumbnails/actions/workflows/python.yml/badge.svg
     :alt: Build Status
-    :target: http://travis-ci.org/SmileyChris/easy-thumbnails
+    :target: https://github.com/SmileyChris/easy-thumbnails/actions/workflows/python.yml
 
 
 A powerful, yet easy to implement thumbnailing application for Django 1.11+
