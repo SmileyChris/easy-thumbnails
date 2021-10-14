@@ -1,10 +1,10 @@
 import gc
 import os
 import time
-from django.utils.timezone import datetime, timedelta
 
 from django.core.files.storage import get_storage_class
 from django.core.management.base import BaseCommand
+from django.utils.timezone import datetime, timedelta
 
 from easy_thumbnails.conf import settings
 from easy_thumbnails.models import Source
