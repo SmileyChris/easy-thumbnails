@@ -1,6 +1,7 @@
 import gc
 import os
 import time
+from datetime import date
 
 from django.core.files.storage import get_storage_class
 from django.core.management.base import BaseCommand
@@ -58,7 +59,7 @@ class ThumbnailCollectionCleaner:
 
         query = Source.objects.all()
         if last_n_days > 0:
-            today = datetime.today()
+            today = date.today()
             query = query.filter(
                 modified__range=(today - timedelta(days=last_n_days), today))
         if cleanup_path:
