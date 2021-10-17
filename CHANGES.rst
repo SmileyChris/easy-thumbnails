@@ -1,6 +1,15 @@
 Changes
 =======
 
+2.7.2 (2021-10-17)
+------------------
+
+* Add support for Django 3.2 and Python-3.10.
+* Fix #563: Do not close image after loading content.
+* In management command `thumbnail_cleanup`, replace `print`-statements against `stdout.write`.
+* Use Python format strings whereever possible.
+
+
 2.7.1 (2020-11-23)
 ------------------
 
