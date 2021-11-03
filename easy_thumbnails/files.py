@@ -376,15 +376,15 @@ class Thumbnailer(File):
                 continue
             min_dim, max_dim = min(min_dim, dim), max(max_dim, dim)
         if max_dim == 0 or min_dim < 0:
-            raise exceptions.EasyThumbnailsError(
-                "The source image is an invalid size (%sx%s)" % orig_size)
+            msg = "The source image has an invalid size ({0}x{1})"
+            raise exceptions.EasyThumbnailsError(msg.format(*orig_size))
 
         image = engine.generate_source_image(
             self, thumbnail_options, self.source_generators,
             fail_silently=silent_template_exception)
         if image is None:
-            raise exceptions.InvalidImageFormatError(
-                "The source file does not appear to be an image")
+            msg = "The source file does not appear to be an image: '{name}'"
+            raise exceptions.InvalidImageFormatError(msg.format(name=self.name))
 
         thumbnail_image = engine.process_image(image, thumbnail_options,
                                                self.thumbnail_processors)
@@ -705,7 +705,10 @@ class ThumbnailerFieldFile(FieldFile, Thumbnailer):
         return state
 
     def __setstate__(self, state):
-        self.__dict__.update(state)
+        if hasattr(super(), '__setstate__'):
+            super().__setstate__(state)
+        else:
+            self.__dict__.update(state)
         self.__dict__['alias_target'] = self
 
 

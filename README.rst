@@ -5,9 +5,9 @@ Easy Thumbnails
 .. image:: https://img.shields.io/pypi/v/easy-thumbnails.svg
     :target: https://pypi.python.org/pypi/easy-thumbnails/
 
-.. image:: https://secure.travis-ci.org/SmileyChris/easy-thumbnails.svg?branch=master
+.. image:: https://github.com/SmileyChris/easy-thumbnails/actions/workflows/python.yml/badge.svg
     :alt: Build Status
-    :target: http://travis-ci.org/SmileyChris/easy-thumbnails
+    :target: https://github.com/SmileyChris/easy-thumbnails/actions/workflows/python.yml
 
 
 A powerful, yet easy to implement thumbnailing application for Django 1.11+
@@ -45,7 +45,9 @@ Installation
 
 Run ``pip install easy-thumbnails``.
 
-Add ``easy_thumbnails`` to your ``INSTALLED_APPS`` setting::
+Add ``easy_thumbnails`` to your ``INSTALLED_APPS`` setting:
+
+.. code-block:: python
 
     INSTALLED_APPS = (
         ...
@@ -64,7 +66,9 @@ specified in the template or Python code when run.
 Using a predefined alias
 ------------------------
 
-Given the following setting::
+Given the following setting:
+
+.. code-block:: python
 
     THUMBNAIL_ALIASES = {
         '': {
@@ -72,12 +76,16 @@ Given the following setting::
         },
     }
 
-Template::
+Template:
+
+.. code-block:: html+django
 
     {% load thumbnail %}
     <img src="{{ profile.photo|thumbnail_url:'avatar' }}" alt="" />
 
-Python::
+Python:
+
+.. code-block:: python
 
     from easy_thumbnails.files import get_thumbnailer
     thumb_url = get_thumbnailer(profile.photo)['avatar'].url
@@ -85,12 +93,16 @@ Python::
 Manually specifying size / options
 ----------------------------------
 
-Template::
+Template:
+
+.. code-block:: html+django
 
     {% load thumbnail %}
     <img src="{% thumbnail profile.photo 50x50 crop %}" alt="" />
 
-Python::
+Python:
+
+.. code-block:: python
 
     from easy_thumbnails.files import get_thumbnailer
     options = {'size': (100, 100), 'crop': True}
@@ -102,7 +114,9 @@ Using in combination with other thumbnailers
 Alternatively, you load the templatetags by {% load easy_thumbnails_tags %} 
 instead of traditional {% load thumbnail %}. It's especially useful in 
 projects that do make use of multiple thumbnailer libraries that use the 
-same name (`thumbnail`) for the templatetag module::
+same name (`thumbnail`) for the templatetag module:
+
+.. code-block:: html+django
 
     {% load easy_thumbnails_tags %}
     <img src="{% thumbnail profile.photo 50x50 crop %}" alt="" />
@@ -113,7 +127,9 @@ Fields
 You can use ``ThumbnailerImageField`` (or ``ThumbnailerField``) for easier
 access to retrieve or generate thumbnail images.
 
-For example::
+For example:
+
+.. code-block:: python
 
     from easy_thumbnails.fields import ThumbnailerImageField
 
@@ -121,12 +137,16 @@ For example::
         user = models.OneToOneField('auth.User')
         photo = ThumbnailerImageField(upload_to='photos', blank=True)
 
-Accessing the field's predefined alias in a template::
+Accessing the field's predefined alias in a template:
+
+.. code-block:: html+django
 
     {% load thumbnail %}
     <img src="{{ profile.photo.avatar.url }}" alt="" />
 
-Accessing the field's predefined alias in Python code::
+Accessing the field's predefined alias in Python code:
+
+.. code-block:: python
 
     thumb_url = profile.photo['avatar'].url
 
