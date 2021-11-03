@@ -1,15 +1,15 @@
 Changes
 =======
 
-2.8.0 (unreleased)
-------------------
+2.8.0.rc0 (2020-11-23)
+----------------------
 
-* Add support for SVG images. This is done by adding an emulation layer named VIL, which aims to be
-  compatible with PIL. All thumbnailing operations, such as scaling and cropping behave like pixel
-  images.
+* Add support for thumbnailing SVG images. This is done by adding an emulation layer named VIL,
+  which aims to be compatible with PIL. All thumbnailing operations, such as scaling and cropping
+  behave like pixel images.
 
 
-2.7.1 (unreleased)
+2.7.1 (2020-11-23)
 ------------------
 
 * Add support for Django 3.1
