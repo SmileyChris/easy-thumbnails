@@ -13,14 +13,14 @@ class ThumbnailOptions(dict):
         self.setdefault('subsampling', 2)
 
     def prepared_options(self):
-        prepared_opts = ['%sx%s' % tuple(self['size'])]
+        prepared_opts = ['{size[0]}x{size[1]}'.format(**self)]
 
-        subsampling = str(self['subsampling'])
-        if subsampling == '2':
-            subsampling_text = ''
-        else:
-            subsampling_text = 'ss%s' % subsampling
-        prepared_opts.append('q%s%s' % (self['quality'], subsampling_text))
+        opts_text = ''
+        if 'quality' in self:
+            opts_text += 'q{quality}'.format(**self)
+        if 'subsampling' in self and str(self['subsampling']) != '2':
+            opts_text += 'ss{subsampling}'.format(**self)
+        prepared_opts.append(opts_text)
 
         for key, value in sorted(self.items()):
             if key == key.upper():
@@ -28,7 +28,7 @@ class ThumbnailOptions(dict):
                 # use of prepared options is to generate the filename -- these
                 # options don't alter the filename).
                 continue
-            if not value or key in ('size', 'quality', 'subsampling'):
+            if not value or key in ['size', 'quality', 'subsampling']:
                 continue
             if value is True:
                 prepared_opts.append(key)
@@ -38,6 +38,6 @@ class ThumbnailOptions(dict):
                     value = ','.join([str(item) for item in value])
                 except TypeError:
                     value = str(value)
-            prepared_opts.append('%s-%s' % (key, value))
+            prepared_opts.append('{0}-{1}'.format(key, value))
 
         return prepared_opts
