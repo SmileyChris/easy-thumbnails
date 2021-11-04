@@ -10,7 +10,7 @@ Easy Thumbnails
     :target: https://github.com/SmileyChris/easy-thumbnails/actions/workflows/python.yml
 
 
-A powerful, yet easy to implement thumbnailing application for Django 1.11+
+A powerful, yet easy to implement thumbnailing application for Django 2.2+
 
 Below is a quick summary of usage. For more comprehensive information, view the
 `full documentation`__ online or the peruse the project's ``docs`` directory.
@@ -21,7 +21,7 @@ __ http://easy-thumbnails.readthedocs.org/en/latest/index.html
 Breaking News
 =============
 
-Version 2.8.rc0 adds support for thumbnailing SVG images.
+Version 2.8.0 adds support for thumbnailing SVG images.
 
 Of course it doesn't make sense to thumbnail SVG images, because being in vector format they can
 scale to any size without quality of loss. However, users of easy-thumbnails may want to upload and
