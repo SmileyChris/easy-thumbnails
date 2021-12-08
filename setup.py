@@ -48,7 +48,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'django>=2.2,<4.0',
+        'django>=2.2,<4.1',
         'pillow',
         'svglib',
         'reportlab',
@@ -63,6 +63,7 @@ setup(
         'Framework :: Django :: 3.0',
         'Framework :: Django :: 3.1',
         'Framework :: Django :: 3.2',
+        'Framework :: Django :: 4.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
