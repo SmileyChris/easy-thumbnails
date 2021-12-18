@@ -44,8 +44,9 @@ def vil_image(source, **options):
 
     if not source:
         return
-    filename = source.source_storage.path(source.file.name)
+    # path method should not be implemented for remote storages. We can pass the file directly.
+    # filename = source.source_storage.path(source.file.name)
     try:
-        return Image.load(filename)
+        return Image.load(source.file)
     except Exception as exc:
         raise exc
