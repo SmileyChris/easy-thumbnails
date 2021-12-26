@@ -402,6 +402,10 @@ class Thumbnailer(File):
                 subsampling=subsampling)
         data = img.read()
 
+        # S3 requires the data as bytes.
+        if not isinstance(data, bytes):
+            data = data.encode()
+
         thumbnail = ThumbnailFile(
             filename, file=ContentFile(data), storage=self.thumbnail_storage,
             thumbnail_options=thumbnail_options)
