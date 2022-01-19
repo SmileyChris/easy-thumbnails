@@ -46,8 +46,9 @@ def save_pil_image(image, destination=None, filename=None, **options):
     # Ensure plugins are fully loaded so that Image.EXTENSION is populated.
     Image.init()
     format = Image.EXTENSION.get(os.path.splitext(filename)[1].lower(), 'JPEG')
-    if format in ('JPEG', 'WEBP'):
-        options.setdefault('quality', 85)
+    if format in settings.THUMBNAIL_IMAGE_SAVE_OPTIONS:
+        for key, value in settings.THUMBNAIL_IMAGE_SAVE_OPTIONS[format].items():
+            options.setdefault(key, value)
     saved = False
     if format == 'JPEG':
         if image.mode.endswith('A'):
