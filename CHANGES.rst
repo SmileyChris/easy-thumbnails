@@ -1,12 +1,21 @@
 Changes
 =======
 
+
+2.8.1 (2022-01-20)
+------------------
+
+* Add support for Django 4.
+* New ``THUMBNAIL_IMAGE_SAVE_OPTIONS`` setting.
+* Fix #587: Uploading SVG Images to S3 storage.
+
+
 2.8.0 (2021-11-03)
 ------------------
 
-* Add support for thumbnailing SVG images. This is done by adding an emulation layer named VIL,
-  which aims to be compatible with PIL. All thumbnailing operations, such as scaling and cropping
-  behave like pixel images.
+* Add support for thumbnailing SVG images. This is done by adding an emulation
+  layer named VIL, which aims to be compatible with PIL. All thumbnailing
+  operations, such as scaling and cropping behave like pixel images.
 
 
 2.7.2 (2021-10-17)
@@ -14,7 +23,8 @@ Changes
 
 * Add support for Django 3.2 and Python-3.10.
 * Fix #563: Do not close image after loading content.
-* In management command `thumbnail_cleanup`, replace `print`-statements against `stdout.write`.
+* In management command ``thumbnail_cleanup``, replace ``print``-statements
+  against ``stdout.write``.
 * Use Python format strings whereever possible.
 
 
