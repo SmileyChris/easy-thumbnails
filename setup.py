@@ -34,9 +34,13 @@ setup(
     install_requires=[
         "django>=2.2",
         "pillow",
-        "svglib",
-        "reportlab",
     ],
+    extras_require={
+        "svg": [
+            "svglib",
+            "reportlab",
+        ],
+    },
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
