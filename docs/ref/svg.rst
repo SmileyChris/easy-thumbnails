@@ -21,4 +21,6 @@ images and hence can be used by third-party apps such as
 
 Since easy-thumbnails version 2.8, you can therefore use an SVG image, just as you would use any other image.
 
+This requires easy-thumbnails to have been installed with the ``[svg]`` extra enabled.
+
 Cropping an SVG image works as expected. Filtering an SVG image will however not work.

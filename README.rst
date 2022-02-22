@@ -21,7 +21,7 @@ __ http://easy-thumbnails.readthedocs.org/en/latest/index.html
 Breaking News
 =============
 
-Version 2.8.0 adds support for thumbnailing SVG images.
+Version 2.8.0 adds support for thumbnailing SVG images when installed with the ``[svg]`` extra.
 
 Of course it doesn't make sense to thumbnail SVG images, because being in vector format they can
 scale to any size without quality of loss. However, users of easy-thumbnails may want to upload and

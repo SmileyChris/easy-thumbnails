@@ -1,3 +1,4 @@
+import warnings
 from io import BytesIO
 
 from easy_thumbnails import utils
@@ -40,7 +41,11 @@ def vil_image(source, **options):
     """
     Try to open the source file directly using VIL, ignoring any errors.
     """
-    from easy_thumbnails.VIL import Image
+    try:
+        from easy_thumbnails.VIL import Image
+    except ImportError as ie:
+        warnings.warn(f"Could not import VIL for SVG image support: {ie}.")
+        return
 
     if not source:
         return
