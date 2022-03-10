@@ -16,16 +16,9 @@ class AppSettings(BaseSettings):
     """
 
     def __init__(self, isolated=False, *args, **kwargs):
-        import warnings
-
         self.isolated = isolated
         self._changed = {}
         self._added = []
-        if django_settings.configured:
-            if hasattr(django_settings, 'THUMBNAIL_HIGH_RESOLUTION'):
-                warnings.warn("THUMBNAIL_HIGH_RESOLUTION is unused and now obsolete.", DeprecationWarning)
-            if hasattr(django_settings, 'THUMBNAIL_HIGHRES_INFIX'):
-                warnings.warn("THUMBNAIL_HIGHRES_INFIX is unused and now obsolete.", DeprecationWarning)
 
     def get_isolated(self):
         return self._isolated

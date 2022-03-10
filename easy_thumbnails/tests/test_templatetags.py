@@ -148,6 +148,9 @@ class ThumbnailTagTest(Base):
         settings.THUMBNAIL_DEBUG = True
         self.assertRaises(TemplateSyntaxError, self.render_template, src)
 
+        src = '{% thumbnail source 240x240 HIGH_RESOLUTION %}'
+        self.assertRaises(TemplateSyntaxError, self.render_template, src)
+
     def testTag(self):
         # Set THUMBNAIL_DEBUG = True to make it easier to trace any failures
         settings.THUMBNAIL_DEBUG = True
