@@ -103,19 +103,21 @@ def exif_orientation(im):
     if exif:
         orientation = exif.get(0x0112)
         if orientation == 2:
-            im = im.transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         elif orientation == 3:
-            im = im.transpose(Image.ROTATE_180)
+            im = im.transpose(Image.Transpose.ROTATE_180)
         elif orientation == 4:
-            im = im.transpose(Image.FLIP_TOP_BOTTOM)
+            im = im.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
         elif orientation == 5:
-            im = im.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image.Transpose.ROTATE_270) \
+                   .transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         elif orientation == 6:
-            im = im.transpose(Image.ROTATE_270)
+            im = im.transpose(Image.Transpose.ROTATE_270)
         elif orientation == 7:
-            im = im.transpose(Image.ROTATE_90).transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image.Transpose.ROTATE_90) \
+                   .transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         elif orientation == 8:
-            im = im.transpose(Image.ROTATE_90)
+            im = im.transpose(Image.Transpose.ROTATE_90)
     return im
 
 
