@@ -2,6 +2,11 @@ Changes
 =======
 
 
+2.8.2 (2022-07-31)
+------------------
+* Installation of easy-thumbnails now optionally depends on the reportlab library.
+
+
 2.8.1 (2022-01-20)
 ------------------
 
