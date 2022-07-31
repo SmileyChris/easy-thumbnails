@@ -7,6 +7,8 @@ Changes
 * Add support for thumbnailing SVG images. This is done by adding an emulation layer named VIL,
   which aims to be compatible with PIL. All thumbnailing operations, such as scaling and cropping
   behave like pixel images.
+* Remove configuration directives ``THUMBNAIL_HIGH_RESOLUTION`` and ``THUMBNAIL_HIGHRES_INFIX``
+  from easy-thumbnails setting directives.
 
 
 2.7.2 (2021-10-17)
