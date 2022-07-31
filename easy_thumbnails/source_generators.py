@@ -1,3 +1,4 @@
+import warnings
 from io import BytesIO
 
 from easy_thumbnails import utils
@@ -40,12 +41,17 @@ def vil_image(source, **options):
     """
     Try to open the source file directly using VIL, ignoring any errors.
     """
-    from easy_thumbnails.VIL import Image
+    try:
+        from easy_thumbnails.VIL import Image
+    except ImportError as ie:
+        warnings.warn(f"Could not import VIL for SVG image support: {ie}.")
+        return
 
     if not source:
         return
-    filename = source.source_storage.path(source.file.name)
+    # path method should not be implemented for remote storages. We can pass the file directly.
+    # filename = source.source_storage.path(source.file.name)
     try:
-        return Image.load(filename)
+        return Image.load(source.file)
     except Exception as exc:
         raise exc

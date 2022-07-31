@@ -7,3 +7,4 @@ docs/_build
 *.egg
 *.pyc
 reports/*
+.python-version

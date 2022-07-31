@@ -309,4 +309,17 @@ class Settings(AppSettings):
     :class:`easy_thumbnails.widgets.ImageClearableFileInput` widget.
     """
 
+    THUMBNAIL_IMAGE_SAVE_OPTIONS = {
+        'JPEG': {
+            'quality': 85,
+        },
+        'WEBP': {
+            'quality': 85,
+        },
+    }
+    """
+    Allows customising Image.save parameters based on format, for example:
+    `{'WEBP': {'method': 6}}`
+    """
+
 settings = Settings()
