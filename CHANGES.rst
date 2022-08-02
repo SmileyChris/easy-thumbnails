@@ -1,6 +1,10 @@
 Changes
 =======
 
+2.8.3 (2022-08-02)
+------------------
+* Fix regression in library detection introduced  in version 2.8.2.
+
 
 2.8.2 (2022-07-31)
 ------------------
