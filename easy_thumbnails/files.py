@@ -14,7 +14,6 @@ from easy_thumbnails import engine, exceptions, models, utils, signals, storage
 from easy_thumbnails.alias import aliases
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
-from easy_thumbnails.VIL.Image import load
 
 
 def get_thumbnailer(obj, relative_name=None):
@@ -118,6 +117,7 @@ def database_get_image_dimensions(file, close=False, dimensions=None):
         if dimensions_cache:
             return dimensions_cache.width, dimensions_cache.height
     if os.path.splitext(file.file.name)[1] == '.svg':
+        from easy_thumbnails.VIL.Image import load
         dimensions = load(file.path).size
     else:
         dimensions = get_image_dimensions(file, close=close)
