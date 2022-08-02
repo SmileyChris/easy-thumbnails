@@ -119,10 +119,10 @@ class BaseTest(TestCase):
         will be passed instead.
         """
         if image_format == 'SVG':
-            Image = import_string('easy_thumbnails.VIL.Image')
+            from easy_thumbnails.VIL import Image
             data = StringIO()
         else:
-            Image = import_string('PIL.Image')
+            from PIL import Image
             data = BytesIO()
         with Image.new(image_mode, size) as img:
             img.save(data, image_format)

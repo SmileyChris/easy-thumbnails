@@ -1,4 +1,5 @@
 import tempfile
+import unittest
 from pathlib import Path
 
 from django.template import Template, Context, TemplateSyntaxError
@@ -9,6 +10,7 @@ from easy_thumbnails import alias, storage
 from easy_thumbnails.conf import settings
 from easy_thumbnails.files import get_thumbnailer
 from easy_thumbnails.tests import utils as test
+from easy_thumbnails import VIL
 
 
 class Base(test.BaseTest):
@@ -368,6 +370,7 @@ class ThumbnailerDataUriTest(ThumbnailerBase):
         self.assertEqual(output, startswith)
 
 
+@unittest.skipUnless(VIL.is_available(), "SVG support not available")
 class ThumbnailSVGImage(test.BaseTest):
 
     def setUp(self):

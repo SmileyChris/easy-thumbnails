@@ -1,10 +1,11 @@
-from easy_thumbnails.VIL import Image, ImageDraw
-from easy_thumbnails import processors
-from reportlab.lib.colors import Color
-from unittest import TestCase
+import unittest
+from easy_thumbnails import processors, VIL
 
 
 def create_image(mode='RGB', size=(800, 600)):
+    from easy_thumbnails.VIL import Image, ImageDraw
+    from reportlab.lib.colors import Color
+
     image = Image.new(mode, size, (255, 255, 255))
     draw = ImageDraw.Draw(image)
     x_bit, y_bit = size[0] // 10, size[1] // 10
@@ -13,7 +14,8 @@ def create_image(mode='RGB', size=(800, 600)):
     return image
 
 
-class ScaleAndCropTest(TestCase):
+@unittest.skipUnless(VIL.is_available(), "SVG support not available")
+class ScaleAndCropTest(unittest.TestCase):
     def test_scale(self):
         image = create_image()
 
