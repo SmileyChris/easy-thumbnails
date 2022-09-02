@@ -68,6 +68,6 @@ In the future, Easy Thumbnails might support WebP natively. This however means t
 be usable as ``<img ...>`` -tag, supported by all browsers, and fully integrated into tools
 such as django-filer_.
 
-Until that happens, I reccomend to proceed with the workarround described here.
+Until that happens, I recommend to proceed with the workarround described here.
 
 .. _django-filer: https://django-filer.readthedocs.io/en/latest/
