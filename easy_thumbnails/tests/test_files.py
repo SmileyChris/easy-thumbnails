@@ -286,7 +286,7 @@ class FilesTest(test.BaseTest):
         opts = {'size': (50, 50)}
         thumb = self.thumbnailer.get_thumbnail(opts)
         self.assertEqual((thumb.width, thumb.height), (50, 38))
-        # Now the thumb has been created, check that dimesions are in the
+        # Now the thumb has been created, check that dimensions are in the
         # database.
         dimensions = models.ThumbnailDimensions.objects.all()[0]
         self.assertEqual(
