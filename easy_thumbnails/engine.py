@@ -1,9 +1,13 @@
 import os
-from io import BytesIO, StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
-from django.utils.module_loading import import_string
-
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 
 from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
