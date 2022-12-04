@@ -2,10 +2,6 @@
 Installation
 ============
 
-Before installing easy-thumbnails, you'll obviously need to have copy of
-Django installed. For the |version| release, both Django 1.4 and Django 1.7 or
-above is supported.
-
 By default, all of the image manipulation is handled by the
 `Python Imaging Library`__ (a.k.a. PIL), so you'll probably want that
 installed too.
@@ -23,6 +19,7 @@ The easiest way is to use an automatic package-installation tools like pip__.
 Simply type::
 
     pip install easy-thumbnails
+
 
 Manual installation
 -------------------

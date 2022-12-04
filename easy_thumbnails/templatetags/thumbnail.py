@@ -17,7 +17,6 @@ RE_SIZE = re.compile(r'(\d+)x(\d+)$')
 
 VALID_OPTIONS = utils.valid_processor_options()
 VALID_OPTIONS.remove('size')
-VALID_OPTIONS.append('HIGH_RESOLUTION')
 
 
 def split_args(args):
@@ -296,7 +295,9 @@ def thumbnail_url(source, alias):
     """
     try:
         thumb = get_thumbnailer(source)[alias]
-    except Exception:
+    except Exception as e:
+        if settings.THUMBNAIL_DEBUG:
+            raise e
         return ''
     return thumb.url
 

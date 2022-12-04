@@ -177,15 +177,6 @@ class FilesTest(test.BaseTest):
         thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
         self.assertEqual(path.splitext(thumb.name)[1], '.jpg')
 
-    def test_high_resolution(self):
-        self.ext_thumbnailer.thumbnail_high_resolution = True
-        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
-        base, ext = path.splitext(thumb.path)
-        hires_thumb_file = ''.join([base + '@2x', ext])
-        self.assertTrue(path.isfile(hires_thumb_file))
-        with Image.open(hires_thumb_file) as thumb:
-            self.assertEqual(thumb.size, (200, 150))
-
     def test_subsampling(self):
         samplings = {
             0: (1, 1, 1, 1, 1, 1),
@@ -219,33 +210,6 @@ class FilesTest(test.BaseTest):
             self.assertIn('ss1', thumb.name)
             sampling = im.layer[0][1:3] + im.layer[1][1:3] + im.layer[2][1:3]
             self.assertEqual(sampling, (2, 1, 1, 1, 1, 1))
-
-    def test_high_resolution_force_off(self):
-        self.ext_thumbnailer.thumbnail_high_resolution = True
-        thumb = self.ext_thumbnailer.get_thumbnail(
-            {'size': (100, 100), 'HIGH_RESOLUTION': False})
-        base, ext = path.splitext(thumb.path)
-        hires_thumb_file = ''.join([base + '@2x', ext])
-        self.assertFalse(path.exists(hires_thumb_file))
-
-    def test_high_resolution_force(self):
-        thumb = self.ext_thumbnailer.get_thumbnail(
-            {'size': (100, 100), 'HIGH_RESOLUTION': True})
-        base, ext = path.splitext(thumb.path)
-        hires_thumb_file = ''.join([base + '@2x', ext])
-        self.assertTrue(path.isfile(hires_thumb_file))
-        with Image.open(hires_thumb_file) as thumb:
-            self.assertEqual(thumb.size, (200, 150))
-
-    def test_highres_infix(self):
-        self.ext_thumbnailer.thumbnail_high_resolution = True
-        self.ext_thumbnailer.thumbnail_highres_infix = '_2x'
-        thumb = self.ext_thumbnailer.get_thumbnail({'size': (100, 100)})
-        base, ext = path.splitext(thumb.path)
-        hires_thumb_file = ''.join([base + '_2x', ext])
-        self.assertTrue(path.isfile(hires_thumb_file))
-        with Image.open(hires_thumb_file) as thumb:
-            self.assertEqual(thumb.size, (200, 150))
 
     @unittest.skipIf(
         'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
@@ -322,7 +286,7 @@ class FilesTest(test.BaseTest):
         opts = {'size': (50, 50)}
         thumb = self.thumbnailer.get_thumbnail(opts)
         self.assertEqual((thumb.width, thumb.height), (50, 38))
-        # Now the thumb has been created, check that dimesions are in the
+        # Now the thumb has been created, check that dimensions are in the
         # database.
         dimensions = models.ThumbnailDimensions.objects.all()[0]
         self.assertEqual(

@@ -1,3 +1,4 @@
+import django
 from django.conf import settings as django_settings
 
 
@@ -173,13 +174,14 @@ class Settings(AppSettings):
     Note that changing the extension will most likely cause the
     ``THUMBNAIL_QUALITY`` setting to have no effect.
     """
+
     THUMBNAIL_PRESERVE_EXTENSIONS = None
     """
     To preserve specific extensions, for instance if you always want to create
     lossless PNG thumbnails from PNG sources, you can specify these extensions
     using this setting, for example::
 
-        THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
+        THUMBNAIL_PRESERVE_EXTENSIONS = ['png']
 
     All extensions should be lowercase.
 
@@ -191,6 +193,7 @@ class Settings(AppSettings):
     The type of image to save thumbnails with a transparency layer (e.g. GIFs
     or transparent PNGs).
     """
+
     THUMBNAIL_NAMER = 'easy_thumbnails.namers.default'
     """
     The function used to generate the filename for thumbnail images.
@@ -245,8 +248,10 @@ class Settings(AppSettings):
     The order of the processors is the order in which they are sequentially
     called to process the image.
     """
+
     THUMBNAIL_SOURCE_GENERATORS = (
         'easy_thumbnails.source_generators.pil_image',
+        'easy_thumbnails.source_generators.vil_image',
     )
     """
     The :doc:`source_generators` through which the base image is created from
@@ -281,39 +286,6 @@ class Settings(AppSettings):
         THUMBNAIL_DEFAULT_OPTIONS = {'bw': True}
     """
 
-    THUMBNAIL_HIGH_RESOLUTION = False
-    """
-    Enables thumbnails for retina displays.
-
-    Creates a version of the thumbnails in high resolution that can be used by
-    a javascript layer to display higher quality thumbnails for high DPI
-    displays.
-
-    This can be overridden at a per-thumbnail level with the
-    ``HIGH_RESOLUTION`` thumbnail option::
-
-        opts = {'size': (100, 100), 'crop': True, HIGH_RESOLUTION: False}
-        only_basic = get_thumbnailer(obj.image).get_thumbnail(opts)
-
-    In a template tag, use a value of ``0`` to force the disabling of a high
-    resolution version or just the option name to enable it::
-
-        {% thumbnail obj.image 50x50 crop HIGH_RESOLUTION=0 %}  {# no hires #}
-        {% thumbnail obj.image 50x50 crop HIGH_RESOLUTION %}  {# force hires #}
-    """
-
-    THUMBNAIL_HIGHRES_INFIX = '@2x'
-    """
-    Sets the infix used to distinguish thumbnail images for retina displays.
-
-    Thumbnails generated for retina displays are distinguished from the
-    standard resolution counterparts, by adding an infix to the filename just
-    before the dot followed by the extension.
-
-    Apple Inc., formerly suggested to use ``@2x`` as infix, but later changed
-    their mind and now suggests to use ``_2x``, since this is more portable.
-    """
-
     THUMBNAIL_CACHE_DIMENSIONS = False
     """
     Save thumbnail dimensions to the database.
@@ -328,6 +300,19 @@ class Settings(AppSettings):
     """
     Default options for the
     :class:`easy_thumbnails.widgets.ImageClearableFileInput` widget.
+    """
+
+    THUMBNAIL_IMAGE_SAVE_OPTIONS = {
+        'JPEG': {
+            'quality': 85,
+        },
+        'WEBP': {
+            'quality': 85,
+        },
+    }
+    """
+    Allows customising Image.save parameters based on format, for example:
+    `{'WEBP': {'method': 6}}`
     """
 
 settings = Settings()

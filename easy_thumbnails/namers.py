@@ -16,7 +16,7 @@ def default(thumbnailer, prepared_options, source_filename,
         if thumbnail_extension != os.path.splitext(source_filename)[1][1:]:
             filename_parts.append(thumbnail_extension)
     else:
-        filename_parts += ['_'.join(prepared_options), thumbnail_extension]
+        filename_parts.extend(['_'.join(prepared_options), thumbnail_extension])
     return '.'.join(filename_parts)
 
 

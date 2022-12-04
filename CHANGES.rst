@@ -1,6 +1,44 @@
 Changes
 =======
 
+2.8.3 (2022-08-02)
+------------------
+* Fix regression in library detection introduced  in version 2.8.2.
+
+
+2.8.2 (2022-07-31)
+------------------
+* Installation of easy-thumbnails now optionally depends on the reportlab library.
+
+
+2.8.1 (2022-01-20)
+------------------
+
+* Add support for Django 4.
+* New ``THUMBNAIL_IMAGE_SAVE_OPTIONS`` setting.
+* Fix #587: Uploading SVG Images to S3 storage.
+
+
+2.8.0 (2021-11-03)
+------------------
+
+* Add support for thumbnailing SVG images. This is done by adding an emulation layer named VIL,
+  which aims to be compatible with PIL. All thumbnailing operations, such as scaling and cropping
+  behave like pixel images.
+* Remove configuration directives ``THUMBNAIL_HIGH_RESOLUTION`` and ``THUMBNAIL_HIGHRES_INFIX``
+  from easy-thumbnails setting directives.
+
+
+2.7.2 (2021-10-17)
+------------------
+
+* Add support for Django 3.2 and Python-3.10.
+* Fix #563: Do not close image after loading content.
+* In management command ``thumbnail_cleanup``, replace ``print``-statements
+  against ``stdout.write``.
+* Use Python format strings whereever possible.
+
+
 2.7.1 (2020-11-23)
 ------------------
 
@@ -15,10 +53,12 @@ Changes
 * Drop support for Django < 1.11
 * Drop support for Django 2.0, 2.1
 
+
 2.6.0 (2019-02-03)
 ------------------
 
 * Added testing for Django 2.2 (no code changes required).
+
 
 2.5.0 (2017-10-31)
 ------------------

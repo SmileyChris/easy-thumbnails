@@ -6,6 +6,7 @@ from django.core.files.base import ContentFile
 
 from easy_thumbnails.tests import utils, models
 from easy_thumbnails.tests.test_aliases import BaseTest as AliasBaseTest
+from easy_thumbnails.engine import NoSourceGenerator
 from easy_thumbnails.exceptions import (
     InvalidImageFormatError, EasyThumbnailsError)
 
@@ -37,7 +38,7 @@ class ThumbnailerFieldTest(AliasBaseTest):
         instance = models.TestModel(avatar='avatars/invalid.jpg')
         generate = lambda: instance.avatar.generate_thumbnail(
             {'size': (300, 300)})
-        self.assertRaises(IOError, generate)
+        self.assertRaises(NoSourceGenerator, generate)
 
     def test_generate_thumbnail_alias_bad_image(self):
         text_file = ContentFile("Lorem ipsum dolor sit amet. Not an image.")
