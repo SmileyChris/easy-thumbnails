@@ -67,6 +67,9 @@ def save_pil_image(image, destination=None, filename=None, **options):
             # shouldn't be triggered very often these days, as recent versions
             # of pillow avoid the MAXBLOCK limitation.
             pass
+    else:
+        if 'quality' in options:
+            options.pop('quality')
     if not saved:
         image.save(destination, format=format, **options)
     if hasattr(destination, 'seek'):
