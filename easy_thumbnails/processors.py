@@ -191,12 +191,20 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
             crop = True
         scale *= (100 + int(zoom)) / 100.0
 
+    # Check Pillow version and use right constant
+    try:
+        # Pillow >= 9.1.0
+        Image__Resampling__LANCZOS = Image.Resampling.LANCZOS
+    except AttributeError:
+        # Pillow < 9.1.0
+        Image__Resampling__LANCZOS = Image.ANTIALIAS
+
     if scale < 1.0 or (scale > 1.0 and upscale):
         # Resize the image to the target size boundary. Round the scaled
         # boundary sizes to avoid floating point errors.
         im = im.resize((int(round(source_x * scale)),
                         int(round(source_y * scale))),
-                       resample=Image.ANTIALIAS)
+                       resample=Image__Resampling__LANCZOS)
 
     if crop:
         # Use integer values now.

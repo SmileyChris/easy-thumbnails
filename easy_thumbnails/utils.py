@@ -94,6 +94,14 @@ def exif_orientation(im):
     """
     Rotate and/or flip an image to respect the image's EXIF orientation data.
     """
+    # Check Pillow version and use right constant
+    try:
+        # Pillow >= 9.1.0
+        Image__Transpose = Image.Transpose
+    except AttributeError:
+        # Pillow < 9.1.0
+        Image__Transpose = Image
+
     try:
         exif = im._getexif()
     except Exception:
@@ -103,19 +111,21 @@ def exif_orientation(im):
     if exif:
         orientation = exif.get(0x0112)
         if orientation == 2:
-            im = im.transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image__Transpose.FLIP_LEFT_RIGHT)
         elif orientation == 3:
-            im = im.transpose(Image.ROTATE_180)
+            im = im.transpose(Image__Transpose.ROTATE_180)
         elif orientation == 4:
-            im = im.transpose(Image.FLIP_TOP_BOTTOM)
+            im = im.transpose(Image__Transpose.FLIP_TOP_BOTTOM)
         elif orientation == 5:
-            im = im.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image__Transpose.ROTATE_270) \
+                   .transpose(Image__Transpose.FLIP_LEFT_RIGHT)
         elif orientation == 6:
-            im = im.transpose(Image.ROTATE_270)
+            im = im.transpose(Image__Transpose.ROTATE_270)
         elif orientation == 7:
-            im = im.transpose(Image.ROTATE_90).transpose(Image.FLIP_LEFT_RIGHT)
+            im = im.transpose(Image__Transpose.ROTATE_90) \
+                   .transpose(Image__Transpose.FLIP_LEFT_RIGHT)
         elif orientation == 8:
-            im = im.transpose(Image.ROTATE_90)
+            im = im.transpose(Image__Transpose.ROTATE_90)
     return im
 
 
