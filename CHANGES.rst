@@ -1,6 +1,12 @@
 Changes
 =======
 
+2.8.4 (2022-12-14)
+------------------
+* Fix problem when thumbnailing images of type TIFF. PIL's ``TiffImagePlugin`` doesn't
+  like argument ``quality``.
+
+
 2.8.3 (2022-08-02)
 ------------------
 * Fix regression in library detection introduced  in version 2.8.2.
