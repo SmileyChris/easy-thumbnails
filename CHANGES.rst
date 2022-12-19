@@ -1,10 +1,12 @@
 Changes
 =======
 
-2.8.4 (2022-12-14)
+2.8.4 (2022-12-19)
 ------------------
 * Fix problem when thumbnailing images of type TIFF. PIL's ``TiffImagePlugin`` doesn't
   like argument ``quality``.
+* Replace deprecated Pillow constants against newer counterparts. Check
+  https://pillow.readthedocs.io/en/stable/releasenotes/9.1.0.html#deprecations for details.
 
 
 2.8.3 (2022-08-02)
