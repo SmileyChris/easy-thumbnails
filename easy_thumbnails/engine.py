@@ -67,7 +67,7 @@ def save_pil_image(image, destination=None, filename=None, **options):
             # shouldn't be triggered very often these days, as recent versions
             # of pillow avoid the MAXBLOCK limitation.
             pass
-    else:
+    elif format != 'WEBP':
         if 'quality' in options:
             options.pop('quality')
     if not saved:
