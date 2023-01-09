@@ -1,6 +1,12 @@
 Changes
 =======
 
+2.8.5 (2023-01-09)
+------------------
+* Fix regression introduced in version 2.8.4. Argument ``quality`` is not removed for images
+  of type ``.webp``.
+
+
 2.8.4 (2022-12-19)
 ------------------
 * Fix problem when thumbnailing images of type TIFF. PIL's ``TiffImagePlugin`` doesn't
