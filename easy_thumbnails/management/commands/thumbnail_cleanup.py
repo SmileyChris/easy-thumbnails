@@ -18,6 +18,7 @@ class ThumbnailCollectionCleaner:
     sources = 0
     thumbnails = 0
     thumbnails_deleted = 0
+    orphans_deleted = 0
     source_refs_deleted = 0
     execution_time = 0
 
@@ -41,18 +42,39 @@ class ThumbnailCollectionCleaner:
     def _delete_sources_by_id(self, ids):
         Source.objects.all().filter(id__in=ids).delete()
 
+    def _get_all_thumbfiles_in_storage(self, storage, path=None):
+        if path is None:
+            path = os.path.join(settings.MEDIA_ROOT, settings.THUMBNAIL_BASEDIR)
+
+        directories, files = storage.listdir(path)
+        for file in files:
+            yield os.path.join(path, file)
+
+        for dir in directories:
+            for file in self._get_all_thumbfiles_in_storage(storage, path=os.path.join(path, dir)):
+                yield file
+
     def clean_up(self, dry_run=False, verbosity=1, last_n_days=0,
-                 cleanup_path=None, storage=None):
+                 cleanup_path=None, storage=None, delete_orphans=False):
         """
         Iterate through sources. Delete database references to sources
         not existing, including its corresponding thumbnails (files and
         database references).
         """
+        if (last_n_days > 0 or cleanup_path) and delete_orphans:
+            self.stdout.write("WARNING! Conflicting options: "
+                              "--delete-orphans not implemented with --last-n-days or --path.")
+            delete_orphans = False
+
         if dry_run:
             self.stdout.write("Dry run...")
 
         if not storage:
             storage = get_storage_class(settings.THUMBNAIL_DEFAULT_STORAGE)()
+
+        thumbfiles_in_storage = set()
+        if delete_orphans:
+            thumbfiles_in_storage = set(self._get_all_thumbfiles_in_storage(storage))
 
         sources_to_delete = []
         time_start = time.time()
@@ -84,6 +106,14 @@ class ThumbnailCollectionCleaner:
                             storage.delete(abs_thumbnail_path)
                         if verbosity > 0:
                             self.stdout.write("Deleting thumbnail: {}".format(abs_thumbnail_path))
+            elif delete_orphans:
+                for thumb in source.thumbnails.all():
+                    abs_thumbnail_path = self._get_absolute_path(thumb.name)
+                    try:
+                        thumbfiles_in_storage.remove(abs_thumbnail_path)
+                    except KeyError:
+                        # thumbfile has just not been generated yet, so, ignore this exception
+                        pass
 
             if len(sources_to_delete) >= 1000 and not dry_run:
                 self._delete_sources_by_id(sources_to_delete)
@@ -91,6 +121,14 @@ class ThumbnailCollectionCleaner:
 
         if not dry_run:
             self._delete_sources_by_id(sources_to_delete)
+
+        for abs_orphan_path in thumbfiles_in_storage:
+            self.orphans_deleted += 1
+            if not dry_run:
+                storage.delete(abs_orphan_path)
+            if verbosity > 0:
+                self.stdout.write("Deleting orphan: {}".format(abs_orphan_path))
+
         self.execution_time = round(time.time() - time_start)
 
     def print_stats(self):
@@ -104,6 +142,8 @@ class ThumbnailCollectionCleaner:
             "Source references deleted from DB:", self.source_refs_deleted))
         self.stdout.write("{0:<40} {1:>7}".format("Thumbnails deleted from disk:",
                                     self.thumbnails_deleted))
+        self.stdout.write("{0:<40} {1:>7}".format("Orphans deleted from disk:",
+                          self.orphans_deleted))
         self.stdout.write("(Completed in {} seconds)\n".format(self.execution_time))
 
 
@@ -146,6 +186,12 @@ class Command(BaseCommand):
             dest='cleanup_path',
             type=str,
             help='Specify a path to clean up.')
+        parser.add_argument(
+            '--delete-orphans',
+            action='store_true',
+            dest='delete_orphans',
+            default=False,
+            help='Check for files in storage that have no source and delete them.')
 
     def handle(self, *args, **options):
         tcc = ThumbnailCollectionCleaner(self.stdout, self.stderr)
@@ -153,5 +199,6 @@ class Command(BaseCommand):
             dry_run=options.get('dry_run', False),
             verbosity=int(options.get('verbosity', 1)),
             last_n_days=int(options.get('last_n_days', 0)),
-            cleanup_path=options.get('cleanup_path'))
+            cleanup_path=options.get('cleanup_path'),
+            delete_orphans=options.get('delete_orphans'))
         tcc.print_stats()
