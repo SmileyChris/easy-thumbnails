@@ -3,12 +3,12 @@ import os
 import time
 from datetime import date
 
-from django.core.files.storage import get_storage_class
 from django.core.management.base import BaseCommand
 from django.utils.timezone import datetime, timedelta
 
 from easy_thumbnails.conf import settings
 from easy_thumbnails.models import Source
+from easy_thumbnails.storage import get_storage
 
 
 class ThumbnailCollectionCleaner:
@@ -52,7 +52,7 @@ class ThumbnailCollectionCleaner:
             self.stdout.write("Dry run...")
 
         if not storage:
-            storage = get_storage_class(settings.THUMBNAIL_DEFAULT_STORAGE)()
+            storage = get_storage()
 
         sources_to_delete = []
         time_start = time.time()

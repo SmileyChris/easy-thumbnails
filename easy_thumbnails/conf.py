@@ -100,8 +100,15 @@ class Settings(AppSettings):
     THUMBNAIL_DEFAULT_STORAGE = (
         'easy_thumbnails.storage.ThumbnailFileSystemStorage')
     """
+    (DEPRECATED)
     The default Django storage for *saving* generated thumbnails.
     """
+
+    THUMBNAIL_DEFAULT_STORAGE_ALIAS = 'easy_thumbnails'
+    """
+    Django 4.2+: The default Django storage name for *saving* generated thumbnails.
+    """
+
     THUMBNAIL_MEDIA_ROOT = ''
     """
     Used by easy-thumbnail's default storage to locate where thumbnails are

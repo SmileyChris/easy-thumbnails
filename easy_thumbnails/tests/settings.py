@@ -28,6 +28,16 @@ INSTALLED_APPS = [
     'easy_thumbnails.tests.apps.EasyThumbnailsTestConfig',
 ]
 
+
+STORAGES = {
+    "easy_thumbnails": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
