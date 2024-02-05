@@ -35,6 +35,27 @@ def _points_table():
             yield j
 
 
+def _call_pil_method(im, method, *args, **kwargs):
+    """
+    call a method on the provided PIL image
+    if im.n_frames > 1 (image with multiple images, like GIF or WEBP)
+    call the method on all frames
+    """
+    n_frames = getattr(im, "n_frames", 1)
+    method = getattr(im, method, None)
+    if not method:
+        return None
+    if n_frames <= 1:
+        return method(*args, **kwargs)
+    index = 0
+    while index < im.n_frames:
+        im.seek(index)
+        temp = method(*args, **kwargs)
+        im.paste(temp)
+        index += 1
+    return im
+
+
 def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     """
     Convert images to the correct color space.
@@ -57,7 +78,8 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     if im.mode == 'I':
         # PIL (and pillow) have can't convert 16 bit grayscale images to lower
         # modes, so manually convert them to an 8 bit grayscale.
-        im = im.point(list(_points_table()), 'L')
+        # im = im.point(list(_points_table()), "L")
+        im = _call_pil_method(im, "point", list(_points_table()), "L")
 
     is_transparent = utils.is_transparent(im)
     is_grayscale = im.mode in ('L', 'LA')
@@ -78,8 +100,8 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
             new_mode = new_mode + 'A'
 
     if im.mode != new_mode:
-        im = im.convert(new_mode)
-
+        # im = im.convert(new_mode)
+        im = _call_pil_method(im, "convert", new_mode)
     return im
 
 
@@ -108,7 +130,8 @@ def autocrop(im, autocrop=False, **kwargs):
         bg = Image.new('L', im.size, 255)
         bbox = ImageChops.difference(bw, bg).getbbox()
         if bbox:
-            im = im.crop(bbox)
+            # im = im.crop(bbox)
+            im = _call_pil_method(im, "crop", bbox)
     return im
 
 
@@ -202,9 +225,15 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
     if scale < 1.0 or (scale > 1.0 and upscale):
         # Resize the image to the target size boundary. Round the scaled
         # boundary sizes to avoid floating point errors.
-        im = im.resize((int(round(source_x * scale)),
-                        int(round(source_y * scale))),
-                       resample=Image__Resampling__LANCZOS)
+        # im = im.resize((int(round(source_x * scale)),
+        #                 int(round(source_y * scale))),
+        #                resample=Image__Resampling__LANCZOS)
+        im = _call_pil_method(
+            im,
+            "resize",
+            (int(round(source_x * scale)), int(round(source_y * scale))),
+            resample=Image__Resampling__LANCZOS,
+        )
 
     if crop:
         # Use integer values now.
@@ -274,7 +303,8 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
                     diff_y = diff_y - add - remove
                 box = (left, top, right, bottom)
             # Finally, crop the image!
-            im = im.crop(box)
+            # im = im.crop(box)
+            im = _call_pil_method(im, "crop", box)
     return im
 
 
@@ -291,9 +321,11 @@ def filters(im, detail=False, sharpen=False, **kwargs):
 
     """
     if detail:
-        im = im.filter(ImageFilter.DETAIL)
+        # im = im.filter(ImageFilter.DETAIL)
+        im = _call_pil_method(im, "filter", ImageFilter.DETAIL)
     if sharpen:
-        im = im.filter(ImageFilter.SHARPEN)
+        # im = im.filter(ImageFilter.SHARPEN)
+        im = _call_pil_method(im, "filter", ImageFilter.SHARPEN)
     return im
 
 
@@ -321,5 +353,6 @@ def background(im, size, background=None, **kwargs):
     if new_im.mode != im.mode:
         new_im = new_im.convert(im.mode)
     offset = (size[0]-x)//2, (size[1]-y)//2
+    # animated GIF support must manually be added, here.
     new_im.paste(im, offset)
     return new_im
