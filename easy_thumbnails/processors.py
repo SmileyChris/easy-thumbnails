@@ -37,34 +37,6 @@ def _points_table():
             yield j
 
 
-def _call_pil_method(im, method_name, *args, **kwargs):
-    """
-    call a method on the provided PIL image
-    if im.n_frames > 1 (image with multiple images, like GIF or WEBP)
-    call the method on all frames
-    """
-    n_frames = getattr(im, "n_frames", 1)
-    method = getattr(im, method_name, None)
-    if not method:
-        return None
-    if n_frames <= 1:
-        return method(*args, **kwargs)
-    index = 0
-    print(method)
-    new_frames = []
-    while index < im.n_frames:
-        im.seek(index)
-        temp = method(*args, **kwargs)
-        new_frames.append(temp)
-        index += 1
-    write_to = BytesIO()
-    new_frames[0].save(
-        write_to, format=im.format, save_all=True, append_images=new_frames[1:]
-    )
-    return Image.open(write_to)
-    # return im
-
-
 class FrameAware:
     def __new__(cls, im):
         if getattr(im, "n_frames", 1) > 1:
@@ -112,8 +84,7 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     if im.mode == "I":
         # PIL (and pillow) have can't convert 16 bit grayscale images to lower
         # modes, so manually convert them to an 8 bit grayscale.
-        # im = im.point(list(_points_table()), "L")
-        im = _call_pil_method(im, "point", list(_points_table()), "L")
+        im = FrameAware(im).point(list(_points_table()), "L")
 
     is_transparent = utils.is_transparent(im)
     is_grayscale = im.mode in ("L", "LA")
@@ -125,17 +96,31 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
 
     if is_transparent:
         if replace_alpha:
-            if im.mode != "RGBA":
-                im = im.convert("RGBA")
-            base = Image.new("RGBA", im.size, replace_alpha)
-            base.paste(im, mask=im)
-            im = base
+            if not getattr(im, "is_animated", False):
+                if im.mode != "RGBA":
+                    im = FrameAware(im).convert("RGBA")
+                base = Image.new("RGBA", im.size, replace_alpha)
+                base.paste(im, mask=im)
+                im = base
+            else:
+                frames = []
+                for i in range(im.n_frames):
+                    im.seek(i)
+                    if im.mode != "RGBA":
+                        im = FrameAware(im).convert("RGBA")
+                    base = Image.new("RGBA", im.size, replace_alpha)
+                    base.paste(im, mask=im)
+                    frames.append(base)
+                write_to = BytesIO()
+                frames[0].save(
+                    write_to, format=im.format, save_all=True, append_images=frames[1:]
+                )
+                return Image.open(write_to)
         else:
             new_mode = new_mode + "A"
 
     if im.mode != new_mode:
-        # im = im.convert(new_mode)
-        im = _call_pil_method(im, "convert", new_mode)
+        im = FrameAware(im).convert(new_mode)
     return im
 
 
@@ -165,7 +150,7 @@ def autocrop(im, autocrop=False, **kwargs):
         bbox = ImageChops.difference(bw, bg).getbbox()
         if bbox:
             # im = im.crop(bbox)
-            im = _call_pil_method(im, "crop", bbox)
+            im = FrameAware(im).crop(bbox)
     return im
 
 
@@ -263,12 +248,6 @@ def scale_and_crop(
         # im = im.resize((int(round(source_x * scale)),
         #                 int(round(source_y * scale))),
         #                resample=Image__Resampling__LANCZOS)
-        # im = _call_pil_method(
-        #     im,
-        #     "resize",
-        #     (int(round(source_x * scale)), int(round(source_y * scale))),
-        #     resample=Image__Resampling__LANCZOS,
-        # )
         im = FrameAware(im).resize(
             (int(round(source_x * scale)), int(round(source_y * scale))),
             resample=Image__Resampling__LANCZOS,
@@ -363,10 +342,10 @@ def filters(im, detail=False, sharpen=False, **kwargs):
     """
     if detail:
         # im = im.filter(ImageFilter.DETAIL)
-        im = _call_pil_method(im, "filter", ImageFilter.DETAIL)
+        im = FrameAware(im).filter(ImageFilter.DETAIL)
     if sharpen:
         # im = im.filter(ImageFilter.SHARPEN)
-        im = _call_pil_method(im, "filter", ImageFilter.SHARPEN)
+        im = FrameAware(im).filter(ImageFilter.SHARPEN)
     return im
 
 
@@ -394,6 +373,19 @@ def background(im, size, background=None, **kwargs):
     if new_im.mode != im.mode:
         new_im = new_im.convert(im.mode)
     offset = (size[0] - x) // 2, (size[1] - y) // 2
-    # animated GIF support must manually be added, here.
-    new_im.paste(im, offset)
-    return new_im
+    # animated format (gif/webp/...) support manually added.
+    if not getattr(im, "is_animated", False):
+        new_im.paste(im, offset)
+        return new_im
+    else:
+        frames = []
+        for i in range(im.n_frames):
+            im.seek(i)
+            copied_new_im = new_im.copy()
+            copied_new_im.paste(im, offset)
+            frames.append(copied_new_im)
+        write_to = BytesIO()
+        frames[0].save(
+            write_to, format=im.format, save_all=True, append_images=frames[1:]
+        )
+        return Image.open(write_to)
