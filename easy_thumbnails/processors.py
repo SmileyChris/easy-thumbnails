@@ -1,5 +1,7 @@
 import itertools
 import re
+from functools import partial
+from io import BytesIO
 
 from PIL import Image, ImageChops, ImageFilter
 from easy_thumbnails import utils
@@ -35,25 +37,57 @@ def _points_table():
             yield j
 
 
-def _call_pil_method(im, method, *args, **kwargs):
+def _call_pil_method(im, method_name, *args, **kwargs):
     """
     call a method on the provided PIL image
     if im.n_frames > 1 (image with multiple images, like GIF or WEBP)
     call the method on all frames
     """
     n_frames = getattr(im, "n_frames", 1)
-    method = getattr(im, method, None)
+    method = getattr(im, method_name, None)
     if not method:
         return None
     if n_frames <= 1:
         return method(*args, **kwargs)
     index = 0
+    print(method)
+    new_frames = []
     while index < im.n_frames:
         im.seek(index)
         temp = method(*args, **kwargs)
-        im.paste(temp)
+        new_frames.append(temp)
         index += 1
-    return im
+    write_to = BytesIO()
+    new_frames[0].save(
+        write_to, format=im.format, save_all=True, append_images=new_frames[1:]
+    )
+    return Image.open(write_to)
+    # return im
+
+
+class FrameAware:
+    def __new__(cls, im):
+        if getattr(im, "n_frames", 1) > 1:
+            return super().__new__(cls)
+        return im
+
+    def __init__(self, im):
+        self.im = im
+
+    def apply_to_frames(self, method, *args, **kwargs):
+        new_frames = []
+        for i in range(self.im.n_frames):
+            self.im.seek(i)
+            new_frames.append(method(*args, **kwargs))
+        write_to = BytesIO()
+        new_frames[0].save(
+            write_to, format=self.im.format, save_all=True, append_images=new_frames[1:]
+        )
+        return Image.open(write_to)
+
+    def __getattr__(self, key):
+        method = getattr(self.im, key)
+        return partial(self.apply_to_frames, method)
 
 
 def colorspace(im, bw=False, replace_alpha=False, **kwargs):
@@ -75,29 +109,29 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
         white.
 
     """
-    if im.mode == 'I':
+    if im.mode == "I":
         # PIL (and pillow) have can't convert 16 bit grayscale images to lower
         # modes, so manually convert them to an 8 bit grayscale.
         # im = im.point(list(_points_table()), "L")
         im = _call_pil_method(im, "point", list(_points_table()), "L")
 
     is_transparent = utils.is_transparent(im)
-    is_grayscale = im.mode in ('L', 'LA')
+    is_grayscale = im.mode in ("L", "LA")
     new_mode = im.mode
     if is_grayscale or bw:
-        new_mode = 'L'
+        new_mode = "L"
     else:
-        new_mode = 'RGB'
+        new_mode = "RGB"
 
     if is_transparent:
         if replace_alpha:
-            if im.mode != 'RGBA':
-                im = im.convert('RGBA')
-            base = Image.new('RGBA', im.size, replace_alpha)
+            if im.mode != "RGBA":
+                im = im.convert("RGBA")
+            base = Image.new("RGBA", im.size, replace_alpha)
             base.paste(im, mask=im)
             im = base
         else:
-            new_mode = new_mode + 'A'
+            new_mode = new_mode + "A"
 
     if im.mode != new_mode:
         # im = im.convert(new_mode)
@@ -119,15 +153,15 @@ def autocrop(im, autocrop=False, **kwargs):
     if autocrop:
         # If transparent, flatten.
         if utils.is_transparent(im):
-            no_alpha = Image.new('L', im.size, (255))
+            no_alpha = Image.new("L", im.size, (255))
             no_alpha.paste(im, mask=im.split()[-1])
         else:
-            no_alpha = im.convert('L')
+            no_alpha = im.convert("L")
         # Convert to black and white image.
-        bw = no_alpha.convert('L')
+        bw = no_alpha.convert("L")
         # bw = bw.filter(ImageFilter.MedianFilter)
         # White background.
-        bg = Image.new('L', im.size, 255)
+        bg = Image.new("L", im.size, 255)
         bbox = ImageChops.difference(bw, bg).getbbox()
         if bbox:
             # im = im.crop(bbox)
@@ -135,8 +169,9 @@ def autocrop(im, autocrop=False, **kwargs):
     return im
 
 
-def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
-                   **kwargs):
+def scale_and_crop(
+    im, size, crop=False, upscale=False, zoom=None, target=None, **kwargs
+):
     """
     Handle scaling and cropping the source image.
 
@@ -228,9 +263,13 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
         # im = im.resize((int(round(source_x * scale)),
         #                 int(round(source_y * scale))),
         #                resample=Image__Resampling__LANCZOS)
-        im = _call_pil_method(
-            im,
-            "resize",
+        # im = _call_pil_method(
+        #     im,
+        #     "resize",
+        #     (int(round(source_x * scale)), int(round(source_y * scale))),
+        #     resample=Image__Resampling__LANCZOS,
+        # )
+        im = FrameAware(im).resize(
             (int(round(source_x * scale)), int(round(source_y * scale))),
             resample=Image__Resampling__LANCZOS,
         )
@@ -241,9 +280,9 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
         # Difference between new image size and requested size.
         diff_x = int(source_x - min(source_x, target_x))
         diff_y = int(source_y - min(source_y, target_y))
-        if crop != 'scale' and (diff_x or diff_y):
+        if crop != "scale" and (diff_x or diff_y):
             if isinstance(target, str):
-                target = re.match(r'(\d+)?,(\d+)?$', target)
+                target = re.match(r"(\d+)?,(\d+)?$", target)
                 if target:
                     target = target.groups()
             if target:
@@ -261,8 +300,9 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
             box.append(int(min(source_x, box[0] + target_x)))
             box.append(int(min(source_y, box[1] + target_y)))
             # See if an edge cropping argument was provided.
-            edge_crop = (isinstance(crop, str) and
-                         re.match(r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop))
+            edge_crop = isinstance(crop, str) and re.match(
+                r"(?:(-?)(\d+))?,(?:(-?)(\d+))?$", crop
+            )
             if edge_crop and filter(None, edge_crop.groups()):
                 x_right, x_crop, y_bottom, y_crop = edge_crop.groups()
                 if x_crop:
@@ -282,7 +322,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
                         box[1] = offset
                         box[3] = source_y - (diff_y - offset)
             # See if the image should be "smart cropped".
-            elif crop == 'smart':
+            elif crop == "smart":
                 left = top = 0
                 right, bottom = source_x, source_y
                 while diff_x:
@@ -304,7 +344,8 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
                 box = (left, top, right, bottom)
             # Finally, crop the image!
             # im = im.crop(box)
-            im = _call_pil_method(im, "crop", box)
+            # im = _call_pil_method(im, "crop", box)
+            im = FrameAware(im).crop(box)
     return im
 
 
@@ -349,10 +390,10 @@ def background(im, size, background=None, **kwargs):
         # there's nothing to do.
         return im
     im = colorspace(im, replace_alpha=background, **kwargs)
-    new_im = Image.new('RGB', size, background)
+    new_im = Image.new("RGB", size, background)
     if new_im.mode != im.mode:
         new_im = new_im.convert(im.mode)
-    offset = (size[0]-x)//2, (size[1]-y)//2
+    offset = (size[0] - x) // 2, (size[1] - y) // 2
     # animated GIF support must manually be added, here.
     new_im.paste(im, offset)
     return new_im
