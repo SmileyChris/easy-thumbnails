@@ -245,9 +245,6 @@ def scale_and_crop(
     if scale < 1.0 or (scale > 1.0 and upscale):
         # Resize the image to the target size boundary. Round the scaled
         # boundary sizes to avoid floating point errors.
-        # im = im.resize((int(round(source_x * scale)),
-        #                 int(round(source_y * scale))),
-        #                resample=Image__Resampling__LANCZOS)
         im = FrameAware(im).resize(
             (int(round(source_x * scale)), int(round(source_y * scale))),
             resample=Image__Resampling__LANCZOS,
