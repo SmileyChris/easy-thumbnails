@@ -1,6 +1,11 @@
 Changes
 =======
 
+2.9 (2024-07-25)
+----------------
+* Add support for Django 4.2 storages (mandatory in Django 5.1).
+
+
 2.8.5 (2023-01-09)
 ------------------
 * Fix regression introduced in version 2.8.4. Argument ``quality`` is not removed for images
