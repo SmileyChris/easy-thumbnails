@@ -31,7 +31,7 @@ INSTALLED_APPS = [
 
 STORAGES = {
     "easy_thumbnails": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "easy_thumbnails.tests.utils.TemporaryStorage",
     },
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",

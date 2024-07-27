@@ -110,3 +110,18 @@ class ThumbnailCleanupTest(test.BaseTest):
         # Verify the source reference has been deleted
         with self.assertRaises(Source.DoesNotExist):
             Source.objects.get(id=self.source.id)
+
+    def test_source_storage_hash_not_found(self):
+        self.assertTrue(os.path.exists(self.source_image_path))
+        self.assertTrue(os.path.exists(self.thumbnail_path))
+
+        # Change the source's storage_hash to simulate an unknown storage hash
+        self.source.storage_hash = "unknown_storage_hash"
+        self.source.save()
+
+        # Run the thumbnail cleanup command
+        call_command("thumbnail_cleanup", verbosity=2)
+
+        # Verify the thumbnail and source still exist
+        self.assertTrue(os.path.exists(self.thumbnail_path))
+        self.assertIsNotNone(Source.objects.get(id=self.source.id))
