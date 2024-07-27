@@ -6,5 +6,7 @@ docs/_build
 *.egg-info
 *.egg
 *.pyc
+*.swp
+*.orig
 reports/*
 .python-version
