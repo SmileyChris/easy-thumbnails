@@ -9,6 +9,8 @@ from django.utils.timezone import datetime, timedelta
 from easy_thumbnails.conf import settings
 from easy_thumbnails.models import Source
 from easy_thumbnails.storage import get_storage
+from easy_thumbnails.utils import get_storage_hash
+from django.core.files.storage import storages
 
 
 class ThumbnailCollectionCleaner:
@@ -25,8 +27,11 @@ class ThumbnailCollectionCleaner:
         self.stdout = stdout
         self.stderr = stderr
 
-    def _get_absolute_path(self, path):
-        return os.path.join(settings.MEDIA_ROOT, path)
+    def _get_absolute_path(self, path, storage):
+        if hasattr(storage, 'location'):
+            return os.path.join(storage.location, path)
+        else:
+            return os.path.join(settings.MEDIA_ROOT, path)
 
     def _get_relative_path(self, path):
         return os.path.relpath(path, settings.MEDIA_ROOT)
@@ -54,6 +59,7 @@ class ThumbnailCollectionCleaner:
         if not storage:
             storage = get_storage()
 
+        storage_hash_map = {get_storage_hash(storages[alias]): alias for alias in settings.STORAGES.keys()}
         sources_to_delete = []
         time_start = time.time()
 
@@ -66,10 +72,17 @@ class ThumbnailCollectionCleaner:
             query = query.filter(name__startswith=cleanup_path)
 
         for source in queryset_iterator(query):
-            self.sources += 1
-            abs_source_path = self._get_absolute_path(source.name)
+            source_storage_alias = storage_hash_map.get(source.storage_hash)
+            source_storage = storages[source_storage_alias] if source_storage_alias else None
+            if not source_storage:
+                self.stdout.write(f"Source storage hash ({source.storage_hash}) not found in STORAGES")
+                self.stdout.write("Can't determine source storage, skipping source")
+                continue
 
-            if not self._check_if_exists(storage, abs_source_path):
+            self.sources += 1
+            abs_source_path = self._get_absolute_path(source.name, source_storage)
+
+            if not self._check_if_exists(source_storage, abs_source_path):
                 if verbosity > 0:
                     self.stdout.write("Source not present: {}".format(abs_source_path))
                 self.source_refs_deleted += 1
@@ -77,7 +90,7 @@ class ThumbnailCollectionCleaner:
 
                 for thumb in source.thumbnails.all():
                     self.thumbnails_deleted += 1
-                    abs_thumbnail_path = self._get_absolute_path(thumb.name)
+                    abs_thumbnail_path = self._get_absolute_path(thumb.name, storage)
 
                     if self._check_if_exists(storage, abs_thumbnail_path):
                         if not dry_run:
