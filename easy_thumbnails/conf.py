@@ -303,6 +303,14 @@ class Settings(AppSettings):
     still works as a fall back.
     """
 
+    THUMBNAIL_CACHE = None
+    """
+    Use Django's caching system to cache sources and thumbnails
+
+    Setting this to ``None`` will disable caching.  To enable it, set
+    this to the name of the Django cache you would like to use.
+    """
+
     THUMBNAIL_WIDGET_OPTIONS = {'size': (80, 80)}
     """
     Default options for the
