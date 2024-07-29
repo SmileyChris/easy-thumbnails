@@ -7,10 +7,7 @@ from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
 from easy_thumbnails.tests import utils as test
 from PIL import Image
-try:
-    from testfixtures import LogCapture
-except ImportError:
-    LogCapture = None
+from testfixtures import LogCapture
 import unittest
 
 

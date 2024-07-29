@@ -14,5 +14,5 @@ pytest
 ------
 
 Assuming you're just wanting to test the current development version against
-your virtualenv setup, you can alternatively just ``pip install pytest-django``
+your virtualenv setup, you can alternatively just ``pip install pytest-django testfixtures``
 and run ``pytest``.
