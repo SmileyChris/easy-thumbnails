@@ -31,6 +31,10 @@ class ScaleAndCropTest(unittest.TestCase):
         self.assertEqual(upscaled.size, (1000, 750))
         self.assertEqual(upscaled.getbbox(), (0, 0, 800, 600))
 
+        empty = processors.scale_and_crop(create_image(size=(0, 0)), (1000, 1000))
+        self.assertEqual(empty.size, (0, 0))
+        self.assertEqual(empty.getbbox(), (0, 0, 0, 0))
+
     def test_crop(self):
         image = create_image()
 
@@ -49,3 +53,9 @@ class ScaleAndCropTest(unittest.TestCase):
         upscaled = processors.scale_and_crop(image, (1000, 1000), crop=True, upscale=True)
         self.assertEqual(upscaled.size, (1000, 1000))
         self.assertEqual(upscaled.getbbox(), (100, 0, 600, 600))
+
+        empty = processors.scale_and_crop(
+            create_image(size=(0, 0)), (1000, 1000), crop=True
+        )
+        self.assertEqual(empty.size, (0, 0))
+        self.assertEqual(empty.getbbox(), (0, 0, 0, 0))
