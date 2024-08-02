@@ -174,9 +174,15 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
     target_x, target_y = [int(v) for v in size]
 
     if crop or not target_x or not target_y:
-        scale = max(target_x / source_x, target_y / source_y)
+        scale = max(
+            1.0 if source_x == 0 else target_x / source_x,
+            1.0 if source_y == 0 else target_y / source_y,
+        )
     else:
-        scale = min(target_x / source_x, target_y / source_y)
+        scale = min(
+            1.0 if source_x == 0 else target_x / source_x,
+            1.0 if source_y == 0 else target_y / source_y,
+        )
 
     # Handle one-dimensional targets.
     if not target_x:
