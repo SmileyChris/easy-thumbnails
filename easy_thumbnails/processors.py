@@ -173,6 +173,10 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
     source_x, source_y = [float(v) for v in im.size]
     target_x, target_y = [int(v) for v in size]
 
+    if source_x == 0.0 or source_y == 0.0:
+        # No dimensions? Return the original image.
+        return im
+
     if crop or not target_x or not target_y:
         scale = max(target_x / source_x, target_y / source_y)
     else:
