@@ -7,10 +7,7 @@ from easy_thumbnails.conf import settings
 from easy_thumbnails.options import ThumbnailOptions
 from easy_thumbnails.tests import utils as test
 from PIL import Image
-try:
-    from testfixtures import LogCapture
-except ImportError:
-    LogCapture = None
+from testfixtures import LogCapture
 import unittest
 
 
@@ -214,7 +211,6 @@ class FilesTest(test.BaseTest):
     @unittest.skipIf(
         'easy_thumbnails.optimize' not in settings.INSTALLED_APPS,
         'optimize app not installed')
-    @unittest.skipIf(LogCapture is None, 'testfixtures not installed')
     def test_postprocessor(self):
         """use a mock image optimizing post processor doing nothing"""
         settings.THUMBNAIL_OPTIMIZE_COMMAND = {
@@ -222,7 +218,7 @@ class FilesTest(test.BaseTest):
         with LogCapture() as logcap:
             self.ext_thumbnailer.thumbnail_extension = 'png'
             self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
-            actual = tuple(logcap.actual())[0]
+            actual = tuple(logcap.actual())[-1]
             self.assertEqual(actual[0], 'easy_thumbnails.optimize')
             self.assertEqual(actual[1], 'INFO')
             self.assertRegex(
@@ -240,7 +236,7 @@ class FilesTest(test.BaseTest):
         with LogCapture() as logcap:
             self.ext_thumbnailer.thumbnail_extension = 'png'
             self.ext_thumbnailer.get_thumbnail({'size': (10, 10)})
-            actual = tuple(logcap.actual())[0]
+            actual = tuple(logcap.actual())[-1]
             self.assertEqual(actual[0], 'easy_thumbnails.optimize')
             self.assertEqual(actual[1], 'ERROR')
             self.assertRegex(

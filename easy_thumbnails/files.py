@@ -422,6 +422,10 @@ class Thumbnailer(File):
         """
         thumbnail_options = self.get_options(thumbnail_options)
         path, source_filename = os.path.split(self.name)
+        # remove storage location
+        path = path.replace(self.source_storage.location, '')
+        # remove leading slash if present
+        path = path.lstrip('/')
         source_extension = os.path.splitext(source_filename)[1][1:].lower()
         preserve_extensions = self.thumbnail_preserve_extensions
         if preserve_extensions is True or isinstance(preserve_extensions, (list, tuple)) and \
