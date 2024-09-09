@@ -81,34 +81,34 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
         white.
 
     """
-    if im.mode == "I":
+    if im.mode == 'I':
         # PIL (and pillow) have can't convert 16 bit grayscale images to lower
         # modes, so manually convert them to an 8 bit grayscale.
         im = FrameAware(im).point(list(_points_table()), "L")
 
     is_transparent = utils.is_transparent(im)
-    is_grayscale = im.mode in ("L", "LA")
+    is_grayscale = im.mode in ('L', 'LA')
     new_mode = im.mode
     if is_grayscale or bw:
-        new_mode = "L"
+        new_mode = 'L'
     else:
-        new_mode = "RGB"
+        new_mode = 'RGB'
 
     if is_transparent:
         if replace_alpha:
-            if not getattr(im, "is_animated", False):
-                if im.mode != "RGBA":
-                    im = FrameAware(im).convert("RGBA")
-                base = Image.new("RGBA", im.size, replace_alpha)
+            if not getattr(im, 'is_animated', False):
+                if im.mode != 'RGBA':
+                    im = FrameAware(im).convert('RGBA')
+                base = Image.new('RGBA', im.size, replace_alpha)
                 base.paste(im, mask=im)
                 im = base
             else:
                 frames = []
                 for i in range(im.n_frames):
                     im.seek(i)
-                    if im.mode != "RGBA":
-                        im = FrameAware(im).convert("RGBA")
-                    base = Image.new("RGBA", im.size, replace_alpha)
+                    if im.mode != 'RGBA':
+                        im = FrameAware(im).convert('RGBA')
+                    base = Image.new('RGBA', im.size, replace_alpha)
                     base.paste(im, mask=im)
                     frames.append(base)
                 write_to = BytesIO()
@@ -117,7 +117,7 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
                 )
                 return Image.open(write_to)
         else:
-            new_mode = new_mode + "A"
+            new_mode = new_mode + 'A'
 
     if im.mode != new_mode:
         im = FrameAware(im).convert(new_mode)
@@ -138,15 +138,15 @@ def autocrop(im, autocrop=False, **kwargs):
     if autocrop:
         # If transparent, flatten.
         if utils.is_transparent(im):
-            no_alpha = Image.new("L", im.size, (255))
+            no_alpha = Image.new('L', im.size, (255))
             no_alpha.paste(im, mask=im.split()[-1])
         else:
-            no_alpha = im.convert("L")
+            no_alpha = im.convert('L')
         # Convert to black and white image.
-        bw = no_alpha.convert("L")
+        bw = no_alpha.convert('L')
         # bw = bw.filter(ImageFilter.MedianFilter)
         # White background.
-        bg = Image.new("L", im.size, 255)
+        bg = Image.new('L', im.size, 255)
         bbox = ImageChops.difference(bw, bg).getbbox()
         if bbox:
             # im = im.crop(bbox)
@@ -256,9 +256,9 @@ def scale_and_crop(
         # Difference between new image size and requested size.
         diff_x = int(source_x - min(source_x, target_x))
         diff_y = int(source_y - min(source_y, target_y))
-        if crop != "scale" and (diff_x or diff_y):
+        if crop != 'scale' and (diff_x or diff_y):
             if isinstance(target, str):
-                target = re.match(r"(\d+)?,(\d+)?$", target)
+                target = re.match(r'(\d+)?,(\d+)?$', target)
                 if target:
                     target = target.groups()
             if target:
@@ -277,7 +277,7 @@ def scale_and_crop(
             box.append(int(min(source_y, box[1] + target_y)))
             # See if an edge cropping argument was provided.
             edge_crop = isinstance(crop, str) and re.match(
-                r"(?:(-?)(\d+))?,(?:(-?)(\d+))?$", crop
+                r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop
             )
             if edge_crop and filter(None, edge_crop.groups()):
                 x_right, x_crop, y_bottom, y_crop = edge_crop.groups()
@@ -297,8 +297,8 @@ def scale_and_crop(
                     else:
                         box[1] = offset
                         box[3] = source_y - (diff_y - offset)
-            # See if the image should be "smart cropped".
-            elif crop == "smart":
+            # See if the image should be 'smart cropped".
+            elif crop == 'smart':
                 left = top = 0
                 right, bottom = source_x, source_y
                 while diff_x:
@@ -366,12 +366,12 @@ def background(im, size, background=None, **kwargs):
         # there's nothing to do.
         return im
     im = colorspace(im, replace_alpha=background, **kwargs)
-    new_im = Image.new("RGB", size, background)
+    new_im = Image.new('RGB', size, background)
     if new_im.mode != im.mode:
         new_im = new_im.convert(im.mode)
     offset = (size[0] - x) // 2, (size[1] - y) // 2
     # animated format (gif/webp/...) support manually added.
-    if not getattr(im, "is_animated", False):
+    if not getattr(im, 'is_animated', False):
         new_im.paste(im, offset)
         return new_im
     else:
