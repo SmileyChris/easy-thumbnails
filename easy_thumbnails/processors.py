@@ -154,9 +154,8 @@ def autocrop(im, autocrop=False, **kwargs):
     return im
 
 
-def scale_and_crop(
-    im, size, crop=False, upscale=False, zoom=None, target=None, **kwargs
-):
+def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
+                   **kwargs):
     """
     Handle scaling and cropping the source image.
 
