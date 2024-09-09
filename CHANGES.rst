@@ -1,6 +1,11 @@
 Changes
 =======
 
+2.9.0 (2024-09-??)
+------------------
+* Experimental support for animated image formats. See documentation for more infos.
+
+
 2.8.5 (2023-01-09)
 ------------------
 * Fix regression introduced in version 2.8.4. Argument ``quality`` is not removed for images
