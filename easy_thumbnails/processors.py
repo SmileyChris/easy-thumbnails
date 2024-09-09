@@ -149,7 +149,6 @@ def autocrop(im, autocrop=False, **kwargs):
         bg = Image.new('L', im.size, 255)
         bbox = ImageChops.difference(bw, bg).getbbox()
         if bbox:
-            # im = im.crop(bbox)
             im = FrameAware(im).crop(bbox)
     return im
 
@@ -318,8 +317,6 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
                     diff_y = diff_y - add - remove
                 box = (left, top, right, bottom)
             # Finally, crop the image!
-            # im = im.crop(box)
-            # im = _call_pil_method(im, "crop", box)
             im = FrameAware(im).crop(box)
     return im
 
@@ -337,10 +334,8 @@ def filters(im, detail=False, sharpen=False, **kwargs):
 
     """
     if detail:
-        # im = im.filter(ImageFilter.DETAIL)
         im = FrameAware(im).filter(ImageFilter.DETAIL)
     if sharpen:
-        # im = im.filter(ImageFilter.SHARPEN)
         im = FrameAware(im).filter(ImageFilter.SHARPEN)
     return im
 
