@@ -7,6 +7,7 @@ Changes
 * Drop support for Django-4.1 and earlier.
 * Add support for Django-5.1.
 * Experimental support for animated image formats. See documentation for more infos.
+* Fix #642: Do not scale images (SVG) without size information.
 
 
 2.9 (2024-07-25)
