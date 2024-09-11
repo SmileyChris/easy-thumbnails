@@ -1,6 +1,11 @@
 Changes
 =======
 
+next
+----
+* Experimental support for animated image formats. See documentation for more infos.
+
+
 2.9 (2024-07-25)
 ----------------
 * Add support for Django 4.2 storages (mandatory in Django 5.1).
