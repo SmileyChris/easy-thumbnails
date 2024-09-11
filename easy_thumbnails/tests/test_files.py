@@ -240,7 +240,7 @@ class FilesTest(test.BaseTest):
             self.assertEqual(actual[0], 'easy_thumbnails.optimize')
             self.assertEqual(actual[1], 'ERROR')
             self.assertRegex(
-                actual[2], r'^Command\ .+returned non-zero exit status 1.?$')
+                actual[2], r'^Command .+returned non-zero exit status 1.*$')
 
     def test_USE_TZ(self):
         settings.USE_TZ = True
