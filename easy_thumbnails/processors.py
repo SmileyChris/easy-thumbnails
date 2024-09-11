@@ -1,5 +1,7 @@
 import itertools
 import re
+from functools import partial
+from io import BytesIO
 
 from PIL import Image, ImageChops, ImageFilter
 from easy_thumbnails import utils
@@ -35,6 +37,31 @@ def _points_table():
             yield j
 
 
+class FrameAware:
+    def __new__(cls, im):
+        if getattr(im, "n_frames", 1) > 1:
+            return super().__new__(cls)
+        return im
+
+    def __init__(self, im):
+        self.im = im
+
+    def apply_to_frames(self, method, *args, **kwargs):
+        new_frames = []
+        for i in range(self.im.n_frames):
+            self.im.seek(i)
+            new_frames.append(method(*args, **kwargs))
+        write_to = BytesIO()
+        new_frames[0].save(
+            write_to, format=self.im.format, save_all=True, append_images=new_frames[1:]
+        )
+        return Image.open(write_to)
+
+    def __getattr__(self, key):
+        method = getattr(self.im, key)
+        return partial(self.apply_to_frames, method)
+
+
 def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     """
     Convert images to the correct color space.
@@ -57,7 +84,7 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
     if im.mode == 'I':
         # PIL (and pillow) have can't convert 16 bit grayscale images to lower
         # modes, so manually convert them to an 8 bit grayscale.
-        im = im.point(list(_points_table()), 'L')
+        im = FrameAware(im).point(list(_points_table()), "L")
 
     is_transparent = utils.is_transparent(im)
     is_grayscale = im.mode in ('L', 'LA')
@@ -69,17 +96,31 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
 
     if is_transparent:
         if replace_alpha:
-            if im.mode != 'RGBA':
-                im = im.convert('RGBA')
-            base = Image.new('RGBA', im.size, replace_alpha)
-            base.paste(im, mask=im)
-            im = base
+            if not getattr(im, 'is_animated', False):
+                if im.mode != 'RGBA':
+                    im = FrameAware(im).convert('RGBA')
+                base = Image.new('RGBA', im.size, replace_alpha)
+                base.paste(im, mask=im)
+                im = base
+            else:
+                frames = []
+                for i in range(im.n_frames):
+                    im.seek(i)
+                    if im.mode != 'RGBA':
+                        im = FrameAware(im).convert('RGBA')
+                    base = Image.new('RGBA', im.size, replace_alpha)
+                    base.paste(im, mask=im)
+                    frames.append(base)
+                write_to = BytesIO()
+                frames[0].save(
+                    write_to, format=im.format, save_all=True, append_images=frames[1:]
+                )
+                return Image.open(write_to)
         else:
             new_mode = new_mode + 'A'
 
     if im.mode != new_mode:
-        im = im.convert(new_mode)
-
+        im = FrameAware(im).convert(new_mode)
     return im
 
 
@@ -108,7 +149,7 @@ def autocrop(im, autocrop=False, **kwargs):
         bg = Image.new('L', im.size, 255)
         bbox = ImageChops.difference(bw, bg).getbbox()
         if bbox:
-            im = im.crop(bbox)
+            im = FrameAware(im).crop(bbox)
     return im
 
 
@@ -202,9 +243,10 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
     if scale < 1.0 or (scale > 1.0 and upscale):
         # Resize the image to the target size boundary. Round the scaled
         # boundary sizes to avoid floating point errors.
-        im = im.resize((int(round(source_x * scale)),
-                        int(round(source_y * scale))),
-                       resample=Image__Resampling__LANCZOS)
+        im = FrameAware(im).resize(
+            (int(round(source_x * scale)), int(round(source_y * scale))),
+            resample=Image__Resampling__LANCZOS,
+        )
 
     if crop:
         # Use integer values now.
@@ -232,8 +274,9 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
             box.append(int(min(source_x, box[0] + target_x)))
             box.append(int(min(source_y, box[1] + target_y)))
             # See if an edge cropping argument was provided.
-            edge_crop = (isinstance(crop, str) and
-                         re.match(r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop))
+            edge_crop = isinstance(crop, str) and re.match(
+                r'(?:(-?)(\d+))?,(?:(-?)(\d+))?$', crop
+            )
             if edge_crop and filter(None, edge_crop.groups()):
                 x_right, x_crop, y_bottom, y_crop = edge_crop.groups()
                 if x_crop:
@@ -252,7 +295,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
                     else:
                         box[1] = offset
                         box[3] = source_y - (diff_y - offset)
-            # See if the image should be "smart cropped".
+            # See if the image should be 'smart cropped".
             elif crop == 'smart':
                 left = top = 0
                 right, bottom = source_x, source_y
@@ -274,7 +317,7 @@ def scale_and_crop(im, size, crop=False, upscale=False, zoom=None, target=None,
                     diff_y = diff_y - add - remove
                 box = (left, top, right, bottom)
             # Finally, crop the image!
-            im = im.crop(box)
+            im = FrameAware(im).crop(box)
     return im
 
 
@@ -291,9 +334,9 @@ def filters(im, detail=False, sharpen=False, **kwargs):
 
     """
     if detail:
-        im = im.filter(ImageFilter.DETAIL)
+        im = FrameAware(im).filter(ImageFilter.DETAIL)
     if sharpen:
-        im = im.filter(ImageFilter.SHARPEN)
+        im = FrameAware(im).filter(ImageFilter.SHARPEN)
     return im
 
 
@@ -320,6 +363,20 @@ def background(im, size, background=None, **kwargs):
     new_im = Image.new('RGB', size, background)
     if new_im.mode != im.mode:
         new_im = new_im.convert(im.mode)
-    offset = (size[0]-x)//2, (size[1]-y)//2
-    new_im.paste(im, offset)
-    return new_im
+    offset = (size[0] - x) // 2, (size[1] - y) // 2
+    # animated format (gif/webp/...) support manually added.
+    if not getattr(im, 'is_animated', False):
+        new_im.paste(im, offset)
+        return new_im
+    else:
+        frames = []
+        for i in range(im.n_frames):
+            im.seek(i)
+            copied_new_im = new_im.copy()
+            copied_new_im.paste(im, offset)
+            frames.append(copied_new_im)
+        write_to = BytesIO()
+        frames[0].save(
+            write_to, format=im.format, save_all=True, append_images=frames[1:]
+        )
+        return Image.open(write_to)
