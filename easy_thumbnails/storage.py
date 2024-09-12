@@ -1,26 +1,18 @@
 from django.core.files.storage import FileSystemStorage
 from django.utils.deconstruct import deconstructible
-from django.utils.functional import LazyObject
 
 from easy_thumbnails.conf import settings
 
+
 def get_storage():
     # If the user has specified a custom storage backend, use it.
+    from django.core.files.storage.handler import InvalidStorageError
+    from django.core.files.storage import storages, default_storage
+
     try:
-        from django.core.files.storage.handler import InvalidStorageError
-        from django.core.files.storage import storages
-        try:
-            return storages[settings.THUMBNAIL_DEFAULT_STORAGE_ALIAS]
-        except (InvalidStorageError):
-            pass
-    except (ImportError, TypeError):
-        pass
-    from django.core.files.storage import get_storage_class
-    storage_class = get_storage_class(settings.THUMBNAIL_DEFAULT_STORAGE)
-    class ThumbnailDefaultStorage(LazyObject):
-        def _setup(self):
-            self._wrapped = storage_class()
-    return ThumbnailDefaultStorage()
+        return storages[settings.THUMBNAIL_DEFAULT_STORAGE_ALIAS]
+    except InvalidStorageError:
+        return default_storage
 
 
 @deconstructible
