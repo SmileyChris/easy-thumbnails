@@ -65,7 +65,7 @@ def get_storage_hash(storage):
     if not isinstance(storage, str):
         storage_cls = storage.__class__
         storage = '%s.%s' % (storage_cls.__module__, storage_cls.__name__)
-    return hashlib.md5(storage.encode('utf8')).hexdigest()
+    return md5_not_used_for_security(storage.encode('utf8')).hexdigest()
 
 
 def is_transparent(image):
@@ -145,3 +145,19 @@ def get_modified_time(storage, name):
             default_timezone = timezone.get_default_timezone()
             return timezone.make_aware(modified_time, default_timezone)
     return modified_time
+
+def md5_not_used_for_security(data):
+    """
+    Calculate a md5 hash of the given data, but explicitly mark it as not
+    being used for security purposes. Without this flag FIPS compliant
+    systems will raise an exception when used.
+    """
+    return hashlib.new('md5', data, usedforsecurity=False)
+
+def sha1_not_used_for_security(data):
+    """
+    Calculate a sha1 hash of the given data, but explicitly mark it as not
+    being used for security purposes. Without the flag FIPS compliant
+    systems will raise an exception when used.
+    """
+    return hashlib.new('sha1', data, usedforsecurity=False)
