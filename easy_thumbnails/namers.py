@@ -1,5 +1,4 @@
 import base64
-import hashlib
 import os
 
 from easy_thumbnails.utils import sha1_not_used_for_security
