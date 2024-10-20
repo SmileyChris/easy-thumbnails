@@ -1,6 +1,6 @@
 import logging
 import subprocess
-from imghdr import what as determinetype
+from PIL import Image, UnidentifiedImageError
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
 from easy_thumbnails.optimize.conf import settings
@@ -35,9 +35,30 @@ logger = logging.getLogger('easy_thumbnails.optimize')
 
 def optimize_thumbnail(thumbnail):
     '''Optimize thumbnail images by removing unnecessary data'''
+    # Ignore remote storage backends.
     try:
-        optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[
-            determinetype(thumbnail.path)]
+        thumbnail_path = thumbnail.path
+    except NotImplementedError:
+        return
+
+    # We can't use thumbnail.image.format directly because it's set to `None` for images
+    # that have been created by running a method on an existing image. i.e. It's `None`
+    # because of the thumnailing operations.
+    # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.format
+    #
+    # Image.open() is lazy and the full file will not be read when determining the
+    # format.
+    # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.open
+    try:
+        with Image.open(thumbnail_path) as img:
+            # Use the lower case version of format to match the output of previously used
+            # imghdr.what() (removed in Python 3.13).
+            format = img.format.lower()
+    except UnidentifiedImageError:
+        return
+
+    try:
+        optimize_command = settings.THUMBNAIL_OPTIMIZE_COMMAND[format]
         if not optimize_command:
             return
     except (TypeError, KeyError, NotImplementedError):
