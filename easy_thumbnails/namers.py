@@ -1,6 +1,7 @@
 import base64
-import hashlib
 import os
+
+from easy_thumbnails.utils import sha1_not_used_for_security
 
 
 def default(thumbnailer, prepared_options, source_filename,
@@ -38,7 +39,7 @@ def hashed(source_filename, prepared_options, thumbnail_extension, **kwargs):
     for example: ``6qW1buHgLaZ9.jpg``.
     """
     parts = ':'.join([source_filename] + prepared_options)
-    short_sha = hashlib.sha1(parts.encode('utf-8')).digest()
+    short_sha = sha1_not_used_for_security(parts.encode('utf-8')).digest()
     short_hash = base64.urlsafe_b64encode(short_sha[:9]).decode('utf-8')
     return '.'.join([short_hash, thumbnail_extension])
 
@@ -54,10 +55,10 @@ def source_hashed(source_filename, prepared_options, thumbnail_extension,
     base64 sha1 hash of the thumbnail options. For example:
     ``1xedFtqllFo9_100x100_QHCa6G1l.jpg``.
     """
-    source_sha = hashlib.sha1(source_filename.encode('utf-8')).digest()
+    source_sha = sha1_not_used_for_security(source_filename.encode('utf-8')).digest()
     source_hash = base64.urlsafe_b64encode(source_sha[:9]).decode('utf-8')
     parts = ':'.join(prepared_options[1:])
-    parts_sha = hashlib.sha1(parts.encode('utf-8')).digest()
+    parts_sha = sha1_not_used_for_security(parts.encode('utf-8')).digest()
     options_hash = base64.urlsafe_b64encode(parts_sha[:6]).decode('utf-8')
     return '%s_%s_%s.%s' % (
         source_hash, prepared_options[0], options_hash, thumbnail_extension)
