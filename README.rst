@@ -10,7 +10,7 @@ Easy Thumbnails
     :target: https://github.com/SmileyChris/easy-thumbnails/actions/workflows/python.yml
 
 
-A powerful, yet easy to implement thumbnailing application for Django 2.2+
+A powerful, yet easy to implement thumbnailing application for Django 4.2+
 
 Below is a quick summary of usage. For more comprehensive information, view the
 `full documentation`__ online or the peruse the project's ``docs`` directory.
