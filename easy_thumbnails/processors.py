@@ -55,7 +55,12 @@ class FrameAware:
         new_frames[0].save(
             write_to, format=self.im.format, save_all=True, append_images=new_frames[1:]
         )
-        return Image.open(write_to)
+        to_return = Image.open(write_to)
+        # mode changes are not always correctly applied, probably due to the BytesIO and save workaround
+        # so force them here.
+        if to_return.mode != new_frames[0].mode:
+            to_return = to_return.convert(new_frames[0].mode)
+        return to_return
 
     def __getattr__(self, key):
         method = getattr(self.im, key)
