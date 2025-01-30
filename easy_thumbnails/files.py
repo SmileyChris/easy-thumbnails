@@ -423,8 +423,9 @@ class Thumbnailer(File):
         """
         thumbnail_options = self.get_options(thumbnail_options)
         path, source_filename = os.path.split(self.name)
-        # remove storage location
-        path = path.replace(self.source_storage.location, '')
+        if hasattr(self.source_storage, 'location'): # remote storages do not have the location attribute
+            # remove storage location
+            path = path.replace(self.source_storage.location, '')
         # remove leading slash if present
         path = path.lstrip('/')
         source_extension = os.path.splitext(source_filename)[1][1:].lower()
