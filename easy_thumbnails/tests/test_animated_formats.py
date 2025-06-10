@@ -106,4 +106,5 @@ class AnimatedFormatProcessorsTests(TestCase):
                 self.assertTrue(thumbnail.image.is_animated)
         except Exception:
             GifImagePlugin.LOADING_STRATEGY = default_loading_strategy
+            raise
         GifImagePlugin.LOADING_STRATEGY = default_loading_strategy
