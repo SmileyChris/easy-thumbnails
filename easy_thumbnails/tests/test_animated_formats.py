@@ -1,5 +1,5 @@
 from io import BytesIO
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, GifImagePlugin
 from easy_thumbnails import processors
 from unittest import TestCase
 
@@ -85,9 +85,25 @@ class AnimatedFormatProcessorsTests(TestCase):
         self.assertEqual(processed.size, (1000, 1800))
 
     def test_gif_with_mode_p(self):
-        with open("easy_thumbnails/tests/files/animated_mode_p.gif", "rb") as im:
-            t = get_thumbnailer(im, "easy_thumbnails/tests/files/animated_mode_p.gif")
+        image_path = "easy_thumbnails/tests/files/animated_mode_p.gif"
+        with open(image_path, "rb") as im:
+            t = get_thumbnailer(im, image_path)
             # Should not fail because of wrong mode and should still be animated.
             # https://github.com/SmileyChris/easy-thumbnails/issues/653
             thumbnail = t.get_thumbnail({'size': (500, 50), 'crop': True})
-            self.assertTrue(getattr(thumbnail.image, "is_animated", False))
+            self.assertTrue(thumbnail.image.is_animated)
+
+    def test_gif_with_mode_p__gif_plug_loading_strategy_rgb_always(self):
+        image_path = "easy_thumbnails/tests/files/animated_mode_p.gif"
+        default_loading_strategy = GifImagePlugin.LOADING_STRATEGY
+        try:
+            GifImagePlugin.LOADING_STRATEGY = GifImagePlugin.LoadingStrategy.RGB_ALWAYS
+            with open(image_path, "rb") as im:
+                t = get_thumbnailer(im, image_path)
+                # Should not fail because of wrong mode and should still be animated.
+                # https://github.com/SmileyChris/easy-thumbnails/issues/653
+                thumbnail = t.get_thumbnail({'size': (500, 50), 'crop': True})
+                self.assertTrue(thumbnail.image.is_animated)
+        except Exception:
+            GifImagePlugin.LOADING_STRATEGY = default_loading_strategy
+        GifImagePlugin.LOADING_STRATEGY = default_loading_strategy
