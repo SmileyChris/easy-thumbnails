@@ -21,6 +21,22 @@ PNGs.
 There have been issues with conversion from GIF to WEBP, so it's currently not recommended to
 enable this specific conversion for animated images.
 
+Animated GIF
+============
+
+Thumbnailing animated GIFs requires extra processing. To avoid this, you can enable the
+`RGB_ALWAYS` loading strategy for the GifImagePlugin by adding this to your project:
+
+.. code-block:: python
+
+    from PIL import GifImagePlugin
+    GifImagePlugin.LOADING_STRATEGY = GifImagePlugin.LoadingStrategy.RGB_ALWAYS
+
+This setting is an optional optimization because it changes how all GIFs are loaded by
+Pillow, not just animated GIFs. The `Pillow GIF docs
+<https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#gif/>`_
+explain how this settings works and you can decide if it's the right choice for
+your project.
 
 Remark
 ======
