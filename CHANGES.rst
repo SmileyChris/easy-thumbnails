@@ -1,6 +1,10 @@
 Changes
 =======
 
+2.10.1 (2025-08-17)
+-------------------
+* Add support for Django-5.2.
+
 2.10 (2024-09-11)
 -----------------
 * Drop support for Python-3.8.
