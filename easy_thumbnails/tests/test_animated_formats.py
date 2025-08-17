@@ -3,6 +3,8 @@ from PIL import Image, ImageChops, ImageDraw
 from easy_thumbnails import processors
 from unittest import TestCase
 
+from easy_thumbnails.files import get_thumbnailer
+
 
 def create_animated_image(mode='RGB', format="gif", size=(1000, 1000), no_frames=6):
     frames = []
@@ -81,3 +83,10 @@ class AnimatedFormatProcessorsTests(TestCase):
         # indeed processed?
         self.assertEqual(frames_count, processed_frames_count)
         self.assertEqual(processed.size, (1000, 1800))
+
+    def test_gif_with_mode_p(self):
+        with open("easy_thumbnails/tests/files/animated_mode_p.gif", "rb") as im:
+            t = get_thumbnailer(im, "easy_thumbnails/tests/files/animated_mode_p.gif")
+            # should not fail because of wrong mode
+            # https://github.com/SmileyChris/easy-thumbnails/issues/653
+            t.get_thumbnail({'size': (500, 50), 'crop': True})
