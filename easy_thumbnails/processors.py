@@ -365,7 +365,8 @@ def background(im, size, background=None, **kwargs):
         # The image is already equal to (or larger than) the expected size, so
         # there's nothing to do.
         return im
-    im = colorspace(im, replace_alpha=background, **kwargs)
+    kwargs.setdefault('replace_alpha', background) #Avoid duplication in kwargs
+    im = colorspace(im, **kwargs)
     new_im = Image.new('RGB', size, background)
     if new_im.mode != im.mode:
         new_im = new_im.convert(im.mode)
