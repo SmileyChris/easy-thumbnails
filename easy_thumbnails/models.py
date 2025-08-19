@@ -52,7 +52,7 @@ class ThumbnailManager(FileManager):
 
 class File(models.Model):
     storage_hash = models.CharField(max_length=40, db_index=True)
-    name = models.CharField(max_length=255, db_index=True)
+    name = models.CharField(max_length=1023, db_index=True)
     modified = models.DateTimeField(default=timezone.now)
 
     objects = FileManager()
