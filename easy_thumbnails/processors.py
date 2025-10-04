@@ -3,7 +3,7 @@ import re
 from functools import partial
 from io import BytesIO
 
-from PIL import Image, ImageChops, ImageFilter
+from PIL import Image, ImageChops, ImageFilter, GifImagePlugin
 from easy_thumbnails import utils
 
 
@@ -55,7 +55,20 @@ class FrameAware:
         new_frames[0].save(
             write_to, format=self.im.format, save_all=True, append_images=new_frames[1:]
         )
-        return Image.open(write_to)
+
+        to_return = Image.open(write_to)
+        # Animated GIFs are always opened in palette mode (P). We need seek through the
+        # frames to ensure that to_return has the correct mode.
+        # Background information:
+        # https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#gif
+        if (
+            to_return.format == "GIF"
+            and to_return.is_animated
+            and GifImagePlugin.LOADING_STRATEGY != GifImagePlugin.LoadingStrategy.RGB_ALWAYS
+        ):
+            for i in range(to_return.n_frames):
+                to_return.seek(i)
+        return to_return
 
     def __getattr__(self, key):
         method = getattr(self.im, key)
