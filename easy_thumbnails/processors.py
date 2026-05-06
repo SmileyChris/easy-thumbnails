@@ -52,8 +52,9 @@ class FrameAware:
             self.im.seek(i)
             new_frames.append(method(*args, **kwargs))
         write_to = BytesIO()
+        loop = self.im.info.get('loop', 0)
         new_frames[0].save(
-            write_to, format=self.im.format, save_all=True, append_images=new_frames[1:]
+            write_to, format=self.im.format, save_all=True, append_images=new_frames[1:], loop=loop
         )
         return Image.open(write_to)
 
@@ -104,6 +105,7 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
                 im = base
             else:
                 frames = []
+                loop = im.info.get('loop', 0)
                 for i in range(im.n_frames):
                     im.seek(i)
                     if im.mode != 'RGBA':
@@ -113,7 +115,7 @@ def colorspace(im, bw=False, replace_alpha=False, **kwargs):
                     frames.append(base)
                 write_to = BytesIO()
                 frames[0].save(
-                    write_to, format=im.format, save_all=True, append_images=frames[1:]
+                    write_to, format=im.format, save_all=True, append_images=frames[1:], loop=loop
                 )
                 return Image.open(write_to)
         else:
@@ -376,6 +378,7 @@ def background(im, size, background=None, **kwargs):
         return new_im
     else:
         frames = []
+        loop = im.info.get('loop', 0)
         for i in range(im.n_frames):
             im.seek(i)
             copied_new_im = new_im.copy()
@@ -383,6 +386,6 @@ def background(im, size, background=None, **kwargs):
             frames.append(copied_new_im)
         write_to = BytesIO()
         frames[0].save(
-            write_to, format=im.format, save_all=True, append_images=frames[1:]
+            write_to, format=im.format, save_all=True, append_images=frames[1:], loop=loop
         )
         return Image.open(write_to)
