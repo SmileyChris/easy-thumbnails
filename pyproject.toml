@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "easy-thumbnails"
+dynamic = ["version"]
+description = "Easy thumbnails for Django"
+readme = "README.rst"
+authors = [
+    {name="Chris Beaven", email="smileychris@gmail.com"},
+]
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+dependencies = [
+    "django>=4.2",
+    "pillow",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.optional-dependencies]
+svg = [
+    "svglib",
+    "reportlab",
+]
+
+[project.urls]
+Homepage = "http://github.com/SmileyChris/easy-thumbnails"
+
+[tool.setuptools]
+packages = ["easy_thumbnails"]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.package-data]
+easy_thumbnails = [
+    "management/**/*",
+    "mirgrations/**/*",
+    "optimize/**/*",
+    "templatetags/**/*",
+    "tests/**/*",
+    "VIL/**/*",
+]
+
+[tool.setuptools.dynamic]
+version = {attr="easy_thumbnails.__version__"}
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "easy_thumbnails.tests.settings"

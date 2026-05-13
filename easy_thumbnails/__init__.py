@@ -6,3 +6,6 @@ def get_version(*args, **kwargs):
     # Only import if it's actually called.
     from .version_utils import get_version
     return get_version(*args, **kwargs)
+
+
+__version__ = get_version()
