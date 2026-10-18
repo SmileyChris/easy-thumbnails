@@ -3,7 +3,7 @@ import inspect
 import math
 
 from django.utils import timezone
-from django.utils.functional import LazyObject
+from django.utils.functional import LazyObject, empty
 from django.utils.module_loading import import_string
 
 from PIL import Image
@@ -59,7 +59,7 @@ def get_storage_hash(storage):
     """
     # If storage is wrapped in a lazy object we need to get the real thing.
     if isinstance(storage, LazyObject):
-        if storage._wrapped is None:
+        if storage._wrapped is empty:
             storage._setup()
         storage = storage._wrapped
     if not isinstance(storage, str):

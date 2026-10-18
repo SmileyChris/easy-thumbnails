@@ -1,6 +1,8 @@
 """Tests for the models module.
 """
 
+from django.utils.functional import SimpleLazyObject
+
 from easy_thumbnails import utils
 from easy_thumbnails.models import Thumbnail, Source
 from easy_thumbnails.tests import utils as test
@@ -71,3 +73,20 @@ class FileManagerTest(test.BaseTest):
             Thumbnail.objects.get(name=self.filename)
         except Thumbnail.DoesNotExist:
             self.fail('Thumb should exist now')
+
+    def test_lazy_source_storage_lookup(self):
+        storage = SimpleLazyObject(lambda: self.storage)
+        created = Source.objects.get_file(
+            storage, self.filename, create=True)
+        fetched = Source.objects.get_file(self.storage, self.filename)
+        self.assertEqual(created, fetched)
+        self.assertEqual(created.storage_hash, self.storage_hash)
+
+    def test_lazy_thumbnail_storage_lookup(self):
+        storage = SimpleLazyObject(lambda: self.storage)
+        created = Thumbnail.objects.get_file(
+            storage, self.filename, create=True, source=self.source)
+        fetched = Thumbnail.objects.get_file(
+            self.storage, self.filename, source=self.source)
+        self.assertEqual(created, fetched)
+        self.assertEqual(created.storage_hash, self.storage_hash)
