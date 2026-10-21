@@ -2,6 +2,7 @@ from io import BytesIO
 from PIL import Image, ImageChops, ImageDraw
 from easy_thumbnails import processors
 from unittest import TestCase
+from unittest.mock import patch
 
 
 def create_animated_image(mode='RGB', format="gif", size=(1000, 1000), no_frames=6, loop=None):
@@ -96,3 +97,61 @@ class AnimatedFormatProcessorsTests(TestCase):
         processed_loop = processed.info.get('loop', 0)
         self.assertEqual(processed_loop, original_loop)
         self.assertEqual(processed_loop, loop_value)
+
+
+class BrokenSecondaryFrameTests(TestCase):
+    def create_mpo(self, broken_frame=1, corrupt_data=b''):
+        frames = [Image.new('RGB', (40, 30), color) for color in ('red', 'blue', 'green')]
+        output = BytesIO()
+        frames[0].save(output, format='MPO', save_all=True, append_images=frames[1:])
+        data = output.getvalue()
+        # Preserve the MP index but remove the JPEG data for a secondary frame.
+        offset = 0
+        for _ in range(broken_frame):
+            offset = data.index(b'\xff\xd8\xff', offset + 3)
+        return Image.open(BytesIO(data[:offset] + corrupt_data))
+
+    def test_scale_keeps_readable_primary_frame(self):
+        image = self.create_mpo()
+        self.assertEqual(image.n_frames, 3)
+        image.load()
+        expected = image.resize((10, 8))
+        result = processors.scale_and_crop(image, (10, 10))
+        result.load()
+        self.assertEqual(result.size, expected.size)
+        self.assertIsNone(ImageChops.difference(result, expected).getbbox())
+
+    def test_scale_ignores_invalid_secondary_jpeg_header(self):
+        image = self.create_mpo(corrupt_data=b'not a JPEG image')
+        result = processors.scale_and_crop(image, (10, 10))
+        result.load()
+        self.assertEqual(result.size, (10, 8))
+        self.assertGreater(result.getpixel((0, 0))[0], 200)
+
+    def test_colorspace_keeps_readable_primary_frame(self):
+        image = self.create_mpo()
+        result = processors.colorspace(image, bw=True)
+        result.load()
+        self.assertEqual(result.size, (40, 30))
+        self.assertEqual(result.mode, 'L')
+
+    def test_keeps_all_readable_frames_before_broken_frame(self):
+        image = self.create_mpo(broken_frame=2)
+        result = processors.scale_and_crop(image, (10, 10))
+        self.assertEqual(result.n_frames, 2)
+        result.seek(1)
+        result.load()
+        self.assertEqual(result.size, (10, 8))
+        self.assertGreater(result.getpixel((0, 0))[2], 200)
+
+    def test_primary_frame_seek_error_propagates(self):
+        image = self.create_mpo()
+        with patch.object(image, 'seek', side_effect=ValueError('bad primary')):
+            with self.assertRaisesRegex(ValueError, 'bad primary'):
+                processors.scale_and_crop(image, (10, 10))
+
+    def test_processing_error_propagates(self):
+        image = self.create_mpo()
+        with patch.object(image, 'resize', side_effect=ValueError('bad resize')):
+            with self.assertRaisesRegex(ValueError, 'bad resize'):
+                processors.scale_and_crop(image, (10, 10))

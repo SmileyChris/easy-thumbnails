@@ -49,7 +49,14 @@ class FrameAware:
     def apply_to_frames(self, method, *args, **kwargs):
         new_frames = []
         for i in range(self.im.n_frames):
-            self.im.seek(i)
+            try:
+                self.im.seek(i)
+                self.im.load()
+            except (ValueError, EOFError, OSError, SyntaxError):
+                if not new_frames:
+                    raise
+                # Some MPO files contain a readable main image but a broken preview.
+                break
             new_frames.append(method(*args, **kwargs))
         write_to = BytesIO()
         loop = self.im.info.get('loop', 0)

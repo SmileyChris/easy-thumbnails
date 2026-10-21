@@ -1,6 +1,10 @@
 Changes
 =======
 
+Unreleased
+----------
+* Fix #673: Keep readable frames when a secondary image frame is damaged.
+
 2.10.1 (2025-08-17)
 -------------------
 * Add support for Django-5.2.
