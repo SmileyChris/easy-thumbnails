@@ -122,3 +122,79 @@ class ThumbnailerFieldTest(AliasBaseTest):
             'file.gif', ContentFile(self._read_filefield(instance.avatar)), save=False)
 
         self.assertEqual(instance.picture.name, 'pictures/file.jpg')
+
+
+class ResizedDimensionTest(utils.BaseTest):
+    def setUp(self):
+        super().setUp()
+        self.storage = utils.TemporaryStorage()
+        field = models.DimensionModel._meta.get_field('picture')
+        self.old_storage = field.storage
+        self.old_thumbnail_storage = field.thumbnail_storage
+        field.storage = self.storage
+        field.thumbnail_storage = self.storage
+
+    def tearDown(self):
+        field = models.DimensionModel._meta.get_field('picture')
+        field.storage = self.old_storage
+        field.thumbnail_storage = self.old_thumbnail_storage
+        self.storage.delete_temporary_storage()
+        super().tearDown()
+
+    def image(self, name='original.jpg', size=(400, 200)):
+        data = self.create_image(None, name, size=size)
+        return ContentFile(data.read(), name=name)
+
+    def assert_dimensions(self, instance, expected):
+        saved = type(instance).objects.get(pk=instance.pk)
+        self.assertEqual((saved.width, saved.height), expected)
+        self.assertEqual((saved.picture.width, saved.picture.height), expected)
+        self.assertEqual((instance.width, instance.height), expected)
+
+    def test_model_save_persists_resized_dimensions(self):
+        instance = models.DimensionModel(picture=self.image())
+        instance.save()
+        self.assert_dimensions(instance, (100, 50))
+
+    def test_replacing_image_persists_new_dimensions(self):
+        instance = models.DimensionModel.objects.create(picture=self.image())
+        instance.picture = self.image('replacement.jpg', size=(200, 400))
+        instance.save()
+        self.assert_dimensions(instance, (50, 100))
+
+    def test_explicit_image_save_without_model_save(self):
+        instance = models.DimensionModel()
+        instance.picture.save('explicit.jpg', self.image(), save=False)
+        instance.save()
+        self.assert_dimensions(instance, (100, 50))
+
+    def test_partial_save_with_image_and_dimensions(self):
+        instance = models.DimensionModel.objects.create(picture=self.image())
+        instance.picture = self.image('replacement.jpg', size=(200, 400))
+        instance.save(update_fields={'picture', 'width', 'height'})
+        self.assert_dimensions(instance, (50, 100))
+
+    def test_partial_save_without_image_does_not_write_pending_file(self):
+        instance = models.DimensionModel.objects.create(picture=self.image())
+        original = instance.picture.name
+        instance.picture = self.image('pending.jpg', size=(200, 400))
+        instance.label = 'updated'
+        instance.save(update_fields={'label'})
+        saved = models.DimensionModel.objects.get(pk=instance.pk)
+        self.assertEqual(saved.picture.name, original)
+        self.assertEqual((saved.width, saved.height), (100, 50))
+        self.assertFalse(instance.picture._committed)
+        self.assertFalse(self.storage.exists('pictures/pending.jpg'))
+
+    def test_inherited_model_persists_resized_dimensions(self):
+        instance = models.DimensionChild(picture=self.image())
+        instance.save()
+        self.assert_dimensions(instance, (100, 50))
+
+    def test_raw_save_does_not_resize_pending_image(self):
+        instance = models.DimensionModel(picture=self.image())
+        instance.save_base(raw=True)
+        self.assertFalse(instance.picture._committed)
+        self.assertFalse(self.storage.exists('pictures/original.jpg'))
+        saved = models.DimensionModel.objects.get(pk=instance.pk)
+        self.assertEqual((saved.width, saved.height), (400, 200))

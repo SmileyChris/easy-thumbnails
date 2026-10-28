@@ -15,3 +15,16 @@ class Profile(models.Model):
 
     class Meta:
         app_label = 'easy_thumbnails_tests'
+
+
+class DimensionModel(models.Model):
+    width = models.PositiveIntegerField()
+    height = models.PositiveIntegerField()
+    picture = ThumbnailerImageField(
+        upload_to='pictures', width_field='width', height_field='height',
+        resize_source={'size': (100, 100)})
+    label = models.CharField(max_length=20, default='')
+
+
+class DimensionChild(DimensionModel):
+    extra = models.CharField(max_length=20, default='')

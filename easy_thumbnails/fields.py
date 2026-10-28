@@ -1,3 +1,4 @@
+from django.db.models import signals
 from django.db.models.fields.files import FileField, ImageField
 from easy_thumbnails import files
 
@@ -43,3 +44,27 @@ class ThumbnailerImageField(ThumbnailerField, ImageField):
         self.resize_source = kwargs.pop('resize_source', None)
 
         super().__init__(*args, **kwargs)
+
+
+def _resize_source_images(sender, instance, raw=False, update_fields=None,
+                          **kwargs):
+    # Dimension columns may be collected before ImageField.pre_save().
+    if raw:
+        return
+    for field in sender._meta.fields:
+        if (isinstance(field, ThumbnailerImageField) and field.resize_source
+                and (field.width_field or field.height_field)
+                and (update_fields is None or field.name in update_fields)):
+            image = getattr(instance, field.attname)
+            if image and not image._committed:
+                image.save(image.name, image.file, save=False)
+
+
+def _connect_resize_source_images(sender, **kwargs):
+    if any(isinstance(field, ThumbnailerImageField) and field.resize_source
+           and (field.width_field or field.height_field)
+           for field in sender._meta.fields):
+        signals.pre_save.connect(_resize_source_images, sender=sender, weak=False)
+
+
+signals.class_prepared.connect(_connect_resize_source_images, weak=False)

@@ -1,6 +1,10 @@
 Changes
 =======
 
+Unreleased
+----------
+* Fix #548: Save resized source dimensions regardless of model field order.
+
 2.10.1 (2025-08-17)
 -------------------
 * Add support for Django-5.2.
